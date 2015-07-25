@@ -1,8 +1,18 @@
+# http://docs.openstack.org/juno/install-guide/install/apt/content/keystone-install.html
+- name: Create database
+  mysql_db: name=keystone state=present
+
+- name: Create database user
+  mysql_user: name=keystone host=localhost password={{ keystone_dbpass }} priv=keystone.*:ALL,GRANT state=present
+
+- name: Create database user
+  mysql_user: name=keystone host=% password={{ keystone_dbpass }} priv=keystone.*:ALL,GRANT state=present
+
 - name: Install keystone
   apt: name=keystone state=latest
 
 - name: Configure keystone service
-  template: src=keystone.conf.j2 dest=/etc/keystone/keystone.conf
+  template: src=keystone.conf.j2 dest=/etc/keystone/keystone.conf owner=keystone group=root
   notify: reconfigure keystone
 
 - name: Configure keystone crontab

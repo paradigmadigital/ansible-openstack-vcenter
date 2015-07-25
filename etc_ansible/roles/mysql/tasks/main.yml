@@ -1,3 +1,4 @@
+# http://docs.openstack.org/juno/install-guide/install/apt/content/ch_basic_environment.html#basics-packages
 - name: Install mysql server
   apt: name=mariadb-server state=latest
 

@@ -1,5 +1,5 @@
 - name: reconfigure keystone
-  command: su -s /bin/sh -c "keystone-manage db_sync" keystone;service keystone restart
+  shell: su -s /bin/sh -c "keystone-manage db_sync" keystone; service keystone restart
 
 - name: restart keystone
   service: name=keystone state=restarted

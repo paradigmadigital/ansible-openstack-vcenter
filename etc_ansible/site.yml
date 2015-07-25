@@ -1,6 +1,8 @@
 - hosts: controller
   remote_user: root
   roles:
+  - ubuntu-cloud
+  - ntp
   - mysql
   - rabbitmq
-#  - keystone
+  - keystone
