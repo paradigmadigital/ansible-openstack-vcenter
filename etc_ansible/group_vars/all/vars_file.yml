@@ -1,0 +1,3 @@
+rabbitmq_guest_password: RABBIT_PASS
+keystone_dbpass: KEYSTONE_DBPASS
+administration_token: 4f8df8a0581622075047

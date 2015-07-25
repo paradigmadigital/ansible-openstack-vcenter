@@ -1,0 +1,6 @@
+- hosts: controller
+  remote_user: root
+  roles:
+  - mysql
+  - rabbitmq
+#  - keystone
