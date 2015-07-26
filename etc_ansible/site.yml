@@ -6,3 +6,4 @@
   - mysql
   - rabbitmq
   - keystone
+  - glance
