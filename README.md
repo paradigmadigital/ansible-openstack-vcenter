@@ -3,7 +3,7 @@ Ansible playbooks to create a openstack vcenter.
 
 Needs vcenter network configured as follows:
 
-+++
+```
 # This file describes the network interfaces available on your system
 # and how to activate them. For more information, see interfaces(5).
 
@@ -27,10 +27,10 @@ auto eth1
 iface eth1 inet manual
 	up ip link set dev $IFACE up
         down ip link set dev $IFACE down
-+++
+```
 
 Needs compute node network that hosts vcenter kvm vm configured as follows:
-+++
+```
 # interfaces(5) file used by ifup(8) and ifdown(8)
 auto lo
 iface lo inet loopback
@@ -56,12 +56,12 @@ iface osm inet static
     bridge_fd 0
     up iptables -t nat -A POSTROUTING -s 10.42.84.0/24 ! -d 10.42.84.0/24 -j MASQUERADE
     down iptables -t nat -D POSTROUTING -s 10.42.84.0/24! -d 10.42.84.0/24 -j MASQUERADE
-+++
+```
 
 The vcenter virtual machine can be created with virt-manager and must have two network interfaces attached to osm and br0 network devices.
 
 Configuration example in /etc/libvirt/qemu/OpenStack-vCenter.xml
-+++
+```
 <!--
 WARNING: THIS IS AN AUTO-GENERATED FILE. CHANGES TO IT ARE LIKELY TO BE
 OVERWRITTEN AND LOST. Changes to this xml configuration should be made using:
@@ -142,11 +142,10 @@ or other application using the libvirt API.
     </memballoon>
   </devices>
 </domain>
-+++
+```
 
 /etc/hosts in both nodes must have this lines:
-+++
-10.42.84.2	openstack-controller	controller	openstack-vcenter	vcenter	openstack-
-storage	storage	openstack-network	network
+```
+10.42.84.2	openstack-controller	controller	openstack-vcenter	vcenter	openstack-storage	storage	openstack-network	network
 10.42.84.1	openstack-compute	compute
-+++
+```
