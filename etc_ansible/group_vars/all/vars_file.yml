@@ -1,0 +1,25 @@
+rabbitmq_guest_password: RABBIT_PASS
+#TODO: mysql_root_password: MYSQL_ROOT_PASS
+# keystone section vars: http://docs.openstack.org/juno/install-guide/install/apt/content/ch_keystone.html
+keystone_dbpass: KEYSTONE_DBPASS
+administration_token: 4f8df8a0581622075047
+keystone_admin_name: admin
+keystone_admin_password: admin
+keystone_admin_email: admin@localhost
+keystone_admin_tenant_name: admin
+keystone_admin_tenant_description: Admin Tenant
+keystone_admin_role: admin
+keystone_user_name: demo
+keystone_user_password: demo
+keystone_user_email: demo@localhost
+keystone_user_tenant_name: demo
+keystone_user_tenant_description: Demo Tenant
+keystone_service_tenant_name: service
+keystone_service_tenant_description: service
+# --publicurl http://controller:5000/v2.0
+public_hostname: openstack-controller
+# --internalurl http://controller:5000/v2.0
+internal_hostname: openstack-controller
+# --adminurl http://controller:35357/v2.0
+admin_hostname: openstack-controller
+region_name: RegionOne

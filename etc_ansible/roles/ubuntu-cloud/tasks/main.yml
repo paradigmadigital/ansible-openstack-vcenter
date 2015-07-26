@@ -1,0 +1,7 @@
+# http://docs.openstack.org/juno/install-guide/install/apt/content/ch_basic_environment.html#basics-packages
+- name: Install ubuntu cloud keyring
+  apt: name=ubuntu-cloud-keyring state=latest
+
+- name: Add ubuntu cloud repository
+  template: src=cloudarchive-juno.list.j2 dest=/etc/apt/sources.list.d/cloudarchive-juno.list
+  notify: apt-get dist-upgrade

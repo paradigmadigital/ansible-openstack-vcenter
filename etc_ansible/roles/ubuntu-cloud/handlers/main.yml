@@ -1,0 +1,2 @@
+- name: apt-get dist-upgrade
+  shell: apt-get update && apt-get dist-upgrade
