@@ -28,3 +28,5 @@ region_name: RegionOne
 # Glance vars
 # http://docs.openstack.org/juno/install-guide/install/apt/content/ch_glance.html
 glance_dbpass: GLANCE_DBPASS
+keystone_glance_name: glance
+keystone_glance_password: glance
