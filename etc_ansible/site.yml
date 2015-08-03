@@ -1,8 +1,21 @@
-- hosts: controller
+- hosts: databases
   remote_user: root
   roles:
   - ubuntu-cloud
   - ntp
   - mysql
   - rabbitmq
+
+- hosts: keystone
+  remote_user: root
+  roles:
+  - ubuntu-cloud
+  - ntp
   - keystone
+
+- hosts: glance
+  remote_user: root
+  roles:
+  - ubuntu-cloud
+  - ntp
+  - glance

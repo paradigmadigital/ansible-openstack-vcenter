@@ -2,18 +2,22 @@
 - name: Create database
   mysql_db: name=keystone state=present
 
-- name: Create database user
+- name: Create database user to localhost
   mysql_user: name=keystone host=localhost password={{ keystone_dbpass }} priv=keystone.*:ALL,GRANT state=present
 
-- name: Create database user
+- name: Create database user to %
   mysql_user: name=keystone host=% password={{ keystone_dbpass }} priv=keystone.*:ALL,GRANT state=present
 
 - name: Install keystone
-  apt: name=keystone state=latest
+  apt: name=keystone state=present
 
 - name: Configure keystone service
   template: src=keystone.conf.j2 dest=/etc/keystone/keystone.conf owner=keystone group=root
-  notify: reconfigure keystone
+  notify:
+  - populate database
+  - restart keystone
+
+- meta: flush_handlers
 
 - name: Configure keystone crontab
   template: src=var_spool_cron_crontabs_keystone dest=/var/spool/cron/crontabs/keystone
@@ -96,7 +100,7 @@
   shell: |
     export OS_SERVICE_TOKEN={{ administration_token }}
     export OS_SERVICE_ENDPOINT=http://{{ admin_hostname }}:35357/v2.0
-    keystone service-create --name keystone --type identity --description "OpenStack Identity"
+    keystone service-create --name {{ keystone_user_name }} --type identity --description "OpenStack Identity"
   when: service_entity_exists|failed
 
 - name: Test if endpoint exists
@@ -121,4 +125,4 @@
   template: src=admin-openrc.sh.j2 dest=/root/{{ keystone_admin_name }}-openrc.sh
 
 - name: Create {{ keystone_user_name }} environment script
-  template: src=user-openrc.sh.j2 dest=/root/{{ keystone_user_name}}-openrc.sh
+  template: src=user-openrc.sh.j2 dest=/root/{{ keystone_user_name }}-openrc.sh
