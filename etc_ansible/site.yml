@@ -3,7 +3,7 @@
   roles:
   - ubuntu-cloud
   - ntp
-  - mysql
+  - mariadb
   - rabbitmq
 
 - hosts: keystone
