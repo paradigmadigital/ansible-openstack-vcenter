@@ -19,3 +19,10 @@
   - ubuntu-cloud
   - ntp
   - glance
+
+#- hosts: compute-controller
+#  remote_user: root
+#  roles:
+#  - ubuntu-cloud
+#  - ntp
+#  - compute-controller

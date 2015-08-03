@@ -47,6 +47,9 @@ openstack-controller
 [keystone]
 openstack-controller
 
+[glance-controller]
+openstack-controller
+
 [glance]
 openstack-controller
 
@@ -55,6 +58,9 @@ openstack-network
 
 [storage]
 openstack-storage
+
+[compute-controller]
+openstack-controller
 
 [compute]
 openstack-compute

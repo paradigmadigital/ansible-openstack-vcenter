@@ -1,124 +1,79 @@
-# http://docs.openstack.org/juno/install-guide/install/apt/content/keystone-install.html
+# http://docs.openstack.org/juno/install-guide/install/apt/content/image-service-overview.html
+
+# http://docs.openstack.org/juno/install-guide/install/apt/content/glance-install.html
 - name: Create database
   mysql_db: name=glance state=present
 
 - name: Create database user
   mysql_user: name=glance host=localhost password={{ glance_dbpass }} priv=glance.*:ALL,GRANT state=present
 
-#- name: Create database user
-#  mysql_user: name=keystone host=% password={{ keystone_dbpass }} priv=keystone.*:ALL,GRANT state=present
-#
-#- name: Install keystone
-#  apt: name=keystone state=latest
-#
-#- name: Configure keystone service
-#  template: src=keystone.conf.j2 dest=/etc/keystone/keystone.conf owner=keystone group=root
-#  notify: reconfigure keystone
-#
-#- name: Configure keystone crontab
-#  template: src=var_spool_cron_crontabs_keystone dest=/var/spool/cron/crontabs/keystone
-#
-#- name: Install python keystone client
-#  apt: name=python-keystoneclient state=latest
-#
-## Create tenants, users and roles
-## http://docs.openstack.org/juno/install-guide/install/apt/content/keystone-users.html
-## Admin tenant, user and role
-#- name: Create the admin tenant
-#  keystone_user:
-#    tenant={{ keystone_admin_tenant_name }}
-#    tenant_description="{{ keystone_admin_tenant_description }}"
-#    token={{ administration_token }}
-#    endpoint=http://{{ admin_hostname }}:35357/v2.0
-#
-#- name: Create the admin user
-#  keystone_user:
-#    user={{ keystone_admin_name }}
-#    tenant={{ keystone_admin_tenant_name }}
-#    password={{ keystone_admin_password }}
-#    email={{ keystone_admin_email }}
-#    token={{ administration_token }}
-#    endpoint=http://{{ admin_hostname }}:35357/v2.0
-#
-#- name: Add the admin role to the admin tenant and user
-#  keystone_user:
-#    role={{ keystone_admin_role }}
-#    user={{ keystone_admin_name }}
-#    tenant={{ keystone_admin_tenant_name }}
-#    token={{ administration_token }}
-#    endpoint=http://{{ admin_hostname }}:35357/v2.0
-#
-## Non admin user tenant, user and role
-#- name: Create the non admin tenant
-#  keystone_user:
-#    tenant={{ keystone_user_tenant_name }}
-#    tenant_description="{{ keystone_user_tenant_description }}"
-#    token={{ administration_token }}
-#    endpoint=http://{{ admin_hostname }}:35357/v2.0
-#
-#- name: Create the non admin user
-#  keystone_user:
-#    user={{ keystone_user_name }}
-#    tenant={{ keystone_user_tenant_name }}
-#    password={{ keystone_user_password }}
-#    email={{ keystone_user_email }}
-#    token={{ administration_token }}
-#    endpoint=http://{{ admin_hostname }}:35357/v2.0
-#
-#- name: Add the non admin role to the non admin tenant and user
-#  keystone_user:
-#    role=_member_
-#    user={{ keystone_user_name }}
-#    tenant={{ keystone_user_tenant_name }}
-#    token={{ administration_token }}
-#    endpoint=http://{{ admin_hostname }}:35357/v2.0
-#
-## Create the service tenant
-#- name: Create the service tenant
-#  keystone_user:
-#    tenant={{ keystone_service_tenant_name }}
-#    tenant_description={{ keystone_service_tenant_description }}
-#    token={{ administration_token }}
-#    endpoint=http://{{ admin_hostname }}:35357/v2.0
-#
-##http://docs.openstack.org/juno/install-guide/install/apt/content/keystone-services.html
-##Create the service entity and API endpoint
-#- name: Test if service entity exists
-#  shell: |
-#    export OS_SERVICE_TOKEN={{ administration_token }}
-#    export OS_SERVICE_ENDPOINT=http://{{ admin_hostname }}:35357/v2.0
-#    keystone service-list | grep " identity "| wc -l
-#  register: service_entity_exists
-#  ignore_errors: True
-#  failed_when: "'0' in service_entity_exists.stdout"
-#
-#- name: Create the service entity for the Identity service
-#  shell: |
-#    export OS_SERVICE_TOKEN={{ administration_token }}
-#    export OS_SERVICE_ENDPOINT=http://{{ admin_hostname }}:35357/v2.0
-#    keystone service-create --name keystone --type identity --description "OpenStack Identity"
-#  when: service_entity_exists|failed
-#
-#- name: Test if endpoint exists
-#  shell: |
-#    export OS_SERVICE_TOKEN={{ administration_token }}
-#    export OS_SERVICE_ENDPOINT=http://{{ admin_hostname }}:35357/v2.0
-#    keystone endpoint-list | grep 'http://{{ admin_hostname }}:5000/v2.0' | wc -l
-#  register: endpoint_exists
-#  ignore_errors: True
-#  failed_when: "'0' in endpoint_exists.stdout"
-#
-#- name: Create the Identity service API endpoints
-#  shell: |
-#    export OS_SERVICE_TOKEN={{ administration_token }}
-#    export OS_SERVICE_ENDPOINT=http://{{ admin_hostname }}:35357/v2.0
-#    keystone endpoint-create --service-id $(keystone service-list | awk '/ identity / {print $2}') --publicurl http://{{ admin_hostname }}:5000/v2.0 --internalurl http://{{ admin_hostname }}:5000/v2.0 --adminurl http://{{ admin_hostname }}:35357/v2.0  --region {{ region_name }}
-#  when: endpoint_exists|failed
-#
-## http://docs.openstack.org/juno/install-guide/install/apt/content/keystone-client-environment-scripts.html
-##  Create OpenStack client environment scripts
-#- name: Create admin-openrc.sh environment script
-#  template: src=admin-openrc.sh.j2 dest=/root/{{ keystone_admin_name }}-openrc.sh
-#
-#- name: Create {{ keystone_user_name }} environment script
-#  template: src=user-openrc.sh.j2 dest=/root/{{ keystone_user_name}}-openrc.sh
+- name: Create database user
+  mysql_user: name=glance host=% password={{ glance_dbpass }} priv=glance.*:ALL,GRANT state=present
+
+- name: Create the glance user
+  keystone_user:
+    user={{ keystone_glance_name }}
+    tenant={{ keystone_service_tenant_name }}
+    password={{ keystone_glance_password }}
+    token={{ administration_token }}
+    endpoint=http://{{ admin_hostname }}:35357/v2.0
+
+- name: Add the admin role to the glance user
+  keystone_user:
+    role={{ keystone_admin_role }}
+    user={{ keystone_glance_name }}
+    tenant={{ keystone_service_tenant_name }}
+    token={{ administration_token }}
+    endpoint=http://{{ admin_hostname }}:35357/v2.0
+
+#Create the service entity and API endpoint
+- name: Test if service entity exists
+  shell: |
+    export OS_SERVICE_TOKEN={{ administration_token }}
+    export OS_SERVICE_ENDPOINT=http://{{ admin_hostname }}:35357/v2.0
+    keystone service-list | grep " image "| wc -l
+  register: service_entity_exists
+  ignore_errors: True
+  failed_when: "'0' in service_entity_exists.stdout"
+
+- name: Create the service entity for the Image service
+  shell: |
+    export OS_SERVICE_TOKEN={{ administration_token }}
+    export OS_SERVICE_ENDPOINT=http://{{ admin_hostname }}:35357/v2.0
+    keystone service-create --name {{ keystone_glance_name }} --type image --description "OpenStack Image Service"
+  when: service_entity_exists|failed
+
+- name: Test if endpoint exists
+  shell: |
+    export OS_SERVICE_TOKEN={{ administration_token }}
+    export OS_SERVICE_ENDPOINT=http://{{ admin_hostname }}:35357/v2.0
+    keystone endpoint-list | grep 'http://{{ admin_hostname }}:9292' | wc -l
+  register: endpoint_exists
+  ignore_errors: True
+  failed_when: "'0' in endpoint_exists.stdout"
+
+- name: Create the Image service API endpoints
+  shell: |
+    export OS_SERVICE_TOKEN={{ administration_token }}
+    export OS_SERVICE_ENDPOINT=http://{{ admin_hostname }}:35357/v2.0
+    keystone endpoint-create --service-id $(keystone service-list | awk '/ image / {print $2}') --publicurl http://{{ admin_hostname }}:9292 --internalurl http://{{ admin_hostname }}:9292 --adminurl http://{{ admin_hostname }}:9292  --region {{ region_name }}
+  when: endpoint_exists|failed
+
+# To install and configure the Image Service components
+- name: Install glance
+  apt: name=glance state=present
+
+- name: Install python-glanceclient
+  apt: name=python-glanceclient state=present
+
+- name: Configure glance api service
+  template: src=glance-api.conf.j2 dest=/etc/glance/glance-api.conf owner=glance group=glance
+  notify:
+  - populate database
+  - restart glance-api
+
+- name: Configure glance registry service
+  template: src=glance-registry.conf.j2 dest=/etc/glance/glance-registry.conf owner=glance group=glance
+  notify:
+  - populate database
+  - restart glance-registry

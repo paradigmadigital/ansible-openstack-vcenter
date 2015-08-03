@@ -100,7 +100,7 @@
   shell: |
     export OS_SERVICE_TOKEN={{ administration_token }}
     export OS_SERVICE_ENDPOINT=http://{{ admin_hostname }}:35357/v2.0
-    keystone service-create --name keystone --type identity --description "OpenStack Identity"
+    keystone service-create --name {{ keystone_user_name }} --type identity --description "OpenStack Identity"
   when: service_entity_exists|failed
 
 - name: Test if endpoint exists

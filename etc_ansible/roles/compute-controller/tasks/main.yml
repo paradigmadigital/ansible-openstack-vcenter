@@ -1,0 +1,83 @@
+# http://docs.openstack.org/juno/install-guide/install/apt/content/ch_nova.html
+# http://docs.openstack.org/juno/install-guide/install/apt/content/ch_nova.html#nova-controller-install
+- name: Create database
+  mysql_db: name=nova state=present
+
+- name: Create database user
+  mysql_user: name=nova host=localhost password={{ nova_dbpass }} priv=nova.*:ALL,GRANT state=present
+
+- name: Create the nova user
+  keystone_user:
+    user={{ keystone_nova_name }}
+    tenant={{ keystone_service_tenant_name }}
+    password={{ keystone_nova_password }}
+    token={{ administration_token }}
+    endpoint=http://{{ admin_hostname }}:35357/v2.0
+
+- name: Add the admin role to the nova user
+  keystone_user:
+    role={{ keystone_admin_role }}
+    user={{ keystone_nova_name }}
+    tenant={{ keystone_service_tenant_name }}
+    token={{ administration_token }}
+    endpoint=http://{{ admin_hostname }}:35357/v2.0
+
+#Create the service entity and API endpoint
+- name: Test if service entity exists
+  shell: |
+    export OS_SERVICE_TOKEN={{ administration_token }}
+    export OS_SERVICE_ENDPOINT=http://{{ admin_hostname }}:35357/v2.0
+    keystone service-list | grep " compute "| wc -l
+  register: service_entity_exists
+  ignore_errors: True
+  failed_when: "'0' in service_entity_exists.stdout"
+
+- name: Create the service entity for the Nova service
+  shell: |
+    export OS_SERVICE_TOKEN={{ administration_token }}
+    export OS_SERVICE_ENDPOINT=http://{{ admin_hostname }}:35357/v2.0
+    keystone service-create --name {{ keystone_nova_name }} --type compute --description "OpenStack Compute"
+  when: service_entity_exists|failed
+
+- name: Test if endpoint exists
+  shell: |
+    export OS_SERVICE_TOKEN={{ administration_token }}
+    export OS_SERVICE_ENDPOINT=http://{{ admin_hostname }}:35357/v2.0
+    keystone endpoint-list | grep 'http://{{ admin_hostname }}:8774/v2' | wc -l
+  register: endpoint_exists
+  ignore_errors: True
+  failed_when: "'0' in endpoint_exists.stdout"
+
+- name: Create the Compute service API endpoints
+  shell: |
+    export OS_SERVICE_TOKEN={{ administration_token }}
+    export OS_SERVICE_ENDPOINT=http://{{ admin_hostname }}:35357/v2.0
+    keystone endpoint-create --service-id $(keystone service-list | awk '/ compute / {print $2}') --publicurl http://{{ admin_hostname }}:8774/v2/%\(tenant_id\)s --internalurl http://{{ admin_hostname }}:8774/v2/%\(tenant_id\)s --adminurl http://{{ admin_hostname }}:8774/v2/%\(tenant_id\)s  --region {{ region_name }}
+  when: endpoint_exists|failed
+
+# To install and configure the Compute controller components
+- name: Install nova packages
+  apt: name={{ item }} state=present
+  with_items:
+  - nova-api
+  - nova-cert
+  - nova-conductor
+  - nova-consoleauth
+  - nova-novncproxy
+  - nova-scheduler
+  - python-novaclient  
+#
+#- name: Install python-glanceclient
+#  apt: name=python-glanceclient state=present
+#
+#- name: Configure glance api service
+#  template: src=glance-api.conf.j2 dest=/etc/glance/glance-api.conf owner=glance group=glance
+#  notify:
+#  - populate database
+#  - restart glance-api
+#
+#- name: Configure glance registry service
+#  template: src=glance-registry.conf.j2 dest=/etc/glance/glance-registry.conf owner=glance group=glance
+#  notify:
+#  - populate database
+#  - restart glance-registry
