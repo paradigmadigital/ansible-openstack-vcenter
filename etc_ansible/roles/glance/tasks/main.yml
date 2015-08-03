@@ -63,4 +63,14 @@
 - name: Install python-glanceclient
   apt: name=python-glanceclient state=present
 
+- name: Configure glance api service
+  template: src=glance-api.conf.j2 dest=/etc/glance/glance-api.conf owner=glance group=glance
+  notify:
+  - populate database
+  - restart glance-api
 
+- name: Configure glance registry service
+  template: src=glance-registry.conf.j2 dest=/etc/glance/glance-registry.conf owner=glance group=glance
+  notify:
+  - populate database
+  - restart glance-registry
