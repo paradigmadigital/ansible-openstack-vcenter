@@ -2,6 +2,11 @@
 - name: Install ubuntu cloud keyring
   apt: name=ubuntu-cloud-keyring state=latest
 
+- name: Add apt_repository dependency
+  apt: name=python-pycurl state=latest
+
 - name: Add ubuntu cloud repository
-  template: src=cloudarchive-juno.list.j2 dest=/etc/apt/sources.list.d/cloudarchive-juno.list
-  notify: apt-get dist-upgrade
+  apt_repository: repo='deb http://ubuntu-cloud.archive.canonical.com/ubuntu trusty-updates/juno main' state=present update_cache=yes
+
+- name: Upgrade distribution
+  apt: upgrade=dist

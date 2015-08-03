@@ -1,3 +1,4 @@
+controller_hostname: openstack-controller
 rabbitmq_guest_password: RABBIT_PASS
 #TODO: mysql_root_password: MYSQL_ROOT_PASS
 # keystone section vars: http://docs.openstack.org/juno/install-guide/install/apt/content/ch_keystone.html
