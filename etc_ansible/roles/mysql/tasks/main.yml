@@ -1,10 +1,6 @@
 # http://docs.openstack.org/juno/install-guide/install/apt/content/ch_basic_environment.html#basics-packages
 - name: Install mysql server
-<<<<<<< HEAD:etc_ansible/roles/mysql/tasks/main.yml
   apt: name=mysql-server state=present
-=======
-  apt: name=mariadb-server state=present
->>>>>>> 86b0579022e0671a71ab4988b868e454fd5ca49c:etc_ansible/roles/mariadb/tasks/main.yml
 
 - name: Configure mysql server
   template: src=my.cnf.j2 dest=/etc/mysql/my.cnf
