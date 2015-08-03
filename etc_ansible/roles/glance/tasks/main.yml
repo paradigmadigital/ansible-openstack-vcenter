@@ -7,6 +7,9 @@
 - name: Create database user
   mysql_user: name=glance host=localhost password={{ glance_dbpass }} priv=glance.*:ALL,GRANT state=present
 
+- name: Create database user
+  mysql_user: name=glance host=% password={{ glance_dbpass }} priv=glance.*:ALL,GRANT state=present
+
 - name: Create the glance user
   keystone_user:
     user={{ keystone_glance_name }}
