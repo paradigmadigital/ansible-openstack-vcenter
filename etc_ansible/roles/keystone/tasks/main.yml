@@ -2,18 +2,20 @@
 - name: Create database
   mysql_db: name=keystone state=present
 
-- name: Create database user
+- name: Create database user to localhost
   mysql_user: name=keystone host=localhost password={{ keystone_dbpass }} priv=keystone.*:ALL,GRANT state=present
 
-- name: Create database user
+- name: Create database user to %
   mysql_user: name=keystone host=% password={{ keystone_dbpass }} priv=keystone.*:ALL,GRANT state=present
 
 - name: Install keystone
-  apt: name=keystone state=latest
+  apt: name=keystone state=present
 
 - name: Configure keystone service
   template: src=keystone.conf.j2 dest=/etc/keystone/keystone.conf owner=keystone group=root
-  notify: reconfigure keystone
+  notify:
+  - populate database
+  - restart keystone
 
 - name: Configure keystone crontab
   template: src=var_spool_cron_crontabs_keystone dest=/var/spool/cron/crontabs/keystone
