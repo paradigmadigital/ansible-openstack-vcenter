@@ -41,7 +41,13 @@
 # leading 0s:
 
 #db-[99:101]-node.example.com
-[controller]
+[databases]
+openstack-controller
+
+[keystone]
+openstack-controller
+
+[glance]
 openstack-controller
 
 [network]
