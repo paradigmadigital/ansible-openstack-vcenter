@@ -33,3 +33,10 @@
   - ubuntu-cloud
   - ntp
   - compute-hypervisor
+
+- hosts: networking-controller
+  remote_user: root
+  roles:
+  - ubuntu-cloud
+  - ntp
+  - networking-controller

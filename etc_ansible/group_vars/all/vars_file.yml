@@ -35,3 +35,8 @@ keystone_glance_password: glance
 nova_dbpass: NOVA_DBPASS
 keystone_nova_name: nova
 keystone_nova_password: nova
+# Neutron vars
+# http://docs.openstack.org/juno/install-guide/install/apt/content/neutron-controller-node.html
+neutron_dbpass: NEUTRON_DBPASS
+keystone_neutron_name: neutron
+keystone_neutron_password: neutron

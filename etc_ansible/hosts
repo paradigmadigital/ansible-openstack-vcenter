@@ -53,8 +53,11 @@ openstack-controller
 [glance]
 openstack-controller
 
-[network]
-openstack-network
+[networking-controller]
+openstack-controller
+
+[networking-manager]
+openstack-controller
 
 [storage]
 openstack-storage
