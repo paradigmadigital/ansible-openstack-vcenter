@@ -56,7 +56,7 @@ openstack-controller
 [networking-controller]
 openstack-controller
 
-[networking-manager]
+[networking-network]
 openstack-controller
 
 [storage]

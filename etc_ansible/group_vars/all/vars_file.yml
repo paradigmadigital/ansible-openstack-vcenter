@@ -40,3 +40,5 @@ keystone_nova_password: nova
 neutron_dbpass: NEUTRON_DBPASS
 keystone_neutron_name: neutron
 keystone_neutron_password: neutron
+# http://docs.openstack.org/juno/install-guide/install/apt/content/neutron-network-node.html
+metadata_secret: METADATA_SECRET

@@ -40,3 +40,10 @@
   - ubuntu-cloud
   - ntp
   - networking-controller
+
+- hosts: networking-network
+  remote_user: root
+  roles:
+  - ubuntu-cloud
+  - ntp
+  - networking-network
