@@ -62,5 +62,5 @@ openstack-storage
 [compute-controller]
 openstack-controller
 
-[compute]
+[compute-hypervisor]
 openstack-compute
