@@ -3,8 +3,11 @@
 - name: Create database
   mysql_db: name=nova state=present
 
-- name: Create database user
+- name: Create database user from localhost
   mysql_user: name=nova host=localhost password={{ nova_dbpass }} priv=nova.*:ALL,GRANT state=present
+
+- name: Create database user from %
+  mysql_user: name=nova host=% password={{ nova_dbpass }} priv=nova.*:ALL,GRANT state=present
 
 - name: Create the nova user
   keystone_user:
@@ -66,18 +69,14 @@
   - nova-novncproxy
   - nova-scheduler
   - python-novaclient  
-#
-#- name: Install python-glanceclient
-#  apt: name=python-glanceclient state=present
-#
-#- name: Configure glance api service
-#  template: src=glance-api.conf.j2 dest=/etc/glance/glance-api.conf owner=glance group=glance
-#  notify:
-#  - populate database
-#  - restart glance-api
-#
-#- name: Configure glance registry service
-#  template: src=glance-registry.conf.j2 dest=/etc/glance/glance-registry.conf owner=glance group=glance
-#  notify:
-#  - populate database
-#  - restart glance-registry
+
+- name: Configure nova
+  template: src=nova.conf.j2 dest=/etc/nova/nova.conf owner=nova group=nova
+  notify:
+  - populate database
+  - restart nova-api
+  - restart nova-cert
+  - restart nova-consoleauth
+  - restart nova-scheduler
+  - restart nova-conductor
+  - restart nova-novncproxy
