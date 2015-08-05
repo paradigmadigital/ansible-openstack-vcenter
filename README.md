@@ -1,6 +1,7 @@
 # ansible-openstack-vcenter
 Ansible playbooks to create a openstack vcenter.
 
+
 Needs vcenter network configured as follows:
 
 ```
