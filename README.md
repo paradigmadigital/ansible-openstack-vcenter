@@ -149,3 +149,6 @@ or other application using the libvirt API.
 10.42.84.2	openstack-controller	controller	openstack-vcenter	vcenter	openstack-storage	storage	openstack-network	network
 10.42.84.1	openstack-compute	compute
 ```
+
+After configuring network remember to create initial networks:
+http://docs.openstack.org/juno/install-guide/install/apt/content/neutron-initial-networks.html
