@@ -17,19 +17,17 @@ rabbit_password = {{ rabbitmq_guest_password }}
 
 auth_strategy = keystone
 
-my_ip = {{ ansible_eth0["ipv4"]["address"] }}
+my_ip = {{ ansible_osm["ipv4"]["address"] }}
 
-vncserver_listen = {{ ansible_eth0["ipv4"]["address"] }}
-vncserver_proxyclient_address = {{ ansible_eth0["ipv4"]["address"] }}
+vnc_enabled = True
+vncserver_listen = 0.0.0.0
+vncserver_proxyclient_address = {{ ansible_osm["ipv4"]["address"] }}
+novncproxy_base_url = http://{{ admin_hostname }}:6080/vnc_auto.html
 
 network_api_class = nova.network.neutronv2.api.API
 security_group_api = neutron
 linuxnet_interface_driver = nova.network.linux_net.LinuxOVSInterfaceDriver
 firewall_driver = nova.virt.firewall.NoopFirewallDriver
-
-
-[database]
-connection = mysql://{{ keystone_nova_name }}:{{ nova_dbpass }}@{{ admin_hostname }}/nova
 
 
 [keystone_authtoken]
@@ -43,7 +41,6 @@ admin_password = {{ keystone_nova_password }}
 [glance]
 host = {{ admin_hostname }}
 
-
 [neutron]
 url = http://{{ admin_hostname }}:9696
 auth_strategy = keystone
@@ -51,6 +48,3 @@ admin_auth_url = http://{{ admin_hostname }}:35357/v2.0
 admin_tenant_name = {{ keystone_service_tenant_name }}
 admin_username = {{ keystone_neutron_name }}
 admin_password = {{ keystone_neutron_password }}
-
-service_metadata_proxy = True
-metadata_proxy_shared_secret = {{ metadata_secret }}

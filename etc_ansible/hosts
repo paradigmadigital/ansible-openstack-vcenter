@@ -56,8 +56,11 @@ openstack-controller
 [networking-controller]
 openstack-controller
 
-[networking-manager]
+[networking-network]
 openstack-controller
+
+[networking-compute]
+openstack-compute
 
 [storage]
 openstack-storage
@@ -67,3 +70,6 @@ openstack-controller
 
 [compute-hypervisor]
 openstack-compute
+
+[dashboard]
+openstack-controller
