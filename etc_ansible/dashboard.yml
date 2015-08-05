@@ -1,0 +1,6 @@
+- hosts: dashboard
+  remote_user: root
+  roles:
+  - ubuntu-cloud
+  - ntp
+  - dashboard
