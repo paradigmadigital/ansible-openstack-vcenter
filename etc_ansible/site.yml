@@ -34,16 +34,4 @@
   - ntp
   - compute-hypervisor
 
-- hosts: networking-controller
-  remote_user: root
-  roles:
-  - ubuntu-cloud
-  - ntp
-  - networking-controller
-
-- hosts: networking-network
-  remote_user: root
-  roles:
-  - ubuntu-cloud
-  - ntp
-  - networking-network
+- include: networking
