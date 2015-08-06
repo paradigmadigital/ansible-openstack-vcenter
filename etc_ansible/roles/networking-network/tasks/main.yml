@@ -26,7 +26,10 @@
   register: tenant_id
 
 - name: Configure neutron server component
-  template: src=neutron.conf.j2 dest=/etc/neutron/neutron.conf owner=root group=neutron mode=0644
+  template: src={{ item }}.j2 dest=/etc/neutron/{{ item }} owner=root group=neutron mode=0644
+  with_items:
+  - neutron.conf
+  - dnsmasq-neutron.conf
   notify:
   - restart neutron-plugin-openvswitch-agent
   - restart neutron-l3-agent
