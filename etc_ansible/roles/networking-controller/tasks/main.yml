@@ -87,7 +87,11 @@
   template: src=ml2_conf.ini.j2 dest=/etc/neutron/plugins/ml2/ml2_conf.ini owner=root group=neutron mode=0644
   notify:
   - populate database
+  - restart neutron-server
+
+- name: Configure Compute to use Networking
+  template: src=nova.conf.j2 dest=/etc/nova/nova.conf owner=nova group=nova
+  notify:
   - restart nova-api
   - restart nova-scheduler
   - restart nova-conductor
-  - restart neutron-server

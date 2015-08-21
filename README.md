@@ -153,3 +153,24 @@ or other application using the libvirt API.
 
 After configuring network remember to create initial networks:
 http://docs.openstack.org/juno/install-guide/install/apt/content/neutron-initial-networks.html
+
+External network:
+neutron net-create ext-net --router:external True \
+  --provider:physical_network external --provider:network_type flat
+
+neutron subnet-create ext-net --name ext-subnet \
+  --allocation-pool start=FLOATING_IP_START,end=FLOATING_IP_END \
+  --disable-dhcp --gateway EXTERNAL_NETWORK_GATEWAY EXTERNAL_NETWORK_CIDR
+
+Tenant network:
+neutron net-create demo-net
+
+neutron subnet-create demo-net --name demo-subnet \
+  --gateway 192.168.1.1 192.168.1.0/24
+
+neutron router-create demo-router
+
+neutron router-interface-add demo-router demo-subnet
+
+neutron router-gateway-set demo-router ext-net
+

@@ -47,9 +47,13 @@
   - restart neutron-l3-agent
 
 - name: Configure the DHCP agent
-  template: src=dhcp_agent.ini.j2 dest=/etc/neutron/dhcp_agent.ini owner=root group=root mode=0644
+  template: src={{ item }}.j2 dest=/etc/neutron/{{ item }}.ini owner=root group=root mode=0644
+  with_items:
+  - dhcp_agent.ini
+  - dnsmasq-neutron.conf
   notify:
   - restart neutron-dhcp-agent
+  - pkill dnsmasq
 
 - name: Configure the metadata agent
   template: src=metadata_agent.ini.j2 dest=/etc/neutron/metadata_agent.ini owner=root group=root mode=0644

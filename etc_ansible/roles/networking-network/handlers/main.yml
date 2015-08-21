@@ -7,9 +7,12 @@
 - name: restart neutron-l3-agent
   service: name=neutron-l3-agent state=restarted
 
+- name: pkill dnsmasq
+  shell: pkill dnsmasq
+  ignore_errors: True
+
 - name: restart neutron-dhcp-agent
   service: name=neutron-dhcp-agent state=restarted
 
 - name: restart neutron-metadata-agent
   service: name=neutron-metadata-agent state=restarted
-
