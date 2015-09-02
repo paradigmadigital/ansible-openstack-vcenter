@@ -1,12 +1,14 @@
 - hosts: compute-controller
-  remote_user: root
+  remote_user: sistemas
+  sudo: yes
   roles:
   - ubuntu-cloud
   - ntp
   - compute-controller
 
 - hosts: compute-hypervisor
-  remote_user: root
+  remote_user: sistemas
+  sudo: yes
   roles:
   - ubuntu-cloud
   - ntp

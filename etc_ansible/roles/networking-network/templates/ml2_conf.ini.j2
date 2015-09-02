@@ -78,7 +78,7 @@ enable_ipset = True
 firewall_driver = neutron.agent.linux.iptables_firewall.OVSHybridIptablesFirewallDriver
 
 [ovs]
-local_ip = {{ ansible_eth0["ipv4"]["address"] }}
+local_ip = {{ ansible_osm["ipv4"]["address"] }}
 enable_tunneling = True
 bridge_mappings = external:br-ex
 

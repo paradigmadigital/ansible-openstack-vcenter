@@ -1,5 +1,6 @@
 - hosts: databases
-  remote_user: root
+  remote_user: sistemas
+  sudo: yes
   roles:
   - ubuntu-cloud
   - ntp
@@ -7,14 +8,16 @@
   - rabbitmq
 
 - hosts: keystone
-  remote_user: root
+  remote_user: sistemas
+  sudo: yes
   roles:
   - ubuntu-cloud
   - ntp
   - keystone
 
 - hosts: glance
-  remote_user: root
+  remote_user: sistemas
+  sudo: yes
   roles:
   - ubuntu-cloud
   - ntp
