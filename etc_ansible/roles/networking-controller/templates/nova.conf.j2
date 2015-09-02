@@ -1,4 +1,6 @@
 [DEFAULT]
+verbose = True
+
 dhcpbridge_flagfile=/etc/nova/nova.conf
 dhcpbridge=/usr/bin/nova-dhcpbridge
 logdir=/var/log/nova
@@ -17,10 +19,10 @@ rabbit_password = {{ rabbitmq_guest_password }}
 
 auth_strategy = keystone
 
-my_ip = {{ ansible_eth0["ipv4"]["address"] }}
+my_ip = {{ ansible_osm["ipv4"]["address"] }}
 
-vncserver_listen = {{ ansible_eth0["ipv4"]["address"] }}
-vncserver_proxyclient_address = {{ ansible_eth0["ipv4"]["address"] }}
+vncserver_listen = {{ ansible_osm["ipv4"]["address"] }}
+vncserver_proxyclient_address = {{ ansible_osm["ipv4"]["address"] }}
 
 network_api_class = nova.network.neutronv2.api.API
 security_group_api = neutron

@@ -44,7 +44,7 @@ skip-external-locking
 #
 # Instead of skip-networking the default is now to listen only on
 # localhost which is more compatible and is not less secure.
-bind-address		= {{ ansible_eth0["ipv4"]["address"] }}
+bind-address		= {{ ansible_osm["ipv4"]["address"] }}
 #
 # * Fine Tuning
 #

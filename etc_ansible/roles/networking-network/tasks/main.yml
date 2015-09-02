@@ -26,7 +26,10 @@
   register: tenant_id
 
 - name: Configure neutron server component
-  template: src=neutron.conf.j2 dest=/etc/neutron/neutron.conf owner=root group=neutron mode=0644
+  template: src={{ item }}.j2 dest=/etc/neutron/{{ item }} owner=root group=neutron mode=0644
+  with_items:
+  - neutron.conf
+  - dnsmasq-neutron.conf
   notify:
   - restart neutron-plugin-openvswitch-agent
   - restart neutron-l3-agent
@@ -44,9 +47,13 @@
   - restart neutron-l3-agent
 
 - name: Configure the DHCP agent
-  template: src=dhcp_agent.ini.j2 dest=/etc/neutron/dhcp_agent.ini owner=root group=root mode=0644
+  template: src={{ item }}.j2 dest=/etc/neutron/{{ item }} owner=root group=root mode=0644
+  with_items:
+  - dhcp_agent.ini
+  - dnsmasq-neutron.conf
   notify:
   - restart neutron-dhcp-agent
+  - pkill dnsmasq
 
 - name: Configure the metadata agent
   template: src=metadata_agent.ini.j2 dest=/etc/neutron/metadata_agent.ini owner=root group=root mode=0644
@@ -55,10 +62,10 @@
 
 # Configure Open vSwitch service
 - name: Restart OVS service
-  shell: service openvswitch-switch restart; ethtool -K eth1 gro off
+  shell: service openvswitch-switch restart; ethtool -K ose gro off
 
 - name: Add the external bridge
   openvswitch_bridge: bridge=br-ex state=present
 
 - name: Add a port to the external bridge that connects to the physical external network interface
-  openvswitch_port: bridge=br-ex port=eth1 state=present
+  openvswitch_port: bridge=br-ex port=ose state=present

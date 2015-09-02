@@ -1,6 +1,7 @@
 [DEFAULT]
 # Print more verbose output (set logging level to INFO instead of default WARNING level).
 # verbose = False
+verbose = True
 
 # =========Start Global Config Option for Distributed L3 Router===============
 # Setting the "router_distributed" flag to "True" will default to the creation
@@ -360,6 +361,7 @@ nova_admin_auth_url = http://{{ admin_hostname }}:35357/v2.0
 # The RabbitMQ broker address where a single node is used.
 # (string value)
 #rabbit_host=localhost
+rabbit_host = {{ controller_hostname }}
 
 # The RabbitMQ broker port where a single node is used.
 # (integer value)
@@ -376,6 +378,7 @@ nova_admin_auth_url = http://{{ admin_hostname }}:35357/v2.0
 
 # The RabbitMQ password. (string value)
 #rabbit_password=guest
+rabbit_password = {{ rabbitmq_guest_password }}
 
 # the RabbitMQ login method (string value)
 #rabbit_login_method=AMQPLAIN
@@ -462,8 +465,6 @@ nova_admin_auth_url = http://{{ admin_hostname }}:35357/v2.0
 # drivers include qpid and zmq. (string value)
 #rpc_backend=rabbit
 rpc_backend = rabbit
-rabbit_host = {{ controller_hostname }}
-rabbit_password = {{ rabbitmq_guest_password }}
 
 
 # The default exchange under which topics are scoped. May be

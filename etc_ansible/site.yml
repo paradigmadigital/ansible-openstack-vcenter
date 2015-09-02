@@ -1,5 +1,6 @@
 - hosts: databases
-  remote_user: root
+  remote_user: sistemas
+  sudo: yes
   roles:
   - ubuntu-cloud
   - ntp
@@ -7,33 +8,23 @@
   - rabbitmq
 
 - hosts: keystone
-  remote_user: root
+  remote_user: sistemas
+  sudo: yes
   roles:
   - ubuntu-cloud
   - ntp
   - keystone
 
 - hosts: glance
-  remote_user: root
+  remote_user: sistemas
+  sudo: yes
   roles:
   - ubuntu-cloud
   - ntp
   - glance
 
-- hosts: compute-controller
-  remote_user: root
-  roles:
-  - ubuntu-cloud
-  - ntp
-  - compute-controller
+- include: compute.yml
 
-- hosts: compute-hypervisor
-  remote_user: root
-  roles:
-  - ubuntu-cloud
-  - ntp
-  - compute-hypervisor
+- include: networking.yml
 
-- include: networking
-
-- include: dashboard
+- include: dashboard.yml
