@@ -1,23 +1,17 @@
 # networking tasks
 - hosts: networking-controller
-  remote_user: sistemas
-  sudo: yes
   roles:
   - ubuntu-cloud
   - ntp
   - networking-controller
 
 - hosts: networking-network
-  remote_user: sistemas
-  sudo: yes
   roles:
   - ubuntu-cloud
   - ntp
   - networking-network
 
 - hosts: networking-compute
-  remote_user: sistemas
-  sudo: yes
   roles:
   - ubuntu-cloud
   - ntp

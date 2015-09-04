@@ -1,32 +1,32 @@
 [databases]
-openstack-controller
+openstack-controller ansible_ssh_user=root
 
 [keystone]
-openstack-controller
+openstack-controller ansible_ssh_user=root
 
 [glance-controller]
-openstack-controller
+openstack-controller ansible_ssh_user=root
 
 [glance]
-openstack-controller
+openstack-controller ansible_ssh_user=root
 
 [networking-controller]
-openstack-controller
+openstack-controller ansible_ssh_user=root
 
 [networking-network]
-openstack-controller
+openstack-controller ansible_ssh_user=root
 
 [networking-compute]
-openstack-compute
+openstack-compute ansible_ssh_user=root
 
 [storage]
-openstack-storage
+openstack-storage ansible_ssh_user=root
 
 [compute-controller]
-openstack-controller
+openstack-controller ansible_ssh_user=root
 
 [compute-hypervisor]
-openstack-compute
+openstack-compute ansible_ssh_user=root
 
 [dashboard]
-openstack-controller
+openstack-controller ansible_ssh_user=root
