@@ -1,32 +1,34 @@
 [databases]
-openstack-controller ansible_ssh_user=root
+os-vcenter-01.paradigmatecnologico.com ansible_ssh_user=root
 
 [keystone]
-openstack-controller ansible_ssh_user=root
+os-vcenter-01.paradigmatecnologico.com ansible_ssh_user=root
 
 [glance-controller]
-openstack-controller ansible_ssh_user=root
+os-vcenter-01.paradigmatecnologico.com ansible_ssh_user=root
 
 [glance]
-openstack-controller ansible_ssh_user=root
+os-vcenter-01.paradigmatecnologico.com ansible_ssh_user=root
 
 [networking-controller]
-openstack-controller ansible_ssh_user=root
+os-vcenter-01.paradigmatecnologico.com ansible_ssh_user=root
 
 [networking-network]
-openstack-controller ansible_ssh_user=root
+os-vcenter-01.paradigmatecnologico.com ansible_ssh_user=root
 
 [networking-compute]
-openstack-compute ansible_ssh_user=root
+os-kvm-01.paradigmatecnologico.com ansible_ssh_user=root
+os-kvm-02.paradigmatecnologico.com ansible_ssh_user=root
 
 [storage]
-openstack-storage ansible_ssh_user=root
+ov-vcenter-01.paradigmatecnologico.com ansible_ssh_user=root
 
 [compute-controller]
-openstack-controller ansible_ssh_user=root
+os-vcenter-01.paradigmatecnologico.com ansible_ssh_user=root
 
 [compute-hypervisor]
-openstack-compute ansible_ssh_user=root
+os-kvm-01.paradigmatecnologico.com ansible_ssh_user=root
+os-kvm-02.paradigmatecnologico.com ansible_ssh_user=root
 
 [dashboard]
-openstack-controller ansible_ssh_user=root
+os-vcenter-01.paradigmatecnologico.com ansible_ssh_user=root
