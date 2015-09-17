@@ -1,9 +1,11 @@
 # ansible-openstack-vcenter
 Ansible playbooks to create a openstack vcenter.
 
+
+
 Steps:
-* Install compute node (Ubuntu 14.04) with qemu-kvm bridge-utils and virt-manager 
-* Configure compute node network as follows:
+* Install compute node (Ubuntu 14.04) with qemu-kvm, bridge-utils and virt-manager 
+* You need two network interfaces configured as external (ose) and management (osm). For a development environment osm interface does not need to be "connected" to any physical device and maybe ose can be connected to physical network as follows (use your network manager managed wlan interface to access internet):
 ```
 # interfaces(5) file used by ifup(8) and ifdown(8)
 auto lo
@@ -14,7 +16,7 @@ auto ose
 iface ose inet manual
 	up ip link set dev $IFACE up
         down ip link set dev $IFACE down
-        bridge_ports p128p1
+        bridge_ports eth0
         bridge_maxwait 0
 
 
@@ -110,7 +112,7 @@ or other application using the libvirt API.
   </devices>
 </domain>
 ```
-* Install bridge-utils git and ansible
+* Install bridge-utils, git and ansible
 * Configure vcenter virtual machine network as follows and reboot:
 ```
 # This file describes the network interfaces available on your system
@@ -140,20 +142,23 @@ iface ose inet manual
 ```
 * /etc/hosts in compute an vcenter must have this lines:
 ```
-192.168.84.3	openstack-controller	controller	openstack-vcenter	vcenter	openstack-storage	storage	openstack-network	network
-192.168.84.2	openstack-compute	compute
+192.168.84.3	os-vcenter-01
+192.168.84.1	os-kvm-01
 ```
 * In vcenter virtual machine generate ssh key with "ssh-keygen -t rsa"
-* Copy key to compute node and him self: ssh-copy-id 192.168.84.3;ssh-copy-id 192.168.84.2
-* Allow this user to use sudo without password adding in /etc/sudoers.d/90-ansible-user :
-```
-# User rules for ansible user
-ubuntu ALL=(ALL) NOPASSWD:ALL
-```
-
+* Copy key to os-kvm-01 and os-vcenter-01: ssh-copy-id root@os-kvm-01;ssh-copy-id root@os-vcenter-01
 * Clone repository with "git clone https://github.com/elmanytas/ansible-openstack-vcenter.git"
 * Change vars in etc_ansible/group_vars/all/vars_file.yml
 * Configure hosts in etc_ansible/hosts
 * Run ansible-playbook -i hosts site.yml
 
 * After finishing the ansible playbook remember to create initial networks: http://docs.openstack.org/juno/install-guide/install/apt/content/neutron-initial-networks.html
+
+
+Restoring:
+* In KVM node:
+** apt-get -y remove --purge neutron-plugin-ml2 neutron-plugin-openvswitch-agent nova-compute neutron-plugin-openvswitch-agent python-neutron python-neutronclient neutron-common openvswitch-common openvswitch-switch
+** apt-get -y autoremove --purge
+** rm -rf /var/log/neutron /var/lib/neutron/lock /var/log/openvswitch /var/log/nova /var/lib/nova/instances /etc/iscsi 
+
+If this KVM node is hosting vcenter, destroy vcenter virtual machine with virt-manager.
