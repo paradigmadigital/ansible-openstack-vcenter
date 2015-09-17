@@ -1,34 +1,33 @@
 [databases]
-os-vcenter-01.paradigmatecnologico.com ansible_ssh_user=root
+os-vcenter-01 ansible_ssh_user=root
 
 [keystone]
-os-vcenter-01.paradigmatecnologico.com ansible_ssh_user=root
+os-vcenter-01 ansible_ssh_user=root
 
 [glance-controller]
-os-vcenter-01.paradigmatecnologico.com ansible_ssh_user=root
+os-vcenter-01 ansible_ssh_user=root
 
 [glance]
-os-vcenter-01.paradigmatecnologico.com ansible_ssh_user=root
+os-vcenter-01 ansible_ssh_user=root
 
 [networking-controller]
-os-vcenter-01.paradigmatecnologico.com ansible_ssh_user=root
+os-vcenter-01 ansible_ssh_user=root
 
 [networking-network]
-os-vcenter-01.paradigmatecnologico.com ansible_ssh_user=root
+os-vcenter-01 ansible_ssh_user=root
 
 [networking-compute]
-os-kvm-01.paradigmatecnologico.com ansible_ssh_user=root
-os-kvm-02.paradigmatecnologico.com ansible_ssh_user=root
-
-[storage]
-ov-vcenter-01.paradigmatecnologico.com ansible_ssh_user=root
+os-kvm-01 ansible_ssh_user=root
+os-kvm-02 ansible_ssh_user=root
+os-kvm-03 ansible_ssh_user=root
 
 [compute-controller]
-os-vcenter-01.paradigmatecnologico.com ansible_ssh_user=root
+os-vcenter-01 ansible_ssh_user=root
 
 [compute-hypervisor]
-os-kvm-01.paradigmatecnologico.com ansible_ssh_user=root
-os-kvm-02.paradigmatecnologico.com ansible_ssh_user=root
+os-kvm-01 ansible_ssh_user=root
+os-kvm-02 ansible_ssh_user=root
+os-kvm-03 ansible_ssh_user=root
 
 [dashboard]
-os-vcenter-01.paradigmatecnologico.com ansible_ssh_user=root
+os-vcenter-01 ansible_ssh_user=root
