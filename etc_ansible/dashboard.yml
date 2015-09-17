@@ -1,6 +1,4 @@
 - hosts: dashboard
-  remote_user: sistemas
-  sudo: yes
   roles:
   - ubuntu-cloud
   - ntp
