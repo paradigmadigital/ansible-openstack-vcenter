@@ -12,8 +12,6 @@
   - ubuntu-cloud
   - ntp
   - keystone
-  tags:
-  - workingon
 
 - hosts: glance
   roles:
