@@ -1,5 +1,2 @@
-- name: guest password
-  shell: rabbitmqctl change_password guest {{ rabbitmq_guest_password }}
-
 - name: restart rabbitmq-server
   service: name=rabbitmq-server state=restarted

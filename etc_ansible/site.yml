@@ -4,12 +4,16 @@
   - ntp
   - mysql
   - rabbitmq
+  tags:
+  - workingon
 
 - hosts: keystone
   roles:
   - ubuntu-cloud
   - ntp
   - keystone
+  tags:
+  - workingon
 
 - hosts: glance
   roles:
