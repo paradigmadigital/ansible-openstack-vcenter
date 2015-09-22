@@ -72,74 +72,6 @@
   tags: workingon
 
 
-
-# Create projects, users and roles
-# http://docs.openstack.org/kilo/install-guide/install/apt/content/keystone-users.html
-# Admin project (same as tenant in juno), user and role
-- name: Create the admin project
-  keystone_user:
-    tenant={{ keystone_admin_tenant_name }}
-    tenant_description="{{ keystone_admin_tenant_description }}"
-    token={{ administration_token }}
-    endpoint=http://{{ admin_hostname }}:35357/v2.0
-  tags: workingon
-
-- name: Create the admin user
-  keystone_user:
-    user={{ keystone_admin_name }}
-    tenant={{ keystone_admin_tenant_name }}
-    password={{ keystone_admin_password }}
-    email={{ keystone_admin_email }}
-    token={{ administration_token }}
-    endpoint=http://{{ admin_hostname }}:35357/v2.0
-  tags: workingon
-
-- name: Create admin role and add the admin role to the admin project and user
-  keystone_user:
-    role={{ keystone_admin_role }}
-    user={{ keystone_admin_name }}
-    tenant={{ keystone_admin_tenant_name }}
-    token={{ administration_token }}
-    endpoint=http://{{ admin_hostname }}:35357/v2.0
-  tags: workingon
-
-# Non admin project, user and role
-- name: Create the non admin project
-  keystone_user:
-    tenant={{ keystone_user_tenant_name }}
-    tenant_description="{{ keystone_user_tenant_description }}"
-    token={{ administration_token }}
-    endpoint=http://{{ admin_hostname }}:35357/v2.0
-  tags: workingon
-
-- name: Create the non admin user
-  keystone_user:
-    user={{ keystone_user_name }}
-    tenant={{ keystone_user_tenant_name }}
-    password={{ keystone_user_password }}
-    email={{ keystone_user_email }}
-    token={{ administration_token }}
-    endpoint=http://{{ admin_hostname }}:35357/v2.0
-  tags: workingon
-
-- name: Create user role and add the non admin role to the non admin tenant and user
-  keystone_user:
-    role=user
-    user={{ keystone_user_name }}
-    tenant={{ keystone_user_tenant_name }}
-    token={{ administration_token }}
-    endpoint=http://{{ admin_hostname }}:35357/v2.0
-  tags: workingon
-
-# Create the service project
-- name: Create the service project
-  keystone_user:
-    tenant={{ keystone_service_tenant_name }}
-    tenant_description={{ keystone_service_tenant_description }}
-    token={{ administration_token }}
-    endpoint=http://{{ admin_hostname }}:35357/v2.0
-  tags: workingon
-
 # Create the service entity and API endpoint
 # http://docs.openstack.org/kilo/install-guide/install/apt/content/keystone-services.html
 - name: Test if service entity exists
@@ -179,6 +111,73 @@
   when: endpoint_exists|failed
   tags: workingon
 
+
+# Create projects, users and roles
+# http://docs.openstack.org/kilo/install-guide/install/apt/content/keystone-users.html
+# Admin project (same as tenant in juno), user and role
+- name: Create the admin project
+  keystone_user:
+    tenant={{ keystone_admin_tenant_name }}
+    tenant_description="{{ keystone_admin_tenant_description }}"
+    token={{ administration_token }}
+    endpoint=http://{{ admin_hostname }}:35357/v2.0
+  tags: workingon
+
+- name: Create the admin user
+  keystone_user:
+    user={{ keystone_admin_name }}
+    tenant={{ keystone_admin_tenant_name }}
+    password={{ keystone_admin_password }}
+    email={{ keystone_admin_email }}
+    token={{ administration_token }}
+    endpoint=http://{{ admin_hostname }}:35357/v2.0
+  tags: workingon
+
+- name: Create admin role and add the admin role to the admin project and user
+  keystone_user:
+    role={{ keystone_admin_role }}
+    user={{ keystone_admin_name }}
+    tenant={{ keystone_admin_tenant_name }}
+    token={{ administration_token }}
+    endpoint=http://{{ admin_hostname }}:35357/v2.0
+  tags: workingon
+
+# Create the service project
+- name: Create the service project
+  keystone_user:
+    tenant={{ keystone_service_tenant_name }}
+    tenant_description={{ keystone_service_tenant_description }}
+    token={{ administration_token }}
+    endpoint=http://{{ admin_hostname }}:35357/v2.0
+  tags: workingon
+
+# Non admin project, user and role
+- name: Create the non admin project
+  keystone_user:
+    tenant={{ keystone_user_tenant_name }}
+    tenant_description="{{ keystone_user_tenant_description }}"
+    token={{ administration_token }}
+    endpoint=http://{{ admin_hostname }}:35357/v2.0
+  tags: workingon
+
+- name: Create the non admin user
+  keystone_user:
+    user={{ keystone_user_name }}
+    tenant={{ keystone_user_tenant_name }}
+    password={{ keystone_user_password }}
+    email={{ keystone_user_email }}
+    token={{ administration_token }}
+    endpoint=http://{{ admin_hostname }}:35357/v2.0
+  tags: workingon
+
+- name: Create user role and add the non admin role to the non admin tenant and user
+  keystone_user:
+    role=user
+    user={{ keystone_user_name }}
+    tenant={{ keystone_user_tenant_name }}
+    token={{ administration_token }}
+    endpoint=http://{{ admin_hostname }}:35357/v2.0
+  tags: workingon
 
 # http://docs.openstack.org/juno/install-guide/install/apt/content/keystone-client-environment-scripts.html
 #  Create OpenStack client environment scripts
