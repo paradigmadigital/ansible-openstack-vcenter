@@ -1,5 +1,0 @@
-- hosts: compute-controller
-  roles:
-  - ubuntu-cloud
-  - ntp
-  - compute-controller

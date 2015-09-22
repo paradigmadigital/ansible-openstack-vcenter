@@ -1,7 +1,0 @@
-# networking tasks
-
-- hosts: networking-compute
-  roles:
-  - ubuntu-cloud
-  - ntp
-  - networking-compute
