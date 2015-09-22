@@ -29,34 +29,34 @@
 #Create the service entity and API endpoint
 - name: Test if service entity exists
   shell: |
-    export OS_SERVICE_TOKEN={{ administration_token }}
-    export OS_SERVICE_ENDPOINT=http://{{ admin_hostname }}:35357/v2.0
-    keystone service-list | grep " image "| wc -l
+    export OS_TOKEN={{ administration_token }}
+    export OS_URL=http://{{ admin_hostname }}:35357/v2.0
+    openstack service list | grep " image "| wc -l
   register: service_entity_exists
   ignore_errors: True
   failed_when: "'0' in service_entity_exists.stdout"
 
 - name: Create the service entity for the Image service
   shell: |
-    export OS_SERVICE_TOKEN={{ administration_token }}
-    export OS_SERVICE_ENDPOINT=http://{{ admin_hostname }}:35357/v2.0
-    keystone service-create --name {{ keystone_glance_name }} --type image --description "OpenStack Image Service"
+    export OS_TOKEN={{ administration_token }}
+    export OS_URL=http://{{ admin_hostname }}:35357/v2.0
+    openstack service create --name {{ keystone_glance_name }} --description "OpenStack Image Service" image
   when: service_entity_exists|failed
 
 - name: Test if endpoint exists
   shell: |
-    export OS_SERVICE_TOKEN={{ administration_token }}
-    export OS_SERVICE_ENDPOINT=http://{{ admin_hostname }}:35357/v2.0
-    keystone endpoint-list | grep 'http://{{ admin_hostname }}:9292' | wc -l
+    export OS_TOKEN={{ administration_token }}
+    export OS_URL=http://{{ admin_hostname }}:35357/v2.0
+    openstack endpoint list | grep image | wc -l
   register: endpoint_exists
   ignore_errors: True
   failed_when: "'0' in endpoint_exists.stdout"
 
 - name: Create the Image service API endpoints
   shell: |
-    export OS_SERVICE_TOKEN={{ administration_token }}
-    export OS_SERVICE_ENDPOINT=http://{{ admin_hostname }}:35357/v2.0
-    keystone endpoint-create --service-id $(keystone service-list | awk '/ image / {print $2}') --publicurl http://{{ admin_hostname }}:9292 --internalurl http://{{ admin_hostname }}:9292 --adminurl http://{{ admin_hostname }}:9292  --region {{ region_name }}
+    export OS_TOKEN={{ administration_token }}
+    export OS_URL=http://{{ admin_hostname }}:35357/v2.0
+    openstack endpoint create --publicurl http://{{ admin_hostname }}:9292 --internalurl http://{{ admin_hostname }}:9292 --adminurl http://{{ admin_hostname }}:9292  --region {{ region_name }} image
   when: endpoint_exists|failed
 
 # To install and configure the Image Service components

@@ -20,6 +20,8 @@
   - ubuntu-cloud
   - ntp
   - glance
+  tags:
+  - workingon
 
 - include: compute.yml
 

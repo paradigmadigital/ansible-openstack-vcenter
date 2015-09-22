@@ -6,12 +6,6 @@ verbose = True
 # Show debugging output in logs (sets DEBUG log level output)
 #debug = False
 
-# Which backend scheme should Glance use by default is not specified
-# in a request to add a new image to Glance? Known schemes are determined
-# by the known_stores option below.
-# Default: 'file'
-default_store = file
-
 # Maximum image size (in bytes) that may be uploaded through the
 # Glance API server. Defaults to 1 TB.
 # WARNING: this value should only be increased after careful consideration
@@ -37,6 +31,11 @@ backlog = 4096
 # TCP_KEEPIDLE value in seconds when creating socket.
 # Not supported on OS X.
 #tcp_keepidle = 600
+
+# Timeout (in seconds) for client connections' socket operations. If an incoming
+# connection is idle for this period it will be closed.  A value of "0"
+# means wait forever.
+#client_socket_timeout = 0
 
 # API to use for accessing data. Default value points to sqlalchemy
 # package, it is also possible to use: glance.db.registry.api
@@ -86,11 +85,6 @@ backlog = 4096
 # Supported values for the 'disk_format' image attribute
 #disk_formats=ami,ari,aki,vhd,vmdk,raw,qcow2,vdi,iso
 
-# Directory to use for lock files. Default to a temp directory
-# (string value). This setting needs to be the same for both
-# glance-scrubber and glance-api.
-#lock_path=<None>
-
 # Property Protections config file
 # This file contains the rules for property protections and the roles/policies
 # associated with it.
@@ -109,6 +103,20 @@ backlog = 4096
 # order. Currently two strategies are packaged with Glance 'location_order'
 # and 'store_type'.
 #location_strategy = location_order
+
+
+# Public url to use for versions endpoint. The default is None,
+# which will use the request's host_url attribute to populate the URL base.
+# If Glance is operating behind a proxy, you will want to change this to
+# represent the proxy's URL.
+#public_endpoint=<None>
+
+# http_keepalive option. If False, server will return the header
+# "Connection: close", If True, server will return "Connection: Keep-Alive"
+# in its responses. In order to close the client socket connection
+# explicitly after the response is sent and read successfully by the client,
+# you simply have to set this option to False when you create a wsgi server.
+#http_keepalive = True
 
 # ================= Syslog Options ============================
 
@@ -136,6 +144,15 @@ backlog = 4096
 # -- if used -- Swift or S3 credentials
 # Should be set to a random string of length 16, 24 or 32 bytes
 #metadata_encryption_key = <16, 24 or 32 char registry metadata key>
+
+
+# Digest algorithm which will be used for digital signature, the default is
+# sha1 in Kilo for a smooth upgrade process, and it will be updated with
+# sha256 in next release(L). Use command
+# "openssl list-message-digest-algorithms" to get the available algorithms
+# supported by the version of OpenSSL on the platform. Examples are 'sha1',
+# 'sha256', 'sha512', etc.
+#digest_algorithm = sha1
 
 # ============ Registry Options ===============================
 
@@ -175,10 +192,6 @@ registry_client_protocol = http
 # Default: 600
 #registry_client_timeout = 600
 
-# Whether to automatically create the database tables.
-# Default: False
-#db_auto_create = False
-
 # Enable DEBUG log messages from sqlalchemy which prints every database
 # query and response.
 # Default: False
@@ -212,6 +225,15 @@ notification_driver = noop
 
 # Default publisher_id for outgoing notifications.
 # default_publisher_id = image.localhost
+
+# List of disabled notifications. A notification can be given either as a
+# notification type to disable a single event, or as a notification group
+# prefix to disable all events within a group.
+# Example: if this config option is set to
+# ["image.create", "metadef_namespace"], then "image.create" notification will
+# not be sent after image is created and none of the notifications for
+# metadefinition namespaces will be sent.
+# disabled_notifications = []
 
 # Messaging driver used for 'messaging' notifications driver
 # rpc_backend = 'rabbit'
@@ -282,6 +304,25 @@ scrubber_datadir = /var/lib/glance/scrubber
 
 # Base directory that the Image Cache uses
 image_cache_dir = /var/lib/glance/image-cache/
+
+# =============== Policy Options ==================================
+
+[oslo_policy]
+# The JSON file that defines policies.
+# Deprecated group/name - [DEFAULT]/policy_file
+#policy_file = policy.json
+
+# Default rule. Enforced when a requested rule is not found.
+# Deprecated group/name - [DEFAULT]/policy_default_rule
+#policy_default_rule = default
+
+# Directories where policy configuration files are stored.
+# They can be relative to any directory in the search path
+# defined by the config_dir option, or absolute paths.
+# The file defined by policy_file must exist for these
+# directories to be searched.
+# Deprecated group/name - [DEFAULT]/policy_dirs
+#policy_dirs = policy.d
 
 # =============== Database Options =================================
 
@@ -382,16 +423,30 @@ connection = mysql://{{ keystone_glance_name }}:{{ glance_dbpass }}@{{ admin_hos
 # (setting -1 implies an infinite retry count) (integer value)
 #db_max_retries = 20
 
+[oslo_concurrency]
+
+# Enables or disables inter-process locks. (boolean value)
+# Deprecated group/name - [DEFAULT]/disable_process_locking
+#disable_process_locking = false
+
+# Directory to use for lock files.  For security, the specified
+# directory should only be writable by the user running the processes
+# that need locking. It could be read from environment variable
+# OSLO_LOCK_PATH. This setting needs to be the same for both
+# glance-scrubber and glance-api service. Default to a temp directory.
+# Deprecated group/name - [DEFAULT]/lock_path (string value)
+#lock_path = /tmp
+
 [keystone_authtoken]
-#identity_uri = http://127.0.0.1:35357
-#admin_tenant_name = %SERVICE_TENANT_NAME%
-#admin_user = %SERVICE_USER%
-#admin_password = %SERVICE_PASSWORD%
-auth_uri = http://{{ admin_hostname }}:5000/v2.0
-identity_uri = http://{{ admin_hostname }}:35357
-admin_tenant_name = {{ keystone_service_tenant_name }}
-admin_user = {{ keystone_glance_name }}
-admin_password = {{ keystone_glance_password }}
+auth_uri = http://{{ admin_hostname }}:5000
+auth_url = http://{{ admin_hostname }}:35357
+auth_plugin = password
+project_domain_id = default
+user_domain_id = default
+project_name = {{ keystone_service_tenant_name }}
+username = {{ keystone_glance_name }}
+password = {{ keystone_glance_password }}
+
 revocation_cache_time = 10
 
 [paste_deploy]
@@ -407,7 +462,7 @@ flavor=keystone
 
 [store_type_location_strategy]
 # The scheme list to use to get store preference order. The scheme must be
-# registered by one of the stores defined by the 'known_stores' config option.
+# registered by one of the stores defined by the 'stores' config option.
 # This option will be applied when you using 'store_type' option as image
 # location strategy defined by the 'location_strategy' config option.
 #store_type_preference =
@@ -428,16 +483,44 @@ flavor=keystone
 # task_time_to_live = 48
 
 # Specifies which task executor to be used to run the task scripts.
-# The default value for task_executor is eventlet.
-# task_executor = eventlet
+# The default value for task_executor is taskflow.
+# task_executor = taskflow
+
+# Work dir for asynchronous task operations.  The directory set here
+# will be used to operate over images - normally before they are
+# imported in the destination store. When providing work dir, make sure
+# enough space is provided for concurrent tasks to run efficiently
+# without running out of space. A rough estimation can be done by
+# multiplying the number of `max_workers` - or the N of workers running
+# - by an average image size (e.g 500MB). The image size estimation
+# should be done based on the average size in your deployment. Note that
+# depending on the tasks running you may need to multiply this number by
+# some factor depending on what the task does. For example, you may want
+# to double the available size if image conversion is enabled. All this
+# being said, remember these are just estimations and you should do them
+# based on the worst case scenario and be prepared to act in case they
+# were wrong.
+# work_dir=None
 
 # Specifies the maximum number of eventlet threads which can be spun up by
 # the eventlet based task executor to perform execution of Glance tasks.
+# DEPRECATED: Use [taskflow_executor]/max_workers instead.
 # eventlet_executor_pool_size = 1000
+
+[taskflow_executor]
+# The mode in which the engine will run. Can be 'default', 'serial',
+# 'parallel' or 'worker-based'
+#engine_mode = serial
+
+# The number of parallel activities executed at the same time by
+# the engine. The value can be greater than one when the engine mode is
+# 'parallel' or 'worker-based', otherwise this value will be ignored.
+#max_workers = 10
 
 [glance_store]
 # List of which store classes and store class locations are
 # currently known to glance at startup.
+# Deprecated group/name - [DEFAULT]/known_stores
 # Existing but disabled stores:
 #      glance.store.rbd.Store,
 #      glance.store.s3.Store,
@@ -448,6 +531,13 @@ flavor=keystone
 #      glance.store.vmware_datastore.Store,
 #stores = glance.store.filesystem.Store,
 #         glance.store.http.Store
+
+# Which backend scheme should Glance use by default is not specified
+# in a request to add a new image to Glance? Known schemes are determined
+# by the stores option.
+# Deprecated group/name - [DEFAULT]/default_store
+# Default: 'file'
+default_store = file
 
 # ============ Filesystem Store Options ========================
 
@@ -524,17 +614,26 @@ swift_store_large_object_size = 5120
 # the image file, and the default is 200MB
 swift_store_large_object_chunk_size = 200
 
-# Whether to use ServiceNET to communicate with the Swift storage servers.
-# (If you aren't RACKSPACE, leave this False!)
+# If set, the configured endpoint will be used. If None, the storage URL
+# from the auth response will be used. The location of an object is
+# obtained by appending the container and object to the configured URL.
 #
-# To use ServiceNET for authentication, prefix hostname of
-# `swift_store_auth_address` with 'snet-'.
-# Ex. https://example.com/v1.0/ -> https://snet-example.com/v1.0/
-swift_enable_snet = False
+# swift_store_endpoint = https://www.example.com/v1/not_a_container
+#swift_store_endpoint =
 
 # If set to True enables multi-tenant storage mode which causes Glance images
 # to be stored in tenant specific Swift accounts.
 #swift_store_multi_tenant = False
+
+# If set to an integer value between 1 and 32, a single-tenant store will
+# use multiple containers to store images. If set to the default value of 0,
+# only a single container will be used. Multi-tenant stores are not affected
+# by this option. The max number of containers that will be used to store
+# images is approximately 16^N where N is the value of this option. Discuss
+# the impact of this with your swift deployment team, as this option is only
+# beneficial in the largest of deployments where swift rate limiting can lead
+# to unwanted throttling on a single container.
+#swift_store_multiple_containers_seed = 0
 
 # A list of swift ACL strings that will be applied as both read and
 # write ACLs to the containers created by Glance in multi-tenant
@@ -565,12 +664,16 @@ swift_enable_snet = False
 # Bypass SSL verification for Swift
 #swift_store_auth_insecure = False
 
+# The path to a CA certificate bundle file to use for SSL verification when
+# communicating with Swift.
+#swift_store_cacert =
+
 # ============ S3 Store Options =============================
 
 # Address where the S3 authentication service lives
 # Valid schemes are 'http://' and 'https://'
 # If no scheme specified,  default to 'http://'
-s3_store_host = 127.0.0.1:8080/v1.0/
+s3_store_host = s3.amazonaws.com
 
 # User to authenticate against the S3 authentication service
 s3_store_access_key = <20-char AWS access key>
@@ -684,10 +787,26 @@ sheepdog_store_chunk_size = 64
 # Inventory path to a datacenter (string value)
 # Value optional when vmware_server_ip is an ESX/ESXi host: if specified
 # should be `ha-datacenter`.
+# Deprecated in favor of vmware_datastores.
 #vmware_datacenter_path = <None>
 
 # Datastore associated with the datacenter (string value)
+# Deprecated in favor of vmware_datastores.
 #vmware_datastore_name = <None>
+
+# A list of datastores where the image can be stored.
+# This option may be specified multiple times for specifying multiple
+# datastores. Either one of vmware_datastore_name or vmware_datastores is
+# required. The datastore name should be specified after its datacenter
+# path, separated by ":". An optional weight may be given after the datastore
+# name, separated again by ":". Thus, the required format becomes
+# <datacenter_path>:<datastore_name>:<optional_weight>.
+# When adding an image, the datastore with highest weight will be selected,
+# unless there is not enough free space available in cases where the image size
+# is already known. If no weight is given, it is assumed to be zero and the
+# directory will be considered for selection last. If multiple datastores have
+# the same weight, then the one with the most free space available is selected.
+#vmware_datastores = <None>
 
 # The number of times we retry on failures
 # e.g., socket error, etc (integer value)
