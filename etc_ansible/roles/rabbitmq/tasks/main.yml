@@ -4,8 +4,8 @@
 
 - name: Create openstack rabbitmq user
   rabbitmq_user:
-    user=openstack
-    password={{ rabbitmq_guest_password }}
+    user={{ rabbitmq_password }}
+    password={{ rabbitmq_password }}
     vhost=/
     configure_priv=.*
     read_priv=.*

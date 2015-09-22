@@ -1,5 +1,6 @@
 controller_hostname: openstack-vcenter
-rabbitmq_guest_password: RABBIT_PASS
+rabbitmq_user: openstack
+rabbitmq_password: RABBIT_PASS
 #TODO: mysql_root_password: MYSQL_ROOT_PASS
 # keystone section vars: http://docs.openstack.org/juno/install-guide/install/apt/content/ch_keystone.html
 keystone_dbpass: KEYSTONE_DBPASS
