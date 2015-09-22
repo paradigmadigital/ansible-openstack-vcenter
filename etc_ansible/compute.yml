@@ -9,3 +9,9 @@
   - ubuntu-cloud
   - ntp
   - compute-hypervisor
+
+- hosts: compute-lxc-hypervisor
+  roles:
+  - ubuntu-cloud
+  - ntp
+  - compute-lxc-hypervisor

@@ -16,3 +16,9 @@
   - ubuntu-cloud
   - ntp
   - networking-compute
+
+- hosts: networking-lxc-compute
+  roles:
+  - ubuntu-cloud
+  - ntp
+  - networking-lxc-compute

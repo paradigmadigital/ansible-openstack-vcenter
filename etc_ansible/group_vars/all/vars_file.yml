@@ -1,4 +1,4 @@
-controller_hostname: os-vcenter-01
+controller_hostname: openstack-vcenter
 rabbitmq_guest_password: RABBIT_PASS
 #TODO: mysql_root_password: MYSQL_ROOT_PASS
 # keystone section vars: http://docs.openstack.org/juno/install-guide/install/apt/content/ch_keystone.html
@@ -18,11 +18,11 @@ keystone_user_tenant_description: Demo Tenant
 keystone_service_tenant_name: service
 keystone_service_tenant_description: service
 # --publicurl http://os-vcenter-01:5000/v2.0
-public_hostname: os-vcenter-01
+public_hostname: openstack-vcenter
 # --internalurl http://os-vcenter-01:5000/v2.0
-internal_hostname: os-vcenter-01
+internal_hostname: openstack-vcenter
 # --adminurl http://os-vcenter-01:35357/v2.0
-admin_hostname: os-vcenter-01
+admin_hostname: openstack-vcenter
 region_name: RegionOne
 
 # Glance vars
