@@ -48,6 +48,12 @@
 
 - name: Enable apache virtualhost
   file: src=/etc/apache2/sites-available/wsgi-keystone.conf dest=/etc/apache2/sites-enabled/wsgi-keystone.conf owner=root group=root state=link
+
+- name: Create directory structure for the WSGI components
+  file: path=/var/www/cgi-bin/keystone owner=root group=root state=directory mode=0755
+
+
+
 # Create tenants, users and roles
 # http://docs.openstack.org/juno/install-guide/install/apt/content/keystone-users.html
 # Admin tenant, user and role
