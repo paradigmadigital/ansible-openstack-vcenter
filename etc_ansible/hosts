@@ -4,30 +4,16 @@ openstack-vcenter ansible_ssh_user=root
 [keystone]
 openstack-vcenter ansible_ssh_user=root
 
-[glance-controller]
-openstack-vcenter ansible_ssh_user=root
-
 [glance]
 openstack-vcenter ansible_ssh_user=root
 
-[networking-controller]
+# vcenter node *MUST* be here
+# vcenter = networking controller + nova controller)
+[networking-compute-controller]
 openstack-vcenter ansible_ssh_user=root
-
-[networking-network]
-openstack-vcenter ansible_ssh_user=root
-
-[networking-compute]
-openstack-compute ansible_ssh_user=root
-openstack-compute ansible_ssh_user=root
-openstack-compute ansible_ssh_user=root
-
-[compute-controller]
-openstack-vcenter ansible_ssh_user=root
-
-[compute-hypervisor]
-openstack-compute ansible_ssh_user=root
-openstack-compute ansible_ssh_user=root
-openstack-compute ansible_ssh_user=root
 
 [dashboard]
 openstack-vcenter ansible_ssh_user=root
+
+[kvm-hypervisor]
+openstack-compute ansible_ssh_user=root

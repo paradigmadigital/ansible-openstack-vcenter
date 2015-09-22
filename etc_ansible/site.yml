@@ -23,8 +23,21 @@
   tags:
   - workingon
 
-- include: compute.yml
+- hosts: networking-compute-controller
+  roles:
+  - ubuntu-cloud
+  - ntp
+  - networking-compute-controller
 
-- include: networking.yml
+- hosts: dashboard
+  roles:
+  - ubuntu-cloud
+  - ntp
+  - dashboard
 
-- include: dashboard.yml
+# Adding hypervisors
+- hosts: kvm-hypervisor
+  roles:
+  - ubuntu-cloud
+  - ntp
+  - kvm-hypervisor

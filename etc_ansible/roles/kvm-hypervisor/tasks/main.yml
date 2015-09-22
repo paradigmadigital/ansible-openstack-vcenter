@@ -1,3 +1,17 @@
+# http://docs.openstack.org/juno/install-guide/install/apt/content/ch_nova.html
+# http://docs.openstack.org/juno/install-guide/install/apt/content/ch_nova.html#nova-compute-install
+
+# To install and configure the Compute controller components
+- name: Install nova packages
+  apt: name={{ item }} state=present
+  with_items:
+  - nova-compute
+  - sysfsutils
+
+- name: Configure nova
+  template: src=nova.conf.j2 dest=/etc/nova/nova.conf owner=nova group=nova
+  notify: restart nova-compute
+
 # http://docs.openstack.org/juno/install-guide/install/apt/content/section_neutron-networking.html
 # http://docs.openstack.org/juno/install-guide/install/apt/content/neutron-compute-node.html
 

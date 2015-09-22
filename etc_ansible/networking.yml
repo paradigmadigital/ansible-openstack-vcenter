@@ -1,15 +1,4 @@
 # networking tasks
-- hosts: networking-controller
-  roles:
-  - ubuntu-cloud
-  - ntp
-  - networking-controller
-
-- hosts: networking-network
-  roles:
-  - ubuntu-cloud
-  - ntp
-  - networking-network
 
 - hosts: networking-compute
   roles:

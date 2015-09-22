@@ -1,5 +1,1 @@
-- hosts: dashboard
-  roles:
-  - ubuntu-cloud
-  - ntp
-  - dashboard
+
