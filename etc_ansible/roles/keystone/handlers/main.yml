@@ -1,5 +1,5 @@
 - name: populate database
   shell: su -s /bin/sh -c 'keystone-manage db_sync' keystone
 
-- name: restart apache
+- name: restart apache2
   service: name=apache2 state=restarted
