@@ -192,7 +192,7 @@
   with_items:
   - neutron.conf
   notify:
-  - populate database
+  - populate neutron database
   - restart nova-api
   - restart nova-scheduler
   - restart nova-conductor
@@ -207,7 +207,7 @@
   template: src=ml2_conf.ini.j2 dest=/etc/neutron/plugins/ml2/ml2_conf.ini owner=root group=neutron mode=0644
   notify:
   - restart neutron-plugin-openvswitch-agent
-  - populate database
+  - populate neutron database
   - restart neutron-server
   tags: workingon
 
@@ -255,7 +255,7 @@
 - name: Configure Nova Compute to use Networking
   template: src=nova.conf.j2 dest=/etc/nova/nova.conf owner=nova group=nova
   notify:
-  - populate database
+  - populate nova database
   - restart nova-api
   - restart nova-cert
   - restart nova-consoleauth

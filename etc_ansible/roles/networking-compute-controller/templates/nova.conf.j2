@@ -14,8 +14,6 @@ api_paste_config=/etc/nova/api-paste.ini
 enabled_apis=ec2,osapi_compute,metadata
 
 rpc_backend = rabbit
-rabbit_host = {{ controller_hostname }}
-rabbit_password = {{ rabbitmq_password }}
 
 auth_strategy = keystone
 
@@ -35,12 +33,14 @@ connection = mysql://{{ keystone_nova_name }}:{{ nova_dbpass }}@{{ admin_hostnam
 
 
 [keystone_authtoken]
-auth_uri = http://{{ admin_hostname }}:5000/v2.0
-identity_uri = http://{{ admin_hostname }}:35357
-admin_tenant_name = {{ keystone_service_tenant_name }}
-admin_user = {{ keystone_nova_name }}
-admin_password = {{ keystone_nova_password }}
-
+auth_uri = http://{{ admin_hostname }}:5000
+auth_url = http://{{ admin_hostname }}:35357
+auth_plugin = password
+project_domain_id = default
+user_domain_id = default
+project_name = {{ keystone_service_tenant_name }}
+username = {{ keystone_nova_name }}
+password = {{ keystone_nova_password }}
 
 [glance]
 host = {{ admin_hostname }}
@@ -56,3 +56,12 @@ admin_password = {{ keystone_neutron_password }}
 
 service_metadata_proxy = True
 metadata_proxy_shared_secret = {{ metadata_secret }}
+
+
+[oslo_messaging_rabbit]
+rabbit_host = {{ controller_hostname }}
+rabbit_userid = {{ rabbitmq_user }}
+rabbit_password = {{ rabbitmq_password }}
+
+[oslo_concurrency]
+lock_path = /var/lib/nova/tmp
