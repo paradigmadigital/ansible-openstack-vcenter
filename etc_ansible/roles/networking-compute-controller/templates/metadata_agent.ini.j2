@@ -3,21 +3,25 @@
 # debug = True
 
 # The Neutron user information for accessing the Neutron API.
-#auth_url = http://localhost:5000/v2.0
-#auth_region = RegionOne
+# auth_url = http://localhost:5000/v2.0
+# auth_region = RegionOne
 # Turn off verification of the certificate for ssl
 # auth_insecure = False
 # Certificate Authority public key (CA cert) file for ssl
 # auth_ca_cert =
-#admin_tenant_name = %SERVICE_TENANT_NAME%
-#admin_user = %SERVICE_USER%
-#admin_password = %SERVICE_PASSWORD%
-auth_url = http://{{ admin_hostname }}:5000/v2.0
-auth_region = {{ region_name }}
-admin_tenant_name = {{ keystone_service_tenant_name }}
-admin_user = {{ keystone_neutron_name }}
-admin_password = {{ keystone_neutron_password }}
+# admin_tenant_name = %SERVICE_TENANT_NAME%
+# admin_user = %SERVICE_USER%
+# admin_password = %SERVICE_PASSWORD%
 
+auth_uri = http://{{ admin_hostname }}:5000
+auth_url = http://{{ admin_hostname }}:35357
+auth_region = {{ region_name }}
+auth_plugin = password
+project_domain_id = default
+user_domain_id = default
+project_name = {{ keystone_service_tenant_name }}
+username = {{ keystone_neutron_name }}
+password = {{ keystone_neutron_password }}
 
 # Network service endpoint type to pull from the keystone catalog
 # endpoint_type = adminURL
@@ -46,12 +50,21 @@ nova_metadata_ip = {{ admin_hostname }}
 # When proxying metadata requests, Neutron signs the Instance-ID header with a
 # shared secret to prevent spoofing.  You may select any string for a secret,
 # but it must match here and in the configuration used by the Nova Metadata
-# Server. NOTE: Nova uses a different key: neutron_metadata_proxy_shared_secret
+# Server. NOTE: Nova uses the same config key, but in [neutron] section.
 # metadata_proxy_shared_secret =
 metadata_proxy_shared_secret = {{ metadata_secret }}
 
 # Location of Metadata Proxy UNIX domain socket
 # metadata_proxy_socket = $state_path/metadata_proxy
+
+# Metadata Proxy UNIX domain socket mode, 3 values allowed:
+# 'deduce': deduce mode from metadata_proxy_user/group values,
+# 'user': set metadata proxy socket mode to 0o644, to use when
+# metadata_proxy_user is agent effective user or root,
+# 'group': set metadata proxy socket mode to 0o664, to use when
+# metadata_proxy_group is agent effective group,
+# 'all': set metadata proxy socket mode to 0o666, to use otherwise.
+# metadata_proxy_socket_mode = deduce
 
 # Number of separate worker processes for metadata server. Defaults to
 # half the number of CPU cores
