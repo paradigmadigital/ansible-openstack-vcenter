@@ -26,8 +26,6 @@
   notify:
   - populate database
 
-- meta: flush_handlers
-
 - name: Configure apache hostname
   lineinfile: dest=/etc/apache2/apache2.conf regexp='^\s*ServerName' line="ServerName {{ admin_hostname }}" owner=root group=root mode=0644
   notify:
@@ -57,6 +55,8 @@
   template: src=wsgi_component.j2 dest=/var/www/cgi-bin/keystone/main owner=keystone group=keystone mode=0755
   notify:
   - restart apache2
+
+- meta: flush_handlers
 
 
 # Create the service entity and API endpoint
