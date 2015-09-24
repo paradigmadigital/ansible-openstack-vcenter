@@ -3,15 +3,12 @@
 ## Install NOVA but not configure ##
 - name: Create database
   mysql_db: name=nova state=present
-  tags: workingon
 
 - name: Create database user from localhost
   mysql_user: name=nova host=localhost password={{ nova_dbpass }} priv=nova.*:ALL,GRANT state=present
-  tags: workingon
 
 - name: Create database user from %
   mysql_user: name=nova host=% password={{ nova_dbpass }} priv=nova.*:ALL,GRANT state=present
-  tags: workingon
 
 - name: Create the nova user
   keystone_user:
@@ -20,7 +17,6 @@
     password={{ keystone_nova_password }}
     token={{ administration_token }}
     endpoint=http://{{ admin_hostname }}:35357/v2.0
-  tags: workingon
 
 - name: Add the admin role to the nova user
   keystone_user:
@@ -29,7 +25,6 @@
     tenant={{ keystone_service_tenant_name }}
     token={{ administration_token }}
     endpoint=http://{{ admin_hostname }}:35357/v2.0
-  tags: workingon
 
 #Create the service entity and API endpoint
 - name: Test if service entity exists
@@ -40,7 +35,6 @@
   register: service_entity_exists
   ignore_errors: True
   failed_when: "'0' in service_entity_exists.stdout"
-  tags: workingon
 
 - name: Create the service entity for the Nova service
   shell: |
@@ -48,7 +42,6 @@
     export OS_URL=http://{{ admin_hostname }}:35357/v2.0
     openstack service create --name {{ keystone_nova_name }} --description "OpenStack Compute" compute
   when: service_entity_exists|failed
-  tags: workingon
 
 - name: Test if endpoint exists
   shell: |
@@ -58,7 +51,6 @@
   register: endpoint_exists
   ignore_errors: True
   failed_when: "'0' in endpoint_exists.stdout"
-  tags: workingon
 
 - name: Create the Compute service API endpoints
   shell: |
@@ -66,7 +58,6 @@
     export OS_URL=http://{{ admin_hostname }}:35357/v2.0
     openstack endpoint create --publicurl http://{{ admin_hostname }}:8774/v2/%\(tenant_id\)s --internalurl http://{{ admin_hostname }}:8774/v2/%\(tenant_id\)s --adminurl http://{{ admin_hostname }}:8774/v2/%\(tenant_id\)s  --region {{ region_name }} compute
   when: endpoint_exists|failed
-  tags: workingon
 
 # To install and configure the Compute controller components
 - name: Install nova packages
@@ -79,7 +70,6 @@
   - nova-novncproxy
   - nova-scheduler
   - python-novaclient
-  tags: workingon
 
 
 # http://docs.openstack.org/juno/install-guide/install/apt/content/section_neutron-networking.html
@@ -87,15 +77,12 @@
 ## Install NEUTRON controller but no configure ##
 - name: Create database
   mysql_db: name=neutron state=present
-  tags: workingon
 
 - name: Create database user from localhost
   mysql_user: name=neutron host=localhost password={{ neutron_dbpass }} priv=neutron.*:ALL,GRANT state=present
-  tags: workingon
 
 - name: Create database user from %
   mysql_user: name=neutron host=% password={{ neutron_dbpass }} priv=neutron.*:ALL,GRANT state=present
-  tags: workingon
 
 - name: Create the neutron user
   keystone_user:
@@ -104,7 +91,6 @@
     password={{ keystone_neutron_password }}
     token={{ administration_token }}
     endpoint=http://{{ admin_hostname }}:35357/v2.0
-  tags: workingon
 
 - name: Add the admin role to the neutron user
   keystone_user:
@@ -113,7 +99,6 @@
     tenant={{ keystone_service_tenant_name }}
     token={{ administration_token }}
     endpoint=http://{{ admin_hostname }}:35357/v2.0
-  tags: workingon
 
 #Create the service entity and API endpoint
 - name: Test if service entity exists
@@ -124,7 +109,6 @@
   register: service_entity_exists
   ignore_errors: True
   failed_when: "'0' in service_entity_exists.stdout"
-  tags: workingon
 
 - name: Create the service entity for the Neutron service
   shell: |
@@ -132,7 +116,6 @@
     export OS_URL=http://{{ admin_hostname }}:35357/v2.0
     openstack service create --name {{ keystone_neutron_name }} --description "OpenStack Networking" network
   when: service_entity_exists|failed
-  tags: workingon
 
 - name: Test if network service API endpoint exists
   shell: |
@@ -142,7 +125,6 @@
   register: endpoint_exists
   ignore_errors: True
   failed_when: "'0' in endpoint_exists.stdout"
-  tags: workingon
 
 - name: Create the Compute service API endpoints
   shell: |
@@ -150,7 +132,6 @@
     export OS_URL=http://{{ admin_hostname }}:35357/v2.0
     openstack endpoint create --publicurl http://{{ admin_hostname }}:9696 --internalurl http://{{ admin_hostname }}:9696 --adminurl http://{{ admin_hostname }}:9696 --region {{ region_name }} network
   when: endpoint_exists|failed
-  tags: workingon
 
 # To install and configure the Compute controller components
 - name: Install networking components
@@ -159,7 +140,6 @@
   - neutron-server
   - neutron-plugin-ml2
   - python-neutronclient
-  tags: workingon
 
 ## Install NEUTRON component and configure it ##
 # http://docs.openstack.org/juno/install-guide/install/apt/content/section_neutron-networking.html
@@ -167,15 +147,12 @@
 
 - name: Enable ip forwarding
   sysctl: name=net.ipv4.ip_forward value=1 reload=yes sysctl_set=yes
-  tags: workingon
 
 - name: Disable all rp_filter
   sysctl: name=net.ipv4.conf.all.rp_filter value=0 reload=yes sysctl_set=yes
-  tags: workingon
 
 - name: Disable default rp_filter
   sysctl: name=net.ipv4.conf.default.rp_filter value=0 reload=yes sysctl_set=yes
-  tags: workingon
 
 - name: Install networking components
   apt: name={{ item }} state=present
@@ -185,7 +162,6 @@
   - neutron-l3-agent
   - neutron-dhcp-agent
   - neutron-metadata-agent
-  tags: workingon
 
 - name: Configure neutron server component
   template: src={{ item }}.j2 dest=/etc/neutron/{{ item }} owner=root group=neutron mode=0644
@@ -201,7 +177,6 @@
   - restart neutron-l3-agent
   - restart neutron-dhcp-agent
   - restart neutron-metadata-agent
-  tags: workingon
 
 - name: Configure Modular Layer 2 (ML2) plug-in
   template: src=ml2_conf.ini.j2 dest=/etc/neutron/plugins/ml2/ml2_conf.ini owner=root group=neutron mode=0644
@@ -209,13 +184,11 @@
   - restart neutron-plugin-openvswitch-agent
   - populate neutron database
   - restart neutron-server
-  tags: workingon
 
 - name: Configure Layer-3 (L3) agent
   template: src=l3_agent.ini.j2 dest=/etc/neutron/l3_agent.ini owner=root group=neutron mode=0644
   notify:
   - restart neutron-l3-agent
-  tags: workingon
 
 - name: Configure the DHCP agent
   template: src={{ item }}.j2 dest=/etc/neutron/{{ item }} owner=root group=root mode=0644
@@ -225,22 +198,18 @@
   notify:
   - restart neutron-dhcp-agent
   - pkill dnsmasq
-  tags: workingon
 
 - name: Configure the metadata agent
   template: src=metadata_agent.ini.j2 dest=/etc/neutron/metadata_agent.ini owner=root group=root mode=0644
   notify:
   - restart neutron-metadata-agent
-  tags: workingon
 
 # Configure Open vSwitch service
 - name: Restart OVS service
   shell: service openvswitch-switch restart; ethtool -K ose gro off
-  tags: workingon
 
 - name: Add the external bridge
   openvswitch_bridge: bridge=br-ex state=present
-  tags: workingon
 
 - name: Add a port to the external bridge that connects to the physical external network interface
   openvswitch_port: bridge=br-ex port=ose state=present
@@ -249,7 +218,6 @@
   - restart neutron-l3-agent
   - restart neutron-dhcp-agent
   - restart neutron-metadata-agent
-  tags: workingon
 
 
 - name: Configure Nova Compute to use Networking
@@ -262,4 +230,3 @@
   - restart nova-scheduler
   - restart nova-conductor
   - restart nova-novncproxy
-  tags: workingon

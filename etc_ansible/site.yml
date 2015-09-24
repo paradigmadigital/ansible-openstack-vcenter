@@ -25,12 +25,14 @@
   - ubuntu-cloud
   - ntp
   - networking-compute-controller
+  tags: workingon
 
 - hosts: dashboard
   roles:
   - ubuntu-cloud
   - ntp
   - dashboard
+  tags: workingon
 
 # Adding hypervisors
 - hosts: kvm-hypervisor
