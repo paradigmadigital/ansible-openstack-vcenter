@@ -136,10 +136,8 @@ rpc_backend = rabbit
 # kombu_ssl_ca_certs =
 # IP address of the RabbitMQ installation
 # rabbit_host = localhost
-rabbit_host = {{ controller_hostname }}
 # Password of the RabbitMQ server
 # rabbit_password = guest
-rabbit_password = {{ rabbitmq_password }}
 # Port where RabbitMQ server is running/listening
 # rabbit_port = 5672
 # RabbitMQ single or HA cluster (host:port pairs i.e: host1:5672, host2:5672)
@@ -147,7 +145,6 @@ rabbit_password = {{ rabbitmq_password }}
 # rabbit_hosts = localhost:5672
 # User ID used for RabbitMQ connections
 # rabbit_userid = guest
-rabbit_userid = {{ rabbitmq_user }}
 # Location of a virtual RabbitMQ installation.
 # rabbit_virtual_host = /
 # Maximum retries with trying to connect to RabbitMQ
