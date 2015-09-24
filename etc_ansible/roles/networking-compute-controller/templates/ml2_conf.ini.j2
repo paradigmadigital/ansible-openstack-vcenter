@@ -102,7 +102,8 @@ firewall_driver = neutron.agent.linux.iptables_firewall.OVSHybridIptablesFirewal
 
 [ovs]
 local_ip = {{ ansible_osm["ipv4"]["address"] }}
-enable_tunneling = True
+# To remove:
+# enable_tunneling = True
 bridge_mappings = external:br-ex
 
 [agent]

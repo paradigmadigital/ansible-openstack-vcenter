@@ -8,29 +8,29 @@
 
 - hosts: keystone
   roles:
-  - ubuntu-cloud
-  - ntp
+#  - ubuntu-cloud
+#  - ntp
   - keystone
   tags: workingon
 
 - hosts: glance
   roles:
-  - ubuntu-cloud
-  - ntp
+#  - ubuntu-cloud
+#  - ntp
   - glance
   tags: workingon
 
 - hosts: networking-compute-controller
   roles:
-  - ubuntu-cloud
-  - ntp
+#  - ubuntu-cloud
+#  - ntp
   - networking-compute-controller
   tags: workingon
 
 - hosts: dashboard
   roles:
-  - ubuntu-cloud
-  - ntp
+#  - ubuntu-cloud
+#  - ntp
   - dashboard
   tags: workingon
 
