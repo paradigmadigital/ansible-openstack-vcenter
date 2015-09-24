@@ -6,7 +6,7 @@
   apt: name=python-pycurl state=latest
 
 - name: Add ubuntu cloud repository
-  apt_repository: repo='deb http://ubuntu-cloud.archive.canonical.com/ubuntu trusty-updates/kilo main' state=present update_cache=yes
+  template: src=cloudarchive.list.j2 dest=/etc/apt/sources.list.d/cloudarchive.list
 
 - name: Upgrade distribution
-  apt: upgrade=dist
+  apt: upgrade=dist update_cache=yes
