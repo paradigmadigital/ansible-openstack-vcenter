@@ -1,0 +1,94 @@
+# http://docs.openstack.org/kilo/install-guide/install/apt/content/ch_cinder.html
+
+# http://docs.openstack.org/kilo/install-guide/install/apt/content/cinder-install-controller-node.html
+- name: Create database
+  mysql_db: name=cinder state=present
+  tags: workingon
+
+- name: Create database user
+  mysql_user: name=cinder host=localhost password={{ cinder_dbpass }} priv=cinder.*:ALL,GRANT state=present
+  tags: workingon
+
+- name: Create database user
+  mysql_user: name=cinder host=% password={{ cinder_dbpass }} priv=cinder.*:ALL,GRANT state=present
+  tags: workingon
+
+- name: Create the cinder user
+  keystone_user:
+    user={{ keystone_cinder_name }}
+    tenant={{ keystone_service_tenant_name }}
+    password={{ keystone_cinder_password }}
+    token={{ administration_token }}
+    endpoint=http://{{ admin_hostname }}:35357/v2.0
+  tags: workingon
+
+- name: Add the admin role to the cinder user
+  keystone_user:
+    role={{ keystone_admin_role }}
+    user={{ keystone_cinder_name }}
+    tenant={{ keystone_service_tenant_name }}
+    token={{ administration_token }}
+    endpoint=http://{{ admin_hostname }}:35357/v2.0
+  tags: workingon
+
+#Create the service entity and API endpoint
+- name: Test if service entity exists
+  shell: |
+    export OS_TOKEN={{ administration_token }}
+    export OS_URL=http://{{ admin_hostname }}:35357/v2.0
+    openstack service list | grep " volume "| wc -l
+  register: service_entity_exists
+  ignore_errors: True
+  failed_when: "'0' in service_entity_exists.stdout"
+  tags: workingon
+
+- name: Create the service entity for the Image service
+  shell: |
+    export OS_TOKEN={{ administration_token }}
+    export OS_URL=http://{{ admin_hostname }}:35357/v2.0
+    openstack service create --name {{ keystone_cinder_name }} --description "OpenStack Block Storage" volume
+  when: service_entity_exists|failed
+  tags: workingon
+
+- name: Create the service entity for the Image service
+  shell: |
+    export OS_TOKEN={{ administration_token }}
+    export OS_URL=http://{{ admin_hostname }}:35357/v2.0
+    openstack service create --name {{ keystone_cinder_name }}v2 --description "OpenStack Block Storage v2" volumev2
+  when: service_entity_exists|failed
+  tags: workingon
+
+- name: Test if endpoint exists
+  shell: |
+    export OS_TOKEN={{ administration_token }}
+    export OS_URL=http://{{ admin_hostname }}:35357/v2.0
+    openstack endpoint list | grep image | wc -l
+  register: endpoint_exists
+  ignore_errors: True
+  failed_when: "'0' in endpoint_exists.stdout"
+
+- name: Create the Image service API endpoints
+  shell: |
+    export OS_TOKEN={{ administration_token }}
+    export OS_URL=http://{{ admin_hostname }}:35357/v2.0
+    openstack endpoint create --publicurl http://{{ admin_hostname }}:9292 --internalurl http://{{ admin_hostname }}:9292 --adminurl http://{{ admin_hostname }}:9292  --region {{ region_name }} image
+  when: endpoint_exists|failed
+
+# To install and configure the Image Service components
+- name: Install glance
+  apt: name=glance state=present
+
+- name: Install python-glanceclient
+  apt: name=python-glanceclient state=present
+
+- name: Configure glance api service
+  template: src=glance-api.conf.j2 dest=/etc/glance/glance-api.conf owner=glance group=glance
+  notify:
+  - populate database
+  - restart glance-api
+
+- name: Configure glance registry service
+  template: src=glance-registry.conf.j2 dest=/etc/glance/glance-registry.conf owner=glance group=glance
+  notify:
+  - populate database
+  - restart glance-registry

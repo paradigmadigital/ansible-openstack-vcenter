@@ -31,11 +31,20 @@
   - networking-compute-controller
   tags: workingon
 
+# Dashboard service
 - hosts: dashboard
   roles:
 #  - ubuntu-cloud
 #  - ntp
   - dashboard
+  tags: workingon
+
+# Block Storage service
+- hosts: cinder
+  roles:
+#  - ubuntu-cloud
+#  - ntp
+  - cinder
   tags: workingon
 
 # Adding hypervisors
