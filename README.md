@@ -152,13 +152,13 @@ iface ose inet manual
 * Configure hosts in etc_ansible/hosts
 * Run ansible-playbook -i hosts site.yml
 
-* After finishing the ansible playbook remember to create initial networks: http://docs.openstack.org/juno/install-guide/install/apt/content/neutron-initial-networks.html
+* After finishing the ansible playbook remember to create initial networks: http://docs.openstack.org/kilo/install-guide/install/apt/content/neutron-initial-networks.html
 
 
 Restoring:
 * In KVM node:
-** apt-get -y remove --purge neutron-plugin-ml2 neutron-plugin-openvswitch-agent nova-compute neutron-plugin-openvswitch-agent python-neutron python-neutronclient neutron-common openvswitch-common openvswitch-switch
-** apt-get -y autoremove --purge
-** rm -rf /var/log/neutron /var/lib/neutron/lock /var/log/openvswitch /var/log/nova /var/lib/nova/instances /etc/iscsi 
+..* apt-get -y remove --purge neutron-plugin-ml2 neutron-plugin-openvswitch-agent nova-compute neutron-plugin-openvswitch-agent python-neutron python-neutronclient neutron-common openvswitch-common openvswitch-switch
+..* apt-get -y autoremove --purge
+..* rm -rf /var/log/neutron /var/lib/neutron/lock /var/log/openvswitch /var/log/nova /var/lib/nova/instances /etc/iscsi 
 
 If this KVM node is hosting vcenter, destroy vcenter virtual machine with virt-manager.

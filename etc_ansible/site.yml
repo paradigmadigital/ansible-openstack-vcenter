@@ -1,3 +1,4 @@
+# Databases services
 - hosts: databases
   roles:
   - ubuntu-cloud
@@ -6,6 +7,7 @@
   - rabbitmq
   tags: workingon
 
+# Keystone service
 - hosts: keystone
   roles:
 #  - ubuntu-cloud
@@ -13,6 +15,7 @@
   - keystone
   tags: workingon
 
+# Image service
 - hosts: glance
   roles:
 #  - ubuntu-cloud
@@ -20,6 +23,7 @@
   - glance
   tags: workingon
 
+# Networking and compute services
 - hosts: networking-compute-controller
   roles:
 #  - ubuntu-cloud
