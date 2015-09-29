@@ -45,7 +45,6 @@
 #  - ubuntu-cloud
 #  - ntp
   - cinder
-  tags: workingon
 
 # Adding hypervisors
 - hosts: kvm-hypervisor
@@ -53,3 +52,4 @@
   - ubuntu-cloud
   - ntp
   - kvm-hypervisor
+  tags: workingon
