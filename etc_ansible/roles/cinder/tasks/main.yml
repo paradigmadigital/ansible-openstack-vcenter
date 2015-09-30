@@ -42,7 +42,7 @@
   failed_when: "'0' in service_entity_exists.stdout"
   tags: workingon
 
-- name: Create the service entity for the Image service
+- name: Create the service entity for the Block Storage service
   shell: |
     export OS_TOKEN={{ administration_token }}
     export OS_URL=http://{{ admin_hostname }}:35357/v2.0
@@ -50,7 +50,17 @@
   when: service_entity_exists|failed
   tags: workingon
 
-- name: Create the service entity for the Image service
+- name: Test if service entity v2 exists
+  shell: |
+    export OS_TOKEN={{ administration_token }}
+    export OS_URL=http://{{ admin_hostname }}:35357/v2.0
+    openstack service list | grep " volumev2 "| wc -l
+  register: service_entity_exists
+  ignore_errors: True
+  failed_when: "'0' in service_entity_exists.stdout"
+  tags: workingon
+
+- name: Create the service entity for the Block Storage service
   shell: |
     export OS_TOKEN={{ administration_token }}
     export OS_URL=http://{{ admin_hostname }}:35357/v2.0
@@ -62,33 +72,70 @@
   shell: |
     export OS_TOKEN={{ administration_token }}
     export OS_URL=http://{{ admin_hostname }}:35357/v2.0
-    openstack endpoint list | grep image | wc -l
+    openstack endpoint list | grep " volume " | wc -l
   register: endpoint_exists
   ignore_errors: True
   failed_when: "'0' in endpoint_exists.stdout"
+  tags: workingon
 
-- name: Create the Image service API endpoints
+- name: Create the Block Storage service API endpoints
   shell: |
     export OS_TOKEN={{ administration_token }}
     export OS_URL=http://{{ admin_hostname }}:35357/v2.0
-    openstack endpoint create --publicurl http://{{ admin_hostname }}:9292 --internalurl http://{{ admin_hostname }}:9292 --adminurl http://{{ admin_hostname }}:9292  --region {{ region_name }} image
+    openstack endpoint create --publicurl http://{{ admin_hostname }}:8776/v2/%\(tenant_id\)s --internalurl http://{{ admin_hostname }}:8776/v2/%\(tenant_id\)s --adminurl http://{{ admin_hostname }}:8776/v2/%\(tenant_id\)s --region {{ region_name }} volume
   when: endpoint_exists|failed
+  tags: workingon
+
+- name: Test if endpoint v2 exists
+  shell: |
+    export OS_TOKEN={{ administration_token }}
+    export OS_URL=http://{{ admin_hostname }}:35357/v2.0
+    openstack endpoint list | grep " volumev2 " | wc -l
+  register: endpoint_exists
+  ignore_errors: True
+  failed_when: "'0' in endpoint_exists.stdout"
+  tags: workingon
+
+- name: Create the Block Storage service API v2 endpoints
+  shell: |
+    export OS_TOKEN={{ administration_token }}
+    export OS_URL=http://{{ admin_hostname }}:35357/v2.0
+    openstack endpoint create --publicurl http://{{ admin_hostname }}:8776/v2/%\(tenant_id\)s --internalurl http://{{ admin_hostname }}:8776/v2/%\(tenant_id\)s --adminurl http://{{ admin_hostname }}:8776/v2/%\(tenant_id\)s --region {{ region_name }} volumev2
+  when: endpoint_exists|failed
+  tags: workingon
 
 # To install and configure the Image Service components
-- name: Install glance
-  apt: name=glance state=present
+- name: Install cinder components
+  apt: name={{ item }} state=present
+  with_items:
+  - cinder-api
+  - cinder-scheduler
+  - python-cinderclient
+  tags: workingon
 
-- name: Install python-glanceclient
-  apt: name=python-glanceclient state=present
-
-- name: Configure glance api service
-  template: src=glance-api.conf.j2 dest=/etc/glance/glance-api.conf owner=glance group=glance
+- name: Configure cinder service
+  template: src=cinder.conf.j2 dest=/etc/cinder/cinder.conf owner=cinder group=cinder
   notify:
   - populate database
-  - restart glance-api
+  - restart cinder-api
+  - restart cinder-scheduler
+  tags: workingon
 
-- name: Configure glance registry service
-  template: src=glance-registry.conf.j2 dest=/etc/glance/glance-registry.conf owner=glance group=glance
-  notify:
-  - populate database
-  - restart glance-registry
+- meta: flush_handlers
+
+# http://docs.openstack.org/kilo/install-guide/install/apt/content/cinder-install-storage-node.html
+- name: Install cinder dependencies in storage node
+  apt: name={{ item }} state=present
+  with_items:
+  - qemu
+  - lvm2
+  tags: workingon
+
+- name: Setup physical devices
+  shell: pvcreate {{ item }}
+  with_items: "{{ cinder_physical_devices }}"
+  tags: workingon
+
+- name: Setup volume group
+  lvg: vg=cinder-volumes pvs={{ cinder_physical_devices|join(',') }}
+  tags: workingon

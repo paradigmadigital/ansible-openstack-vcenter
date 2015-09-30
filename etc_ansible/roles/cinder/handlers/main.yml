@@ -1,8 +1,8 @@
 - name: populate database
-  shell: su -s /bin/sh -c "glance-manage db_sync" glance
+  shell: su -s /bin/sh -c "cinder-manage db sync" cinder
 
-- name: restart glance-registry
-  service: name=glance-registry state=restarted
+- name: restart cinder-scheduler
+  service: name=cinder-scheduler state=restarted
 
-- name: restart glance-api
-  service: name=glance-api state=restarted
+- name: restart cinder-api
+  service: name=cinder-api state=restarted

@@ -5,31 +5,27 @@
   - ntp
   - mysql
   - rabbitmq
-  tags: workingon
 
 # Keystone service
 - hosts: keystone
   roles:
-#  - ubuntu-cloud
-#  - ntp
+  - ubuntu-cloud
+  - ntp
   - keystone
-  tags: workingon
 
 # Image service
 - hosts: glance
   roles:
-#  - ubuntu-cloud
-#  - ntp
+  - ubuntu-cloud
+  - ntp
   - glance
-  tags: workingon
 
 # Networking and compute services
 - hosts: networking-compute-controller
   roles:
-#  - ubuntu-cloud
-#  - ntp
+  - ubuntu-cloud
+  - ntp
   - networking-compute-controller
-  tags: workingon
 
 # Dashboard service
 - hosts: dashboard
@@ -37,7 +33,6 @@
 #  - ubuntu-cloud
 #  - ntp
   - dashboard
-  tags: workingon
 
 # Block Storage service
 - hosts: cinder
@@ -53,3 +48,10 @@
   - ntp
   - kvm-hypervisor
   tags: workingon
+
+# Adding hypervisors
+- hosts: lxc-hypervisor
+  roles:
+  - ubuntu-cloud
+  - ntp
+  - lxc-hypervisor
