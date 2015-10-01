@@ -14,6 +14,10 @@ rpc_backend = rabbit
 
 my_ip = {{ ansible_osm["ipv4"]["address"] }}
 
+enabled_backends = lvm
+
+glance_host = {{ admin_hostname }}
+
 [database]
 connection = mysql://{{ keystone_cinder_name }}:{{ cinder_dbpass }}@{{ admin_hostname }}/cinder
 
@@ -34,3 +38,9 @@ password = {{ keystone_cinder_password }}
 
 [oslo_concurrency]
 lock_path = /var/lock/cinder
+
+[lvm]
+volume_driver = cinder.volume.drivers.lvm.LVMVolumeDriver
+volume_group = cinder-volumes
+iscsi_protocol = iscsi
+iscsi_helper = tgtadm

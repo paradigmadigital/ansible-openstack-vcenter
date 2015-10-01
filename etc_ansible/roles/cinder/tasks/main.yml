@@ -131,11 +131,37 @@
   - lvm2
   tags: workingon
 
+# All LVM devices are allowed temporarily
+- name: Configure permissive lvm filters
+  template: src=permissive_lvm.conf.j2 dest=/etc/lvm/lvm.conf owner=root group=root mode=0644
+  tags: workingon
+
 - name: Setup physical devices
-  shell: pvcreate {{ item }}
+  shell: |
+         if [ `pvs | grep vda3 | wc -l` == '0' ]; then
+           pvcreate {{ item }}
+         fi
   with_items: "{{ cinder_physical_devices }}"
   tags: workingon
 
 - name: Setup volume group
   lvg: vg=cinder-volumes pvs={{ cinder_physical_devices|join(',') }}
+  tags: workingon
+
+- name: Configure lvm filters
+  template: src=lvm.conf.j2 dest=/etc/lvm/lvm.conf owner=root group=root mode=0644
+  tags: workingon
+
+- name: Install cinder components
+  apt: name={{ item }} state=present
+  with_items:
+  - cinder-volume
+  - python-mysqldb
+  tags: workingon
+
+- name: Configure cinder service
+  template: src=cinder.conf.j2 dest=/etc/cinder/cinder.conf owner=cinder group=cinder
+  notify:
+  - restart tgt
+  - restart cinder-volume
   tags: workingon

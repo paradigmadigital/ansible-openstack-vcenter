@@ -6,3 +6,9 @@
 
 - name: restart cinder-api
   service: name=cinder-api state=restarted
+
+- name: restart cinder-volume
+  service: name=cinder-volume state=restarted
+
+- name: restart tgt
+  service: name=tgt state=restarted
