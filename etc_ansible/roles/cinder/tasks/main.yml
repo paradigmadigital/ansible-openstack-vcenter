@@ -121,7 +121,7 @@
   - restart cinder-scheduler
   tags: workingon
 
-- meta: flush_handlers
+#- meta: flush_handlers
 
 # http://docs.openstack.org/kilo/install-guide/install/apt/content/cinder-install-storage-node.html
 - name: Install cinder dependencies in storage node
