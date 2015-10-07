@@ -13,11 +13,19 @@ iface lo inet loopback
 
 # "public" network
 auto ose
-iface ose inet manual
-	up ip link set dev $IFACE up
-        down ip link set dev $IFACE down
-        bridge_ports eth0
-        bridge_maxwait 0
+iface ose inet static
+    #up ip link set dev $IFACE up
+    #down ip link set dev $IFACE down
+    address 10.10.10.1
+    netmask 255.255.255.0
+#    bridge_ports eth0
+    bridge_ports none
+    bridge_stp off
+    bridge_fd 0
+    bridge_maxwait 0
+#    up iptables -t nat -A POSTROUTING -s 10.10.10.0/24 ! -d 10.10.10.0/24 -j MASQUERADE
+#    down iptables -t nat -D POSTROUTING -s 10.10.10.0/24 ! -d 10.10.10.0/24 -j MASQUERADE
+
 
 
 # openstack management network
