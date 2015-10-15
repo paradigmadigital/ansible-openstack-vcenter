@@ -1,0 +1,126 @@
+# http://docs.openstack.org/juno/install-guide/install/apt/content/image-service-overview.html
+
+# http://docs.openstack.org/juno/install-guide/install/apt/content/glance-install.html
+- name: Create database
+  mysql_db: name=heat state=present
+
+- name: Create database user
+  mysql_user: name=heat host=localhost password={{ heat_dbpass }} priv=glance.*:ALL,GRANT state=present
+
+- name: Create database user
+  mysql_user: name=heat host=% password={{ heat_dbpass }} priv=glance.*:ALL,GRANT state=present
+
+- name: Create the heat user
+  keystone_user:
+    user={{ keystone_heat_name }}
+    tenant={{ keystone_service_tenant_name }}
+    password={{ keystone_heat_name_password }}
+    token={{ administration_token }}
+    endpoint=http://{{ admin_hostname }}:35357/v2.0
+
+- name: Add the admin role to the heat user
+  keystone_user:
+    role={{ keystone_admin_role }}
+    user={{ keystone_heat_name }}
+    tenant={{ keystone_service_tenant_name }}
+    token={{ administration_token }}
+    endpoint=http://{{ admin_hostname }}:35357/v2.0
+
+- name: Add the heat_stack_owner role to the demo user
+  keystone_user:
+    role=heat_stack_owner
+    user={{ keystone_user_name }}
+    tenant={{ keystone_service_tenant_name }}
+    token={{ administration_token }}
+    endpoint=http://{{ admin_hostname }}:35357/v2.0
+
+- name: Add the heat_stack_user
+  keystone_user:
+    role=heat_stack_user
+    tenant={{ keystone_service_tenant_name }}
+    token={{ administration_token }}
+    endpoint=http://{{ admin_hostname }}:35357/v2.0
+
+#Create the service entity and API endpoint
+- name: Test if service entity exists
+  shell: |
+    export OS_TOKEN={{ administration_token }}
+    export OS_URL=http://{{ admin_hostname }}:35357/v2.0
+    openstack service list | grep " orchestation "| wc -l
+  register: service_entity_exists
+  ignore_errors: True
+  failed_when: "'0' in service_entity_exists.stdout"
+
+- name: Create the service entity for the Image service
+  shell: |
+    export OS_TOKEN={{ administration_token }}
+    export OS_URL=http://{{ admin_hostname }}:35357/v2.0
+    openstack service create --name {{ keystone_heat_name }} --description "Orchestration" orchestration
+  when: service_entity_exists|failed
+
+- name: Test if service entity exists
+  shell: |
+    export OS_TOKEN={{ administration_token }}
+    export OS_URL=http://{{ admin_hostname }}:35357/v2.0
+    openstack service list | grep " cloudformation "| wc -l
+  register: service_entity_exists
+  ignore_errors: True
+  failed_when: "'0' in service_entity_exists.stdout"
+
+- name: Create the service entity for the Image service
+  shell: |
+    export OS_TOKEN={{ administration_token }}
+    export OS_URL=http://{{ admin_hostname }}:35357/v2.0
+    openstack service create --name {{ keystone_heat_name }}-cnf --description "Orchestration" cloudformation
+  when: service_entity_exists|failed
+
+- name: Test if endpoint exists
+  shell: |
+    export OS_TOKEN={{ administration_token }}
+    export OS_URL=http://{{ admin_hostname }}:35357/v2.0
+    openstack endpoint list | grep heat | wc -l
+  register: endpoint_exists
+  ignore_errors: True
+  failed_when: "'0' in endpoint_exists.stdout"
+
+- name: Create the Image service API endpoints
+  shell: |
+    export OS_TOKEN={{ administration_token }}
+    export OS_URL=http://{{ admin_hostname }}:35357/v2.0
+    openstack endpoint create --publicurl http://{{ admin_hostname }}:8004/v1/%\(tenant_id\)s --internalurl http://{{ admin_hostname }}:8004/v1/%\(tenant_id\)s --adminurl http://{{ admin_hostname }}:8004/v1/%\(tenant_id\)s  --region {{ region_name }} orchestration
+  when: endpoint_exists|failed
+
+- name: Test if endpoint exists
+  shell: |
+    export OS_TOKEN={{ administration_token }}
+    export OS_URL=http://{{ admin_hostname }}:35357/v2.0
+    openstack endpoint list | grep heat-cnf | wc -l
+  register: endpoint_exists
+  ignore_errors: True
+  failed_when: "'0' in endpoint_exists.stdout"
+
+- name: Create the Image service API endpoints
+  shell: |
+    export OS_TOKEN={{ administration_token }}
+    export OS_URL=http://{{ admin_hostname }}:35357/v2.0
+    openstack endpoint create --publicurl http://{{ admin_hostname }}:8004/v1 --internalurl http://{{ admin_hostname }}:8004/v1 --adminurl http://{{ admin_hostname }}:8004/v1 --region {{ region_name }} cloudformation
+  when: endpoint_exists|failed
+
+# To install and configure the Image Service components
+- name: Install glance
+  apt: name=glance state=present
+
+- name: Install python-glanceclient
+  apt: name=python-glanceclient state=present
+
+- name: Configure glance api service
+  template: src=glance-api.conf.j2 dest=/etc/glance/glance-api.conf owner=glance group=glance
+  notify:
+  - populate database
+  - restart glance-api
+
+- name: Configure glance registry service
+  template: src=glance-registry.conf.j2 dest=/etc/glance/glance-registry.conf owner=glance group=glance
+  notify:
+  - populate database
+  - restart glance-registry

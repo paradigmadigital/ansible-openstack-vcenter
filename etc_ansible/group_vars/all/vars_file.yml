@@ -57,3 +57,9 @@ keystone_cinder_password: cinder
 # Separate physical devices with commas
 cinder_physical_devices:
 - /dev/vda3
+
+# Glance vars
+# http://docs.openstack.org/juno/install-guide/install/apt/content/ch_glance.html
+heat_dbpass: HEAT_DBPASS
+keystone_heat_name: heat
+keystone_heat_password: heat

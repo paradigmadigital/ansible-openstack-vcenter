@@ -142,8 +142,8 @@ iface ose inet manual
 ```
 * /etc/hosts in compute an vcenter must have this lines:
 ```
-192.168.84.3	os-vcenter-01
-192.168.84.1	os-kvm-01
+192.168.84.2	openstack-vcenter
+192.168.84.1	openstack-compute
 ```
 * In vcenter virtual machine generate ssh key with "ssh-keygen -t rsa"
 * Copy key to os-kvm-01 and os-vcenter-01: ssh-copy-id root@os-kvm-01;ssh-copy-id root@os-vcenter-01
@@ -152,13 +152,21 @@ iface ose inet manual
 * Configure hosts in etc_ansible/hosts
 * Run ansible-playbook -i hosts site.yml
 
-* After finishing the ansible playbook remember to create initial networks: http://docs.openstack.org/kilo/install-guide/install/apt/content/neutron-initial-networks.html
-
+After finishing the ansible playbook remember to create initial networks: http://docs.openstack.org/kilo/install-guide/install/apt/content/neutron-initial-networks.html
+With network configuration described above run as root:
+* source admin-openrc.sh 
+* neutron net-create ext-net --router:external   --provider:physical_network external --provider:network_type flat
+* neutron subnet-create ext-net 10.10.10.0/24 --name ext-subnet --allocation-pool start=10.10.10.10,end=10.10.10.100 --disable-dhcp --gateway 10.10.10.1
+* neutron net-create demo-net
+* neutron subnet-create demo-net 192.168.1.0/24   --name demo-subnet --gateway 192.168.1.1
+* neutron router-create demo-router
+* neutron router-interface-add demo-router demo-subnet
+* neutron router-gateway-set demo-router ext-net
 
 Restoring:
 * In KVM node:
-..* apt-get -y remove --purge neutron-plugin-ml2 neutron-plugin-openvswitch-agent nova-compute neutron-plugin-openvswitch-agent python-neutron python-neutronclient neutron-common openvswitch-common openvswitch-switch
-..* apt-get -y autoremove --purge
-..* rm -rf /var/log/neutron /var/lib/neutron/lock /var/log/openvswitch /var/log/nova /var/lib/nova/instances /etc/iscsi 
+  * apt-get -y remove --purge neutron-plugin-ml2 neutron-plugin-openvswitch-agent nova-compute neutron-plugin-openvswitch-agent python-neutron python-neutronclient neutron-common openvswitch-common openvswitch-switch
+  * apt-get -y autoremove --purge
+  * rm -rf /var/log/neutron /var/lib/neutron/lock /var/log/openvswitch /var/log/nova /var/lib/nova/instances /etc/iscsi /etc/openvswitch
 
-If this KVM node is hosting vcenter, destroy vcenter virtual machine with virt-manager.
+If this KVM node is hosting vcenter, destroy vcenter virtual machine with virt-manager or restore disk backup in /var/lib/libvirt/images .
