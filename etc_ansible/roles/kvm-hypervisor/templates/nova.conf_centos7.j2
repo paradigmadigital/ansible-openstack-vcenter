@@ -1743,6 +1743,8 @@ security_group_api = neutron
 
 # Fail instance boot if vif plugging fails (boolean value)
 #vif_plugging_is_fatal=true
+# WTF!!! Thanks: https://bugs.launchpad.net/nova/+bug/1467734/comments/2
+vif_plugging_is_fatal=false
 
 # Number of seconds to wait for neutron vif plugging events to
 # arrive before continuing or failing (see
