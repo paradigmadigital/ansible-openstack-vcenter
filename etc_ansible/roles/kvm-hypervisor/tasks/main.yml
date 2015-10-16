@@ -2,12 +2,29 @@
 # http://docs.openstack.org/juno/install-guide/install/apt/content/ch_nova.html#nova-compute-install
 
 # To install and configure the Compute controller components
-- name: Install nova packages
+# Ubuntu 14.04
+- name: Install nova packages (Ubuntu)
   apt: name={{ item }} state=present
   with_items:
   - nova-compute
   - sysfsutils
+  when: ansible_distribution == "Ubuntu" and ansible_distribution_version == "14.04"
   tags: workingon
+
+# CentOS 7
+- name: Install nova packages (CentOS)
+  yum: name={{ item }} state=present
+  with_items:
+  - openstack-nova-compute
+  - sysfsutils
+  when: ansible_distribution == "CentOS" and ansible_distribution_version | search("^7")
+  tags: workingon
+
+- name: Ensure openstack-nova-compute start automatically
+  service: name=openstack-nova-compute enabled=yes
+  when: ansible_distribution == "CentOS" and ansible_distribution_version | search("^7")
+  tags: workingon
+
 
 #- name: Configure nova
 #  template: src=nova.conf.j2 dest=/etc/nova/nova.conf owner=nova group=nova
@@ -33,25 +50,86 @@
   sysctl: name=net.bridge.bridge-nf-call-ip6tables value=1 reload=yes sysctl_set=yes
   tags: workingon
 
-- name: Install networking components
+
+- name: Install networking components (Ubuntu)
   apt: name={{ item }} state=present
   with_items:
   - neutron-plugin-ml2
   - neutron-plugin-openvswitch-agent
+  when: ansible_distribution == "Ubuntu" and ansible_distribution_version == "14.04"
   tags: workingon
 
-- name: Configure neutron server component
-  template: src=neutron.conf.j2 dest=/etc/neutron/neutron.conf owner=root group=neutron mode=0644
+- name: Install networking components (CentOS)
+  yum: name={{ item }} state=present
+  with_items:
+  - openstack-neutron
+  - openstack-neutron-ml2
+  - openstack-neutron-openvswitch
+  when: ansible_distribution == "CentOS" and ansible_distribution_version | search("^7")
+  tags: workingon
+
+- name: Ensure openvswitch starts automatically
+  service: name=openvswitch enabled=yes
+  when: ansible_distribution == "CentOS" and ansible_distribution_version | search("^7")
+  tags: workingon
+
+
+- name: Configure neutron server component (Ubuntu)
+  template: src=neutron.conf_centos7.j2 dest=/etc/neutron/neutron.conf owner=root group=neutron mode=0644
   notify:
   - restart openvswitch-switch
+  when: ansible_distribution == "Ubuntu" and ansible_distribution_version == "14.04"
+  tags: workingon
 
-- name: Configure Modular Layer 2 (ML2) plug-in
+- name: Configure neutron server component (CentOS)
+  template: src=neutron.conf_centos7.j2 dest=/etc/neutron/neutron.conf owner=root group=neutron mode=0644
+  notify:
+  - restart openvswitch
+  when: ansible_distribution == "CentOS" and ansible_distribution_version | search("^7")
+  tags: workingon
+
+
+- name: Configure Modular Layer 2 (ML2) plug-in (Ubuntu)
   template: src=ml2_conf.ini.j2 dest=/etc/neutron/plugins/ml2/ml2_conf.ini owner=root group=neutron mode=0644
   notify:
   - restart openvswitch-switch
+  when: ansible_distribution == "Ubuntu" and ansible_distribution_version == "14.04"
+  tags: workingon
 
-- name: Configure Compute to use Networking
+- name: Configure Modular Layer 2 (ML2) plug-in (CentOS)
+  template: src=ml2_conf.ini_centos7.j2 dest=/etc/neutron/plugins/ml2/ml2_conf.ini owner=root group=neutron mode=0644
+  notify:
+  - restart openvswitch
+  when: ansible_distribution == "CentOS" and ansible_distribution_version | search("^7")
+  tags: workingon
+
+
+- name: Create link to ml2_conf.ini (CentOS)
+  file: src=/etc/neutron/plugins/ml2/ml2_conf.ini dest=/etc/neutron/plugin.ini owner=neutron group=neutron state=link
+  notify:
+  - restart openvswitch
+  - restart neutron-openvswitch-agent
+  when: ansible_distribution == "CentOS" and ansible_distribution_version | search("^7")
+  tags: workingon
+
+- name: Fix neutron-openvswitch-agent package bug (CentOS)
+  copy: src=neutron-openvswitch-agent.service dest=/usr/lib/systemd/system/neutron-openvswitch-agent.service
+  when: ansible_distribution == "CentOS" and ansible_distribution_version | search("^7")
+  tags: workingon
+
+
+- name: Configure Compute to use Networking (Ubuntu)
   template: src=nova.conf.j2 dest=/etc/nova/nova.conf owner=nova group=nova
   notify:
   - restart nova-compute
   - restart neutron-plugin-openvswitch-agent
+  when: ansible_distribution == "Ubuntu" and ansible_distribution_version == "14.04"
+  tags: workingon
+
+- name: Configure Compute to use Networking (CentOS)
+  template: src=nova.conf_centos7.j2 dest=/etc/nova/nova.conf owner=nova group=nova
+  notify:
+  - restart openstack-nova-compute
+  - restart neutron-openvswitch-agent
+  when: ansible_distribution == "CentOS" and ansible_distribution_version | search("^7")
+  tags: workingon
