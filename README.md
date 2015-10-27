@@ -45,10 +45,25 @@ iface lo inet loopback
 # "public" network
 auto ose
 iface ose inet static
+<<<<<<< HEAD
 	up ip link set dev $IFACE up
         down ip link set dev $IFACE down
         bridge_ports eth0
         bridge_maxwait 0
+=======
+    #up ip link set dev $IFACE up
+    #down ip link set dev $IFACE down
+    address 10.10.10.1
+    netmask 255.255.255.0
+#    bridge_ports eth0
+    bridge_ports none
+    bridge_stp off
+    bridge_fd 0
+    bridge_maxwait 0
+#    up iptables -t nat -A POSTROUTING -s 10.10.10.0/24 ! -d 10.10.10.0/24 -j MASQUERADE
+#    down iptables -t nat -D POSTROUTING -s 10.10.10.0/24 ! -d 10.10.10.0/24 -j MASQUERADE
+
+>>>>>>> db9aa1baaba5b4bb272383f59ce5ea768a1365c6
 
 
 # openstack management network
@@ -167,13 +182,17 @@ iface lo inet loopback
 # The primary network interface
 auto osm
 iface osm inet static
-	address 192.168.84.3
+	address 10.42.84.2
 	netmask 255.255.255.0
-	gateway 192.168.84.1
+	gateway 10.42.84.1
 	bridge_ports eth0
 	bridge_stp off
 	bridge_fd 0
+<<<<<<< HEAD
 	dns-nameservers 192.168.84.1
+=======
+	dns-nameservers 8.8.8.8
+>>>>>>> db9aa1baaba5b4bb272383f59ce5ea768a1365c6
 
 auto ose
 iface ose inet manual
@@ -184,8 +203,8 @@ iface ose inet manual
 ```
 * /etc/hosts in compute an vcenter must have this lines:
 ```
-192.168.84.3	os-vcenter-01
-192.168.84.1	os-kvm-01
+10.42.84.2	openstack-vcenter
+10.42.84.1	openstack-compute
 ```
 * In vcenter virtual machine generate ssh key with "ssh-keygen -t rsa"
 * Copy key to os-kvm-01 and os-vcenter-01: ssh-copy-id root@os-kvm-01;ssh-copy-id root@os-vcenter-01
@@ -199,8 +218,8 @@ iface ose inet manual
 
 Restoring:
 * In KVM node:
-..* apt-get -y remove --purge neutron-plugin-ml2 neutron-plugin-openvswitch-agent nova-compute neutron-plugin-openvswitch-agent python-neutron python-neutronclient neutron-common openvswitch-common openvswitch-switch
-..* apt-get -y autoremove --purge
-..* rm -rf /var/log/neutron /var/lib/neutron/lock /var/log/openvswitch /var/log/nova /var/lib/nova/instances /etc/iscsi 
+  * apt-get -y remove --purge neutron-plugin-ml2 neutron-plugin-openvswitch-agent nova-compute neutron-plugin-openvswitch-agent python-neutron python-neutronclient neutron-common openvswitch-common openvswitch-switch
+  * apt-get -y autoremove --purge
+  * rm -rf /var/log/neutron /var/lib/neutron/lock /var/log/openvswitch /var/log/nova /var/lib/nova/instances
 
 If this KVM node is hosting vcenter, destroy vcenter virtual machine with virt-manager.
