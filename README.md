@@ -61,24 +61,22 @@ iface osm inet static
     bridge_fd 0
 ```
 
-* Create vcenter machine as a KVM virtual machine (Ubuntu 14.04) with two network interfaces attached to ose and osm bridges. Configuration example in /etc/libvirt/qemu/OpenStack-vCenter.xml
+* Create vcenter machine as a KVM virtual machine (Ubuntu 14.04) with two network interfaces attached to ose and osm bridges. Configuration example in /etc/libvirt/qemu/OpenStack-vCenter.xml. You can download the appliance to /var/lib/libvirt/images/OpenStack-vCenter.qcow2 and load this configuration with "virsh define configuration.xml":
 ```
-<!--
-WARNING: THIS IS AN AUTO-GENERATED FILE. CHANGES TO IT ARE LIKELY TO BE
-OVERWRITTEN AND LOST. Changes to this xml configuration should be made using:
-  virsh edit OpenStack-vCenter
-or other application using the libvirt API.
--->
-
-<domain type='kvm'>
+<domain type='kvm' id='6'>
   <name>OpenStack-vCenter</name>
-  <uuid>e1342eb2-91a4-c80b-3898-6585c6d198af</uuid>
-  <memory unit='KiB'>1583104</memory>
-  <currentMemory unit='KiB'>1583104</currentMemory>
-  <vcpu placement='static'>2</vcpu>
+  <uuid>82df7c7b-39a8-b11c-b659-f723fb4eedb0</uuid>
+  <memory unit='KiB'>2097152</memory>
+  <currentMemory unit='KiB'>2097152</currentMemory>
+  <vcpu placement='static'>1</vcpu>
+  <resource>
+    <partition>/machine</partition>
+  </resource>
   <os>
     <type arch='x86_64' machine='pc-i440fx-trusty'>hvm</type>
     <boot dev='hd'/>
+    <boot dev='cdrom'/>
+    <bootmenu enable='yes'/>
   </os>
   <features>
     <acpi/>
@@ -92,53 +90,68 @@ or other application using the libvirt API.
   <devices>
     <emulator>/usr/bin/kvm-spice</emulator>
     <disk type='file' device='disk'>
-      <driver name='qemu' type='raw'/>
-      <source file='/var/lib/libvirt/images/OpenStack-vCenter.img'/>
-      <target dev='vda' bus='virtio'/>
-      <address type='pci' domain='0x0000' bus='0x00' slot='0x04' function='0x0'/>
+      <driver name='qemu' type='qcow2'/>
+      <source file='/var/lib/libvirt/images/OpenStack-vCenter.qcow2'/>
+      <backingStore/>
+      <target dev='vdb' bus='virtio'/>
+      <alias name='virtio-disk1'/>
+      <address type='pci' domain='0x0000' bus='0x00' slot='0x06' function='0x0'/>
     </disk>
-    <disk type='block' device='cdrom'>
+    <disk type='file' device='cdrom'>
       <driver name='qemu' type='raw'/>
+      <source file='/var/lib/libvirt/images/ubuntu-14.04.2-server-amd64.iso'/>
+      <backingStore/>
       <target dev='hdc' bus='ide'/>
       <readonly/>
+      <alias name='ide0-1-0'/>
       <address type='drive' controller='0' bus='1' target='0' unit='0'/>
     </disk>
-    <controller type='usb' index='0'>
-      <address type='pci' domain='0x0000' bus='0x00' slot='0x01' function='0x2'/>
-    </controller>
-    <controller type='pci' index='0' model='pci-root'/>
     <controller type='ide' index='0'>
+      <alias name='ide0'/>
       <address type='pci' domain='0x0000' bus='0x00' slot='0x01' function='0x1'/>
     </controller>
     <interface type='bridge'>
-      <mac address='52:54:00:45:07:07'/>
+      <mac address='52:54:00:c6:31:71'/>
       <source bridge='osm'/>
+      <target dev='vnet0'/>
       <model type='virtio'/>
+      <alias name='net0'/>
       <address type='pci' domain='0x0000' bus='0x00' slot='0x03' function='0x0'/>
     </interface>
     <interface type='bridge'>
-      <mac address='52:54:00:40:97:3a'/>
+      <mac address='52:54:00:c0:f7:4d'/>
       <source bridge='ose'/>
+      <target dev='vnet1'/>
       <model type='virtio'/>
-      <address type='pci' domain='0x0000' bus='0x00' slot='0x06' function='0x0'/>
+      <alias name='net1'/>
+      <address type='pci' domain='0x0000' bus='0x00' slot='0x07' function='0x0'/>
     </interface>
     <serial type='pty'>
+      <source path='/dev/pts/19'/>
       <target port='0'/>
+      <alias name='serial0'/>
     </serial>
-    <console type='pty'>
+    <console type='pty' tty='/dev/pts/19'>
+      <source path='/dev/pts/19'/>
       <target type='serial' port='0'/>
+      <alias name='serial0'/>
     </console>
     <input type='mouse' bus='ps2'/>
-    <input type='keyboard' bus='ps2'/>
-    <graphics type='vnc' port='-1' autoport='yes'/>
+    <graphics type='vnc' port='5900' autoport='yes'/>
     <video>
-      <model type='cirrus' vram='9216' heads='1'/>
+      <model type='cirrus' vram='16384' heads='1'/>
+      <alias name='video0'/>
       <address type='pci' domain='0x0000' bus='0x00' slot='0x02' function='0x0'/>
     </video>
     <memballoon model='virtio'>
+      <alias name='balloon0'/>
       <address type='pci' domain='0x0000' bus='0x00' slot='0x05' function='0x0'/>
     </memballoon>
   </devices>
+  <seclabel type='dynamic' model='apparmor' relabel='yes'>
+    <label>libvirt-82df7c7b-39a8-b11c-b659-f723fb4eedb0</label>
+    <imagelabel>libvirt-82df7c7b-39a8-b11c-b659-f723fb4eedb0</imagelabel>
+  </seclabel>
 </domain>
 ```
 * Install bridge-utils, git and ansible
@@ -160,7 +173,7 @@ iface osm inet static
 	bridge_ports eth0
 	bridge_stp off
 	bridge_fd 0
-	dns-nameservers 172.18.0.1
+	dns-nameservers 192.168.84.1
 
 auto ose
 iface ose inet manual
