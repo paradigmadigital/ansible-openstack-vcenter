@@ -5,7 +5,38 @@ Ansible playbooks to create a openstack vcenter.
 
 Steps:
 * Install compute node (Ubuntu 14.04) with qemu-kvm, bridge-utils and virt-manager 
-* You need two network interfaces configured as external (ose) and management (osm). For a development environment osm interface does not need to be "connected" to any physical device and maybe ose can be connected to physical network as follows (use your network manager managed wlan interface to access internet):
+* You need two network interfaces configured as external (ose) and management (osm).
+** For a development environment osm and ose network interfaces interface does not need to be "connected" to any physical device so you can use your physical network interfaces with network manager. Supose you are using a 10.42.84.0/24 management network and a 10.10.10.0/24 external network:
+```
+# interfaces(5) file used by ifup(8) and ifdown(8)
+auto lo
+iface lo inet loopback
+
+# OpenStack External network
+auto ose
+iface ose inet static
+    address 10.10.10.1
+    netmask 255.255.255.0
+    bridge_ports none
+    bridge_stp off
+    bridge_fd 0
+    bridge_maxwait 0
+    up iptables -t nat -o ose -A POSTROUTING -s 10.10.10.0/24 ! -d 10.10.10.0/24 -j MASQUERADE
+    down iptables -t nat -o ose -D POSTROUTING -s 10.10.10.0/24 ! -d 10.10.10.0/24 -j MASQUERADE
+
+# OpenStack Management network
+auto osm
+iface osm inet static
+    address 10.42.84.1
+    netmask 255.255.255.0
+    bridge_ports none
+    bridge_stp off
+    bridge_fd 0
+    up iptables -t nat -o osm -A POSTROUTING -s 10.42.84.0/24 ! -d 10.42.84.0/24 -j MASQUERADE
+    down iptables -t nat -o osm -D POSTROUTING -s 10.42.84.0/24 ! -d 10.42.84.0/24 -j MASQUERADE
+
+```
+** For a production environment you will need a server with two network interfaces (all servers I know have them) and connect both interfaces to the physical interfaces with "bridge_ports". Remember that the physical server is not the gateway so you don't need to NAT:
 ```
 # interfaces(5) file used by ifup(8) and ifdown(8)
 auto lo
@@ -13,7 +44,7 @@ iface lo inet loopback
 
 # "public" network
 auto ose
-iface ose inet manual
+iface ose inet static
 	up ip link set dev $IFACE up
         down ip link set dev $IFACE down
         bridge_ports eth0
@@ -23,13 +54,11 @@ iface ose inet manual
 # openstack management network
 auto osm
 iface osm inet static
-    address 10.42.84.1
+    address 10.42.84.11
     netmask 255.255.255.0
-    bridge_ports none
+    bridge_ports eth1
     bridge_stp off
     bridge_fd 0
-    up iptables -t nat -A POSTROUTING -s 10.42.84.0/24 ! -d 10.42.84.0/24 -j MASQUERADE
-    down iptables -t nat -D POSTROUTING -s 10.42.84.0/24! -d 10.42.84.0/24 -j MASQUERADE
 ```
 
 * Create vcenter machine as a KVM virtual machine (Ubuntu 14.04) with two network interfaces attached to ose and osm bridges. Configuration example in /etc/libvirt/qemu/OpenStack-vCenter.xml
