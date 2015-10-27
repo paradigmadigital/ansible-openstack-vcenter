@@ -42,31 +42,15 @@ iface osm inet static
 auto lo
 iface lo inet loopback
 
-# "public" network
+# OpenStack External network
 auto ose
 iface ose inet static
-<<<<<<< HEAD
 	up ip link set dev $IFACE up
         down ip link set dev $IFACE down
         bridge_ports eth0
         bridge_maxwait 0
-=======
-    #up ip link set dev $IFACE up
-    #down ip link set dev $IFACE down
-    address 10.10.10.1
-    netmask 255.255.255.0
-#    bridge_ports eth0
-    bridge_ports none
-    bridge_stp off
-    bridge_fd 0
-    bridge_maxwait 0
-#    up iptables -t nat -A POSTROUTING -s 10.10.10.0/24 ! -d 10.10.10.0/24 -j MASQUERADE
-#    down iptables -t nat -D POSTROUTING -s 10.10.10.0/24 ! -d 10.10.10.0/24 -j MASQUERADE
 
->>>>>>> db9aa1baaba5b4bb272383f59ce5ea768a1365c6
-
-
-# openstack management network
+# OpenStack Management network
 auto osm
 iface osm inet static
     address 10.42.84.11
@@ -188,11 +172,7 @@ iface osm inet static
 	bridge_ports eth0
 	bridge_stp off
 	bridge_fd 0
-<<<<<<< HEAD
-	dns-nameservers 192.168.84.1
-=======
 	dns-nameservers 8.8.8.8
->>>>>>> db9aa1baaba5b4bb272383f59ce5ea768a1365c6
 
 auto ose
 iface ose inet manual
