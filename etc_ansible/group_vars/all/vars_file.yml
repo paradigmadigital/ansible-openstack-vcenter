@@ -54,6 +54,14 @@ time_zone: Europe/Madrid
 cinder_dbpass: CINDER_DBPASS
 keystone_cinder_name: cinder
 keystone_cinder_password: cinder
-# Separate physical devices with commas
 cinder_physical_devices:
 - /dev/vda3
+
+# Swift vars
+# http://docs.openstack.org/kilo/install-guide/install/apt/content/swift-install-controller-node.html
+keystone_swift_name: swift
+keystone_swift_password: swift
+swift_rsync_directory: /var/lib/swift
+swift_storage_devices:
+- sdb1
+- sdc1

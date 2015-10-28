@@ -41,17 +41,23 @@
 #  - ntp
   - cinder
 
+# Object Storage service
+- hosts: swift
+  roles:
+  - ubuntu-cloud
+  - ntp
+  - swift
+
 # Adding hypervisors
 - hosts: kvm-hypervisor
   roles:
   - ubuntu-cloud
   - ntp
   - kvm-hypervisor
-  tags: workingon
 
-# Adding hypervisors
-- hosts: lxc-hypervisor
-  roles:
-  - ubuntu-cloud
-  - ntp
-  - lxc-hypervisor
+## Adding lxc hypervisors
+#- hosts: lxc-hypervisor
+#  roles:
+#  - ubuntu-cloud
+#  - ntp
+#  - lxc-hypervisor

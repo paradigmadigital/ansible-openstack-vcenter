@@ -7,7 +7,6 @@
   with_items:
   - nova-compute
   - sysfsutils
-  tags: workingon
 
 #- name: Configure nova
 #  template: src=nova.conf.j2 dest=/etc/nova/nova.conf owner=nova group=nova
@@ -19,26 +18,21 @@
 
 - name: Disable net.ipv4.conf.all.rp_filter
   sysctl: name=net.ipv4.conf.all.rp_filter value=0 reload=yes sysctl_set=yes
-  tags: workingon
 
 - name: Disable name=net.ipv4.conf.default.rp_filter
   sysctl: name=net.ipv4.conf.default.rp_filter value=0 reload=yes sysctl_set=yes
-  tags: workingon
 
 - name: Enable net.bridge.bridge-nf-call-iptables
   sysctl: name=net.bridge.bridge-nf-call-iptables value=1 reload=yes sysctl_set=yes
-  tags: workingon
 
 - name: Enable net.bridge.bridge-nf-call-ip6tables
   sysctl: name=net.bridge.bridge-nf-call-ip6tables value=1 reload=yes sysctl_set=yes
-  tags: workingon
 
 - name: Install networking components
   apt: name={{ item }} state=present
   with_items:
   - neutron-plugin-ml2
   - neutron-plugin-openvswitch-agent
-  tags: workingon
 
 - name: Configure neutron server component
   template: src=neutron.conf.j2 dest=/etc/neutron/neutron.conf owner=root group=neutron mode=0644

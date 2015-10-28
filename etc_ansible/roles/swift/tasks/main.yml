@@ -1,0 +1,99 @@
+# http://docs.openstack.org/kilo/install-guide/install/apt/content/object-storage-service.html
+
+# http://docs.openstack.org/kilo/install-guide/install/apt/content/swift-install-controller-node.html
+- name: Create the swift user
+  keystone_user:
+    user={{ keystone_swift_name }}
+    tenant={{ keystone_service_tenant_name }}
+    password={{ keystone_swift_password }}
+    token={{ administration_token }}
+    endpoint=http://{{ admin_hostname }}:35357/v2.0
+  tags: workingon
+
+
+- name: Add the admin role to the swift user
+  keystone_user:
+    role={{ keystone_admin_role }}
+    user={{ keystone_swift_name }}
+    tenant={{ keystone_service_tenant_name }}
+    token={{ administration_token }}
+    endpoint=http://{{ admin_hostname }}:35357/v2.0
+  tags: workingon
+#Create the service entity and API endpoint
+
+- name: Test if service entity exists
+  shell: |
+    export OS_TOKEN={{ administration_token }}
+    export OS_URL=http://{{ admin_hostname }}:35357/v2.0
+    openstack service list | grep " object-store "| wc -l
+  register: service_entity_exists
+  ignore_errors: True
+  failed_when: "'0' in service_entity_exists.stdout"
+  tags: workingon
+
+- name: Create the service entity for the Swift service
+  shell: |
+    export OS_TOKEN={{ administration_token }}
+    export OS_URL=http://{{ admin_hostname }}:35357/v2.0
+    openstack service create --name {{ keystone_swift_name }} --description "OpenStack Object Storage" object-store
+  when: service_entity_exists|failed
+  tags: workingon
+- name: Test if endpoint exists
+
+  shell: |
+    export OS_TOKEN={{ administration_token }}
+    export OS_URL=http://{{ admin_hostname }}:35357/v2.0
+    openstack endpoint list | grep object-store | wc -l
+  register: endpoint_exists
+  ignore_errors: True
+  failed_when: "'0' in endpoint_exists.stdout"
+  tags: workingon
+
+- name: Create the Image service API endpoints
+  shell: |
+    export OS_TOKEN={{ administration_token }}
+    export OS_URL=http://{{ admin_hostname }}:35357/v2.0
+    openstack endpoint create --publicurl 'http://{{ admin_hostname }}:8080/v1/AUTH_%(tenant_id)s' --internalurl 'http://{{ admin_hostname }}:8080/v1/AUTH_%(tenant_id)s' --adminurl http://{{ admin_hostname }}:8080 --region {{ region_name }} object-store
+  when: endpoint_exists|failed
+  tags: workingon
+
+# To install and configure the Object Storage components
+- name: Install swift controller packages
+  apt: name={{ item }} state=present
+  with_items:
+  - swift
+  - swift-proxy
+  - python-swiftclient
+  - python-keystoneclient
+  - python-keystonemiddleware
+  - memcached
+  tags: workingon
+
+- name: Create swift configuration directory
+  file: path=/etc/swift state=directory mode=0755 owner=swift group=swift
+  tags: workingon
+
+- name: Configure swift api service
+  template: src=proxy-server.conf.j2 dest=/etc/swift/proxy-server.conf owner=swift group=swift
+  tags: workingon
+
+# swift storage nodes
+# http://docs.openstack.org/kilo/install-guide/install/apt/content/swift-install-storage-node.html
+- name: Install swift node packages
+  apt: name={{ item }} state=present
+  with_items:
+  - xfsprogs
+  - rsync
+  tags: workingon
+
+- name: Ensure swift rsync directory exists
+  file: path=/var/lib/swift state=directory mode=0755 owner=swift group=swift
+  tags: workingon
+
+- name: Configure rsync server
+  template: src=rsyncd.conf.j2 dest=/etc/rsyncd.conf
+  handler: restart rsync
+
+- name: Configure rsync server autostart
+  template: src=default_rsync.j2 dest=/etc/default/rsync
+  handler: restart rsync
