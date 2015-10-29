@@ -1,3 +1,4 @@
+# Ubuntu
 - name: restart nova-compute
   service: name=nova-compute state=restarted
 
@@ -9,3 +10,16 @@
 
 - name: restart neutron-plugin-openvswitch-agent
   service: name=neutron-plugin-openvswitch-agent state=restarted
+
+# CentOS
+- name: restart openvswitch
+  service: name=openvswitch state=restarted
+
+- name: restart openstack-nova-compute
+  service: name=openstack-nova-compute state=restarted
+
+- name: restart neutron-openvswitch-agent
+  service: name=neutron-openvswitch-agent state=restarted
+
+- name: restart libvirtd
+  service: name=libvirtd state=restarted

@@ -1,7 +1,7 @@
 # Databases services
 - hosts: databases
   roles:
-  - ubuntu-cloud
+  - openstack-repositories
   - ntp
   - mysql
   - rabbitmq
@@ -9,49 +9,49 @@
 # Keystone service
 - hosts: keystone
   roles:
-  - ubuntu-cloud
+  - openstack-repositories
   - ntp
   - keystone
 
 # Image service
 - hosts: glance
   roles:
-  - ubuntu-cloud
+  - openstack-repositories
   - ntp
   - glance
 
 # Networking and compute services
 - hosts: networking-compute-controller
   roles:
-  - ubuntu-cloud
+  - openstack-repositories
   - ntp
   - networking-compute-controller
 
 # Dashboard service
 - hosts: dashboard
   roles:
-#  - ubuntu-cloud
+  - openstack-repositories
 #  - ntp
   - dashboard
 
 # Block Storage service
 - hosts: cinder
   roles:
-#  - ubuntu-cloud
+  - openstack-repositories
 #  - ntp
   - cinder
 
 # Object Storage service
 - hosts: swift
   roles:
-  - ubuntu-cloud
+  - openstack-repositories
   - ntp
   - swift
 
 # Adding hypervisors
 - hosts: kvm-hypervisor
   roles:
-  - ubuntu-cloud
+  - openstack-repositories
   - ntp
   - kvm-hypervisor
 

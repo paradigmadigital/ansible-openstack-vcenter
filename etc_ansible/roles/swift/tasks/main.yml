@@ -79,7 +79,7 @@
 
 # swift storage nodes
 # http://docs.openstack.org/kilo/install-guide/install/apt/content/swift-install-storage-node.html
-- name: Install swift node packages
+- name: Install swift rsync node packages
   apt: name={{ item }} state=present
   with_items:
   - xfsprogs
@@ -92,8 +92,43 @@
 
 - name: Configure rsync server
   template: src=rsyncd.conf.j2 dest=/etc/rsyncd.conf
-  handler: restart rsync
+  notify: restart rsync
+  tags: workingon
 
 - name: Configure rsync server autostart
   template: src=default_rsync.j2 dest=/etc/default/rsync
-  handler: restart rsync
+  notify: restart rsync
+  tags: workingon
+
+- name: Install swift node packages
+  apt: name={{ item }} state=present
+  with_items:
+  - swift
+  - swift-account
+  - swift-container
+  - swift-object
+  tags: workingon
+
+- name: Configure swift account server
+  template: src=account-server.conf.j2 dest=/etc/swift/account-server.conf
+  tags: workingon
+
+- name: Configure swift container server
+  template: src=container-server.conf.j2 dest=/etc/swift/container-server.conf
+  tags: workingon
+
+- name: Configure swift object server
+  template: src=object-server.conf.j2 dest=/etc/swift/object-server.conf
+  tags: workingon
+
+- name: Configure swift container reconciler
+  template: src=container-reconciler.conf.j2 dest=/etc/swift/container-reconciler.conf
+  tags: workingon
+
+- name: Configure swift object expirer
+  template: src=object-expirer.conf.j2 dest=/etc/swift/object-expirer.conf
+  tags: workingon
+
+- name: Create swift configuration directory
+  file: path=/var/cache/swift state=directory mode=0755 owner=swift group=swift
+  tags: workingon
