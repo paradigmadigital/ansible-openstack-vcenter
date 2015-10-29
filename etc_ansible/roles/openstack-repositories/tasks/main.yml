@@ -1,0 +1,35 @@
+# http://docs.openstack.org/kilo/install-guide/install/apt/content/ch_basic_environment.html#basics-packages
+# Ubuntu 14.04
+- name: Install ubuntu cloud keyring
+  apt: name=ubuntu-cloud-keyring state=latest
+  when: ansible_distribution == "Ubuntu" and ansible_distribution_version == "14.04"
+
+- name: Add apt_repository dependency
+  apt: name=python-pycurl state=latest
+  when: ansible_distribution == "Ubuntu" and ansible_distribution_version == "14.04"
+
+- name: Add ubuntu cloud repository
+  apt_repository: repo='deb http://ubuntu-cloud.archive.canonical.com/ubuntu trusty-updates/kilo main' state=present update_cache=yes
+  when: ansible_distribution == "Ubuntu" and ansible_distribution_version == "14.04"
+
+- name: Upgrade distribution
+  apt: upgrade=dist
+  when: ansible_distribution == "Ubuntu" and ansible_distribution_version == "14.04"
+
+# http://docs.openstack.org/kilo/install-guide/install/yum/content/ch_basic_environment.html
+# CentOS 7
+- name: Enable epel repository
+  yum: name=http://dl.fedoraproject.org/pub/epel/7/x86_64/e/epel-release-7-5.noarch.rpm state=present
+  when: ansible_distribution == "CentOS" and ansible_distribution_version | search("^7")
+
+- name: Enable kilo repository
+  yum: name=http://rdo.fedorapeople.org/openstack-kilo/rdo-release-kilo.rpm state=present
+  when: ansible_distribution == "CentOS" and ansible_distribution_version | search("^7")
+
+- name: Upgrade distribucion
+  yum: name=* state=latest
+  when: ansible_distribution == "CentOS" and ansible_distribution_version | search("^7")
+
+- name: Manage SELinux policies for OpenStack services
+  yum: name=openstack-selinux state=present
+  when: ansible_distribution == "CentOS" and ansible_distribution_version | search("^7")
