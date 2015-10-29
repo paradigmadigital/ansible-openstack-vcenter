@@ -70,3 +70,5 @@ swift_rsync_directory: /var/lib/swift
 swift_storage_devices:
 - sdb1
 - sdc1
+swift_hash_path_prefix: SWIFT_HASH_PATH_PREFIX
+swift_hash_path_suffix: SWIFT_HASH_PATH_SUFFIX

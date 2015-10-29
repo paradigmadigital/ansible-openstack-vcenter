@@ -1,2 +1,11 @@
 - name: restart rsync
   service: name=rsync state=restarted
+
+- name: memcached restart
+  service: name=memcached state=restarted
+
+- name: swift-proxy restart
+  service: name=swift-proxy state=restarted
+
+- name: swift-init restart
+  shell: swift-init all start

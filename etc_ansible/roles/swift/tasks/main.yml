@@ -87,7 +87,7 @@
   tags: workingon
 
 - name: Ensure swift rsync directory exists
-  file: path=/var/lib/swift state=directory mode=0755 owner=swift group=swift
+  file: path={{ swift_rsync_directory }} state=directory mode=0755 owner=swift group=swift
   tags: workingon
 
 - name: Configure rsync server
@@ -111,24 +111,169 @@
 
 - name: Configure swift account server
   template: src=account-server.conf.j2 dest=/etc/swift/account-server.conf
+  notify:
+  - memcached restart
+  - swift-proxy restart
+  - swift-init restart
   tags: workingon
 
 - name: Configure swift container server
   template: src=container-server.conf.j2 dest=/etc/swift/container-server.conf
+  notify:
+  - memcached restart
+  - swift-proxy restart
+  - swift-init restart
   tags: workingon
 
 - name: Configure swift object server
   template: src=object-server.conf.j2 dest=/etc/swift/object-server.conf
+  notify:
+  - memcached restart
+  - swift-proxy restart
+  - swift-init restart
   tags: workingon
 
 - name: Configure swift container reconciler
   template: src=container-reconciler.conf.j2 dest=/etc/swift/container-reconciler.conf
+  notify:
+  - memcached restart
+  - swift-proxy restart
+  - swift-init restart
   tags: workingon
 
 - name: Configure swift object expirer
   template: src=object-expirer.conf.j2 dest=/etc/swift/object-expirer.conf
+  notify:
+  - memcached restart
+  - swift-proxy restart
+  - swift-init restart
   tags: workingon
 
 - name: Create swift configuration directory
   file: path=/var/cache/swift state=directory mode=0755 owner=swift group=swift
+  tags: workingon
+
+# Create swift storage devices if not exists
+- name: Ensure swift storage devices exists
+  file: path={{ swift_rsync_directory }}/{{ item }} state=directory mode=0755 owner=swift group=swift
+  with_items: "{{ swift_storage_devices }}"
+  tags: workingon
+
+# Configure rings
+# http://docs.openstack.org/kilo/install-guide/install/apt/content/swift-initial-rings-account.html
+- name: Test if account.builder exists
+  stat: path=/etc/swift/account.builder
+  register: account_builder
+  tags: workingon
+
+- name: Create base account.builder
+  shell: cd /etc/swift ; swift-ring-builder account.builder create 10 3 1
+  when: account_builder.stat.exists == False
+  notify:
+  - memcached restart
+  - swift-proxy restart
+  - swift-init restart
+  tags: workingon
+
+# Add each device of each storage node if not exists
+# This ugly shell script could make you cry. Ansible swift module is needed
+- name: Ensure swift storage devices in account ring exists
+  shell: |
+    cd /etc/swift
+    exists_device=`swift-ring-builder account.builder | grep {{ item }} | wc -l`
+    if [ "$exists_device" = "0" ]; then
+      devices_info=`swift-ring-builder account.builder | grep "Devices: "| wc -l`
+      if [ "$devices_info" = "0" ]; then
+        zone="1"
+      else
+        zone=$((`swift-ring-builder account.builder | wc -l` - 4))
+      fi
+      swift-ring-builder account.builder add r1z${zone}-{{ ansible_osm["ipv4"]["address"] }}:6002/{{ item }} 100
+    fi
+  with_items: "{{ swift_storage_devices }}"
+  tags: workingon
+
+- name: Rebalance the ring
+  shell: cd /etc/swift ; swift-ring-builder account.builder rebalance
+
+# http://docs.openstack.org/kilo/install-guide/install/apt/content/swift-initial-rings-container.html
+- name: Test if container.builder exists
+  stat: path=/etc/swift/container.builder
+  register: container_builder
+  tags: workingon
+
+- name: Create base container.builder
+  shell: cd /etc/swift ; swift-ring-builder container.builder create 10 3 1
+  when: container_builder.stat.exists == False
+  notify:
+  - memcached restart
+  - swift-proxy restart
+  - swift-init restart
+  tags: workingon
+
+- name: Ensure swift storage devices in container ring exists
+  shell: |
+    cd /etc/swift
+    exists_device=`swift-ring-builder container.builder | grep {{ item }} | wc -l`
+    if [ "$exists_device" = "0" ]; then
+      devices_info=`swift-ring-builder container.builder | grep "Devices: "| wc -l`
+      if [ "$devices_info" = "0" ]; then
+        zone="1"
+      else
+        zone=$((`swift-ring-builder container.builder | wc -l` - 4))
+      fi
+      swift-ring-builder container.builder add r1z${zone}-{{ ansible_osm["ipv4"]["address"] }}:6001/{{ item }} 100
+    fi
+  with_items: "{{ swift_storage_devices }}"
+  tags: workingon
+
+- name: Rebalance the ring
+  shell: cd /etc/swift ; swift-ring-builder container.builder rebalance
+  tags: workingon
+
+# http://docs.openstack.org/kilo/install-guide/install/apt/content/swift-initial-rings-object.html
+- name: Test if object.builder exists
+  stat: path=/etc/swift/object.builder
+  register: object_builder
+  tags: workingon
+
+- name: Create base object.builder
+  shell: cd /etc/swift ; swift-ring-builder object.builder create 10 3 1
+  when: object_builder.stat.exists == False
+  notify:
+  - memcached restart
+  - swift-proxy restart
+  - swift-init restart
+  tags: workingon
+
+- name: Ensure swift storage devices in object ring exists
+  shell: |
+    cd /etc/swift
+    exists_device=`swift-ring-builder object.builder | grep {{ item }} | wc -l`
+    if [ "$exists_device" = "0" ]; then
+      devices_info=`swift-ring-builder object.builder | grep "Devices: "| wc -l`
+      if [ "$devices_info" = "0" ]; then
+        zone="1"
+      else
+        zone=$((`swift-ring-builder object.builder | wc -l` - 4))
+      fi
+      swift-ring-builder object.builder add r1z${zone}-{{ ansible_osm["ipv4"]["address"] }}:6001/{{ item }} 100
+    fi
+  with_items: "{{ swift_storage_devices }}"
+  tags: workingon
+
+- name: Rebalance the ring
+  shell: cd /etc/swift ; swift-ring-builder object.builder rebalance
+  tags: workingon
+
+# http://docs.openstack.org/kilo/install-guide/install/apt/content/swift-initial-rings-distribute.html
+# Ansible does it
+
+# http://docs.openstack.org/kilo/install-guide/install/apt/content/swift-finalize-installation.html
+- name: Configure swift server
+  template: src=swift.conf.j2 dest=/etc/swift/swift.conf mode=0755 owner=swift group=swift
+  notify:
+  - memcached restart
+  - swift-proxy restart
+  - swift-init restart
   tags: workingon
