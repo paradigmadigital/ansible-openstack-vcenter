@@ -75,7 +75,7 @@
 
 
 - name: Configure neutron server component (Ubuntu)
-  template: src=neutron.conf_centos7.j2 dest=/etc/neutron/neutron.conf owner=root group=neutron mode=0644
+  template: src=neutron.conf.j2 dest=/etc/neutron/neutron.conf owner=root group=neutron mode=0644
   notify:
   - restart openvswitch-switch
   when: ansible_distribution == "Ubuntu" and ansible_distribution_version == "14.04"
