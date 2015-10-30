@@ -74,7 +74,7 @@
   tags: workingon
 
 - name: Configure swift api service
-  template: src=proxy-server.conf.j2 dest=/etc/swift/proxy-server.conf owner=swift group=swift
+  template: src=proxy-server.conf.j2 dest=/etc/swift/proxy-server.conf  mode=0755 owner=swift group=swift
   tags: workingon
 
 # swift storage nodes
@@ -110,7 +110,7 @@
   tags: workingon
 
 - name: Configure swift account server
-  template: src=account-server.conf.j2 dest=/etc/swift/account-server.conf
+  template: src=account-server.conf.j2 dest=/etc/swift/account-server.conf mode=0755 owner=swift group=swift
   notify:
   - memcached restart
   - swift-proxy restart
@@ -118,7 +118,7 @@
   tags: workingon
 
 - name: Configure swift container server
-  template: src=container-server.conf.j2 dest=/etc/swift/container-server.conf
+  template: src=container-server.conf.j2 dest=/etc/swift/container-server.conf mode=0755 owner=swift group=swift
   notify:
   - memcached restart
   - swift-proxy restart
@@ -126,7 +126,7 @@
   tags: workingon
 
 - name: Configure swift object server
-  template: src=object-server.conf.j2 dest=/etc/swift/object-server.conf
+  template: src=object-server.conf.j2 dest=/etc/swift/object-server.conf mode=0755 owner=swift group=swift
   notify:
   - memcached restart
   - swift-proxy restart
@@ -134,7 +134,7 @@
   tags: workingon
 
 - name: Configure swift container reconciler
-  template: src=container-reconciler.conf.j2 dest=/etc/swift/container-reconciler.conf
+  template: src=container-reconciler.conf.j2 dest=/etc/swift/container-reconciler.conf mode=0755 owner=swift group=swift
   notify:
   - memcached restart
   - swift-proxy restart
@@ -142,7 +142,7 @@
   tags: workingon
 
 - name: Configure swift object expirer
-  template: src=object-expirer.conf.j2 dest=/etc/swift/object-expirer.conf
+  template: src=object-expirer.conf.j2 dest=/etc/swift/object-expirer.conf mode=0755 owner=swift group=swift
   notify:
   - memcached restart
   - swift-proxy restart
@@ -194,7 +194,9 @@
   tags: workingon
 
 - name: Rebalance the ring
-  shell: cd /etc/swift ; swift-ring-builder account.builder rebalance
+  shell: cd /etc/swift ; swift-ring-builder account.builder rebalance ; exit 0
+  ignore_errors: True
+  tags: workingon
 
 # http://docs.openstack.org/kilo/install-guide/install/apt/content/swift-initial-rings-container.html
 - name: Test if container.builder exists
@@ -228,7 +230,8 @@
   tags: workingon
 
 - name: Rebalance the ring
-  shell: cd /etc/swift ; swift-ring-builder container.builder rebalance
+  shell: cd /etc/swift ; swift-ring-builder container.builder rebalance ; exit 0
+  ignore_errors: True
   tags: workingon
 
 # http://docs.openstack.org/kilo/install-guide/install/apt/content/swift-initial-rings-object.html
@@ -257,13 +260,14 @@
       else
         zone=$((`swift-ring-builder object.builder | wc -l` - 4))
       fi
-      swift-ring-builder object.builder add r1z${zone}-{{ ansible_osm["ipv4"]["address"] }}:6001/{{ item }} 100
+      swift-ring-builder object.builder add r1z${zone}-{{ ansible_osm["ipv4"]["address"] }}:6000/{{ item }} 100
     fi
   with_items: "{{ swift_storage_devices }}"
   tags: workingon
 
 - name: Rebalance the ring
-  shell: cd /etc/swift ; swift-ring-builder object.builder rebalance
+  shell: cd /etc/swift ; swift-ring-builder object.builder rebalance ; exit 0
+  ignore_errors: True
   tags: workingon
 
 # http://docs.openstack.org/kilo/install-guide/install/apt/content/swift-initial-rings-distribute.html

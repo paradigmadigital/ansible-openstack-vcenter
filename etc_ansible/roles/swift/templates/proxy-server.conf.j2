@@ -283,8 +283,8 @@ user_test5_tester5 = testing5 service
 # and have it in your main pipeline so instead of having tempauth in
 # there you can change it to: authtoken keystoneauth
 #
-# [filter:authtoken]
-# paste.filter_factory = keystonemiddleware.auth_token:filter_factory
+[filter:authtoken]
+paste.filter_factory = keystonemiddleware.auth_token:filter_factory
 # identity_uri = http://keystonehost:35357/
 # auth_uri = http://keystonehost:5000/
 # admin_tenant_name = service
@@ -310,7 +310,7 @@ delay_auth_decision = true
 # cache = swift.cache
 # include_service_catalog = False
 #
-# [filter:keystoneauth]
+[filter:keystoneauth]
 use = egg:swift#keystoneauth
 # The reseller_prefix option lists account namespaces that this middleware is
 # responsible for. The prefix is placed before the Keystone project id.
