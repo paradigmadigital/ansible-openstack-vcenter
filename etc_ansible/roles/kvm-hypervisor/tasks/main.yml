@@ -75,7 +75,10 @@
   tags: workingon
 
 - name: Ensure openvswitch starts automatically
-  service: name=openvswitch enabled=yes
+  service: name={{ item }} enabled=yes
+  with_items:
+  - openvswitch
+  - neutron-openvswitch-agent
   when: ansible_distribution == "CentOS" and ansible_distribution_version | search("^7")
   tags: workingon
 
