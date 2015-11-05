@@ -16,6 +16,20 @@
   apt: upgrade=dist
   when: ansible_distribution == "Ubuntu" and ansible_distribution_version == "14.04"
 
+# Debian 8
+# Use Mirantis repositories
+- name: Install gpg key
+  shell: wget -qO - http://icehouse.dev-debian.pkgs.enovance.com/debian/dists/icehouse/pubkey.gpg | sudo apt-key add -
+  when: ansible_distribution == "Debian" and ansible_distribution_version | search("^8")
+
+- name: Add openstack backports
+  apt_repository: repo='deb http://kilo-jessie.pkgs.mirantis.com/debian jessie-kilo-backports main' state=present update_cache=yes
+  when: ansible_distribution == "Debian" and ansible_distribution_version | search("^8")
+
+- name: Add openstack backports nochange
+  apt_repository: repo='deb http://kilo-jessie.pkgs.mirantis.com/debian jessie-kilo-backports-nochange main' state=present update_cache=yes
+  when: ansible_distribution == "Debian" and ansible_distribution_version | search("^8")
+
 # http://docs.openstack.org/kilo/install-guide/install/yum/content/ch_basic_environment.html
 # CentOS 7
 - name: Enable epel repository

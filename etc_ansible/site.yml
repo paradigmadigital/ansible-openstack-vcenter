@@ -47,6 +47,7 @@
   - openstack-repositories
   - ntp
   - kvm-hypervisor
+  tags: workingon
 
 # Adding hypervisors
 #- hosts: lxc-hypervisor
