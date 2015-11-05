@@ -99,12 +99,13 @@
   - cinder-scheduler
   - python-cinderclient
 
-- name: Configure cinder service
-  template: src=cinder.conf.j2 dest=/etc/cinder/cinder.conf owner=cinder group=cinder
-  notify:
-  - populate database
-  - restart cinder-api
-  - restart cinder-scheduler
+# Wait until physical device has been configured
+#- name: Configure cinder service
+#  template: src=cinder.conf.j2 dest=/etc/cinder/cinder.conf owner=cinder group=cinder
+#  notify:
+#  - populate database
+#  - restart cinder-api
+#  - restart cinder-scheduler
 
 #- meta: flush_handlers
 
@@ -141,5 +142,8 @@
 - name: Configure cinder service
   template: src=cinder.conf.j2 dest=/etc/cinder/cinder.conf owner=cinder group=cinder
   notify:
+  - populate database
+  - restart cinder-api
+  - restart cinder-scheduler
   - restart tgt
   - restart cinder-volume
