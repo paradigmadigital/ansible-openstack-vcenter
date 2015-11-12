@@ -26,6 +26,11 @@ backlog = 4096
 # Not supported on OS X.
 #tcp_keepidle = 600
 
+# Timeout (in seconds) for client connections' socket operations. If an incoming
+# connection is idle for this period it will be closed.  A value of "0"
+# means wait forever.
+#client_socket_timeout = 0
+
 # API to use for accessing data. Default value points to sqlalchemy
 # package.
 #data_api = glance.db.sqlalchemy.api
@@ -58,6 +63,13 @@ limit_param_default = 25
 # query and response.
 # Default: False
 #sqlalchemy_debug = True
+
+# http_keepalive option. If False, server will return the header
+# "Connection: close", If True, server will return "Connection: Keep-Alive"
+# in its responses. In order to close the client socket connection
+# explicitly after the response is sent and read successfully by the client,
+# you simply have to set this option to False when you create a wsgi server.
+#http_keepalive = True
 
 # ================= Syslog Options ============================
 
@@ -122,6 +134,25 @@ qpid_heartbeat = 5
 qpid_protocol = tcp
 qpid_tcp_nodelay = True
 
+
+# =============== Policy Options ==============================
+
+[oslo_policy]
+# The JSON file that defines policies.
+# Deprecated group/name - [DEFAULT]/policy_file
+#policy_file = policy.json
+
+# Default rule. Enforced when a requested rule is not found.
+# Deprecated group/name - [DEFAULT]/policy_default_rule
+#policy_default_rule = default
+
+# Directories where policy configuration files are stored.
+# They can be relative to any directory in the search path
+# defined by the config_dir option, or absolute paths.
+# The file defined by policy_file must exist for these
+# directories to be searched.
+# Deprecated group/name - [DEFAULT]/policy_dirs
+#policy_dirs = policy.d
 
 # ================= Database Options ==========================
 
@@ -223,15 +254,14 @@ connection = mysql://{{ keystone_glance_name }}:{{ glance_dbpass }}@{{ admin_hos
 #db_max_retries = 20
 
 [keystone_authtoken]
-#identity_uri = http://127.0.0.1:35357
-#admin_tenant_name = %SERVICE_TENANT_NAME%
-#admin_user = %SERVICE_USER%
-#admin_password = %SERVICE_PASSWORD%
-auth_uri = http://{{ admin_hostname }}:5000/v2.0
-identity_uri = http://{{ admin_hostname}}:35357
-admin_tenant_name = {{ keystone_service_tenant_name }}
-admin_user = {{ keystone_glance_name }}
-admin_password = {{ keystone_glance_password }}
+auth_uri = http://{{ admin_hostname }}:5000
+auth_url = http://{{ admin_hostname }}:35357
+auth_plugin = password
+project_domain_id = default
+user_domain_id = default
+project_name = {{ keystone_service_tenant_name }}
+username = {{ keystone_glance_name }}
+password = {{ keystone_glance_password }}
 
 [paste_deploy]
 # Name of the paste configuration file that defines the available pipelines

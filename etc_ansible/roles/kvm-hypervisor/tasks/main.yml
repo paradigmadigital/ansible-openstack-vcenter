@@ -1,0 +1,144 @@
+# http://docs.openstack.org/juno/install-guide/install/apt/content/ch_nova.html
+# http://docs.openstack.org/juno/install-guide/install/apt/content/ch_nova.html#nova-compute-install
+
+# TODO: configure firewalld to allow comunication between instances
+- name: Disable firewalld service (CentOS)
+  service: name=firewalld enabled=no state=stopped
+  when: ansible_distribution == "CentOS" and ansible_distribution_version | search("^7")
+  tags: workingon
+
+# To install and configure the Compute controller components
+# Ubuntu 14.04
+- name: Install nova packages (Ubuntu)
+  apt: name={{ item }} state=present
+  with_items:
+  - nova-compute
+  - sysfsutils
+  when: ansible_distribution == "Ubuntu" and ansible_distribution_version == "14.04"
+  tags: workingon
+
+# CentOS 7
+- name: Install nova packages (CentOS)
+  yum: name={{ item }} state=present
+  with_items:
+  - openstack-nova-compute
+  - sysfsutils
+  when: ansible_distribution == "CentOS" and ansible_distribution_version | search("^7")
+  tags: workingon
+
+- name: Ensure openstack-nova-compute start automatically
+  service: name=openstack-nova-compute enabled=yes
+  when: ansible_distribution == "CentOS" and ansible_distribution_version | search("^7")
+  tags: workingon
+
+
+#- name: Configure nova
+#  template: src=nova.conf.j2 dest=/etc/nova/nova.conf owner=nova group=nova
+#  notify: restart nova-compute
+#  tags: workingon
+
+# http://docs.openstack.org/juno/install-guide/install/apt/content/section_neutron-networking.html
+# http://docs.openstack.org/juno/install-guide/install/apt/content/neutron-compute-node.html
+
+- name: Disable net.ipv4.conf.all.rp_filter
+  sysctl: name=net.ipv4.conf.all.rp_filter value=0 reload=yes sysctl_set=yes
+  tags: workingon
+
+- name: Disable name=net.ipv4.conf.default.rp_filter
+  sysctl: name=net.ipv4.conf.default.rp_filter value=0 reload=yes sysctl_set=yes
+  tags: workingon
+
+- name: Enable net.bridge.bridge-nf-call-iptables
+  sysctl: name=net.bridge.bridge-nf-call-iptables value=1 reload=yes sysctl_set=yes
+  tags: workingon
+
+- name: Enable net.bridge.bridge-nf-call-ip6tables
+  sysctl: name=net.bridge.bridge-nf-call-ip6tables value=1 reload=yes sysctl_set=yes
+  tags: workingon
+
+
+- name: Install networking components (Ubuntu)
+  apt: name={{ item }} state=present
+  with_items:
+  - neutron-plugin-ml2
+  - neutron-plugin-openvswitch-agent
+  when: ansible_distribution == "Ubuntu" and ansible_distribution_version == "14.04"
+  tags: workingon
+
+- name: Install networking components (CentOS)
+  yum: name={{ item }} state=present
+  with_items:
+  - openstack-neutron
+  - openstack-neutron-ml2
+  - openstack-neutron-openvswitch
+  when: ansible_distribution == "CentOS" and ansible_distribution_version | search("^7")
+  tags: workingon
+
+- name: Ensure openvswitch starts automatically
+  service: name={{ item }} enabled=yes
+  with_items:
+  - openvswitch
+  - neutron-openvswitch-agent
+  when: ansible_distribution == "CentOS" and ansible_distribution_version | search("^7")
+  tags: workingon
+
+
+- name: Configure neutron server component (Ubuntu)
+  template: src=neutron.conf.j2 dest=/etc/neutron/neutron.conf owner=root group=neutron mode=0644
+  notify:
+  - restart openvswitch-switch
+  when: ansible_distribution == "Ubuntu" and ansible_distribution_version == "14.04"
+  tags: workingon
+
+- name: Configure neutron server component (CentOS)
+  template: src=neutron.conf_centos7.j2 dest=/etc/neutron/neutron.conf owner=root group=neutron mode=0644
+  notify:
+  - restart openvswitch
+  when: ansible_distribution == "CentOS" and ansible_distribution_version | search("^7")
+  tags: workingon
+
+
+- name: Configure Modular Layer 2 (ML2) plug-in (Ubuntu)
+  template: src=ml2_conf.ini.j2 dest=/etc/neutron/plugins/ml2/ml2_conf.ini owner=root group=neutron mode=0644
+  notify:
+  - restart openvswitch-switch
+  when: ansible_distribution == "Ubuntu" and ansible_distribution_version == "14.04"
+  tags: workingon
+
+- name: Configure Modular Layer 2 (ML2) plug-in (CentOS)
+  template: src=ml2_conf.ini_centos7.j2 dest=/etc/neutron/plugins/ml2/ml2_conf.ini owner=root group=neutron mode=0644
+  notify:
+  - restart openvswitch
+  when: ansible_distribution == "CentOS" and ansible_distribution_version | search("^7")
+  tags: workingon
+
+
+- name: Create link to ml2_conf.ini (CentOS)
+  file: src=/etc/neutron/plugins/ml2/ml2_conf.ini dest=/etc/neutron/plugin.ini owner=neutron group=neutron state=link
+  notify:
+  - restart openvswitch
+  - restart neutron-openvswitch-agent
+  when: ansible_distribution == "CentOS" and ansible_distribution_version | search("^7")
+  tags: workingon
+
+- name: Fix neutron-openvswitch-agent package bug (CentOS)
+  copy: src=neutron-openvswitch-agent.service dest=/usr/lib/systemd/system/neutron-openvswitch-agent.service
+  when: ansible_distribution == "CentOS" and ansible_distribution_version | search("^7")
+  tags: workingon
+
+
+- name: Configure Compute to use Networking (Ubuntu)
+  template: src=nova.conf.j2 dest=/etc/nova/nova.conf owner=nova group=nova
+  notify:
+  - restart nova-compute
+  - restart neutron-plugin-openvswitch-agent
+  when: ansible_distribution == "Ubuntu" and ansible_distribution_version == "14.04"
+  tags: workingon
+
+- name: Configure Compute to use Networking (CentOS)
+  template: src=nova.conf_centos7.j2 dest=/etc/nova/nova.conf owner=nova group=nova
+  notify:
+  - restart openstack-nova-compute
+  - restart neutron-openvswitch-agent
+  when: ansible_distribution == "CentOS" and ansible_distribution_version | search("^7")
+  tags: workingon
