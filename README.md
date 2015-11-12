@@ -44,7 +44,7 @@ iface lo inet loopback
 
 # OpenStack External network
 auto ose
-iface ose inet static
+iface ose inet manual
 	up ip link set dev $IFACE up
         down ip link set dev $IFACE down
         bridge_ports eth0
