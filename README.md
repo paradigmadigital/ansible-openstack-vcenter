@@ -6,7 +6,7 @@ Ansible playbooks to create a openstack vcenter.
 Steps:
 * Install compute node (Ubuntu 14.04) with qemu-kvm, bridge-utils and virt-manager 
 * You need two network interfaces configured as external (ose) and management (osm).
-** For a development environment osm and ose network interfaces interface does not need to be "connected" to any physical device so you can use your physical network interfaces with network manager. Supose you are using a 10.42.84.0/24 management network and a 10.10.10.0/24 external network:
+  *  For a development environment osm and ose network interfaces interface does not need to be "connected" to any physical device so you can use your physical network interfaces with network manager. Supose you are using a 10.42.84.0/24 management network and a 10.10.10.0/24 external network:
 ```
 # interfaces(5) file used by ifup(8) and ifdown(8)
 auto lo
@@ -36,7 +36,7 @@ iface osm inet static
     down iptables -t nat -o osm -D POSTROUTING -s 10.42.84.0/24 ! -d 10.42.84.0/24 -j MASQUERADE
 
 ```
-** For a production environment you will need a server with two network interfaces (all servers I know have them) and connect both interfaces to the physical interfaces with "bridge_ports". Remember that the physical server is not the gateway so you don't need to NAT:
+  * For a production environment you will need a server with two network interfaces (all servers I know have them) and connect both interfaces to the physical interfaces with "bridge_ports". Remember that the physical server is not the gateway so you don't need to NAT:
 ```
 # interfaces(5) file used by ifup(8) and ifdown(8)
 auto lo
