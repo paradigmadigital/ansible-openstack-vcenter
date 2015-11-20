@@ -70,8 +70,6 @@ keystone_heat_name: heat
 keystone_heat_password: heat
 heat_user_domain: heat_user_domain
 heat_domain_admin: heat_domain_admin
-heat_domain_password: HEAT_DOMAIN_PASS
-demo_user: demo
-demo_tenant: demo
-heat_stack_user_role: heat_stack_user_role
-heat_stack_owner_role: heat_stack_owner_role
+heat_domain_admin_password: HEAT_DOMAIN_PASS
+keystone_heat_stack_user_role: heat_stack_user_role
+keystone_heat_stack_owner_role: heat_stack_owner_role
