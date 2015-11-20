@@ -17,7 +17,7 @@
 
 # Where to store Neutron state files.  This directory must be writable by the
 # user executing the agent.
-state_path = /var/lib/neutron
+# state_path = /var/lib/neutron
 
 # log_format = %(asctime)s %(levelname)8s [%(name)s] %(message)s
 # log_date_format = %Y-%m-%d %H:%M:%S
@@ -57,8 +57,9 @@ state_path = /var/lib/neutron
 # previous versions, the class name of a plugin can be specified instead of its
 # entrypoint name.
 #
-core_plugin = ml2
+# core_plugin =
 # Example: core_plugin = ml2
+core_plugin = ml2
 
 # (ListOpt) List of service plugin entrypoints to be loaded from the
 # neutron.service_plugins namespace. See setup.cfg for the entrypoint names of
@@ -245,17 +246,6 @@ allow_overlapping_ips = True
 #
 # CIDR of the administrative network if HA mode is enabled
 # l3_ha_net_cidr = 169.254.192.0/18
-#
-# The network type to use when creating the HA network for an HA router.
-# By default or if empty, the first 'tenant_network_types'
-# is used. This is helpful when the VRRP traffic should use a specific
-# network which not the default one.
-# ha_network_type =
-# Example: ha_network_type = flat
-#
-# The physical network name with which the HA network can be created.
-# ha_network_physical_name =
-# Example: ha_network_physical_name = physnet1
 # =========== end of items for l3 extension =======
 
 # =========== items for metadata proxy configuration ==============
@@ -454,7 +444,7 @@ allow_overlapping_ips = True
 
 # The RabbitMQ broker address where a single node is used.
 # (string value)
-rabbit_host = {{ controller_hostname }}
+# rabbit_host=localhost
 
 # The RabbitMQ broker port where a single node is used.
 # (integer value)
@@ -467,10 +457,10 @@ rabbit_host = {{ controller_hostname }}
 # rabbit_use_ssl=false
 
 # The RabbitMQ userid. (string value)
-rabbit_userid = {{ rabbitmq_user }}
+# rabbit_userid=guest
 
 # The RabbitMQ password. (string value)
-rabbit_password = {{ rabbitmq_password }}
+# rabbit_password=guest
 
 # the RabbitMQ login method (string value)
 # rabbit_login_method=AMQPLAIN
@@ -540,7 +530,6 @@ rabbit_password = {{ rabbitmq_password }}
 # Driver or drivers to handle sending notifications. (multi
 # valued)
 # notification_driver=
-notification_driver = neutron.openstack.common.notifier.rpc_notifier
 
 # AMQP topic used for OpenStack notifications. (list value)
 # Deprecated group/name - [rpc_notifier2]/topics
@@ -668,7 +657,7 @@ rpc_backend=rabbit
 # Use "sudo neutron-rootwrap /etc/neutron/rootwrap.conf" to use the real
 # root filter facility.
 # Change to "sudo" to skip the filtering and just run the command directly
-root_helper = sudo /usr/bin/neutron-rootwrap /etc/neutron/rootwrap.conf
+# root_helper = sudo
 
 # Set to true to add comments to generated iptables rules that describe
 # each rule's purpose. (System must support the iptables comments module.)
@@ -707,11 +696,16 @@ user_domain_id = default
 project_name = {{ keystone_service_tenant_name}}
 username = {{ keystone_neutron_name}}
 password = {{ keystone_neutron_password }}
+#auth_uri = http://127.0.0.1:35357/v2.0/
+#identity_uri = http://127.0.0.1:5000
+#admin_tenant_name = %SERVICE_TENANT_NAME%
+#admin_user = %SERVICE_USER%
+#admin_password = %SERVICE_PASSWORD%
 
 [database]
 # This line MUST be changed to actually run the plugin.
 # Example:
-connection = sqlite:////var/lib/neutron/neutron.sqlite
+# connection = mysql://root:pass@127.0.0.1:3306/neutron
 # Replace 127.0.0.1 above with the IP address of the database used by the
 # main neutron server. (Leave it as is if the database runs on this host.)
 # connection = sqlite://
@@ -967,6 +961,7 @@ lock_path = $state_path/lock
 
 # The RabbitMQ broker address where a single node is used. (string value)
 # Deprecated group/name - [DEFAULT]/rabbit_host
+# rabbit_host = localhost
 rabbit_host = {{ controller_hostname }}
 
 # The RabbitMQ broker port where a single node is used. (integer value)
@@ -983,10 +978,12 @@ rabbit_host = {{ controller_hostname }}
 
 # The RabbitMQ userid. (string value)
 # Deprecated group/name - [DEFAULT]/rabbit_userid
+# rabbit_userid = guest
 rabbit_userid = {{ rabbitmq_user }}
 
 # The RabbitMQ password. (string value)
 # Deprecated group/name - [DEFAULT]/rabbit_password
+# rabbit_password = guest
 rabbit_password = {{ rabbitmq_password }}
 
 # The RabbitMQ login method. (string value)

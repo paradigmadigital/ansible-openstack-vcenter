@@ -3,15 +3,12 @@
 # http://docs.openstack.org/kilo/install-guide/install/apt/content/cinder-install-controller-node.html
 - name: Create database
   mysql_db: name=cinder state=present
-  tags: workingon
 
 - name: Create database user
   mysql_user: name=cinder host=localhost password={{ cinder_dbpass }} priv=cinder.*:ALL,GRANT state=present
-  tags: workingon
 
 - name: Create database user
   mysql_user: name=cinder host=% password={{ cinder_dbpass }} priv=cinder.*:ALL,GRANT state=present
-  tags: workingon
 
 - name: Create the cinder user
   keystone_user:
@@ -20,7 +17,6 @@
     password={{ keystone_cinder_password }}
     token={{ administration_token }}
     endpoint=http://{{ admin_hostname }}:35357/v2.0
-  tags: workingon
 
 - name: Add the admin role to the cinder user
   keystone_user:
@@ -29,7 +25,6 @@
     tenant={{ keystone_service_tenant_name }}
     token={{ administration_token }}
     endpoint=http://{{ admin_hostname }}:35357/v2.0
-  tags: workingon
 
 #Create the service entity and API endpoint
 - name: Test if service entity exists
@@ -40,7 +35,6 @@
   register: service_entity_exists
   ignore_errors: True
   failed_when: "'0' in service_entity_exists.stdout"
-  tags: workingon
 
 - name: Create the service entity for the Block Storage service
   shell: |
@@ -48,7 +42,6 @@
     export OS_URL=http://{{ admin_hostname }}:35357/v2.0
     openstack service create --name {{ keystone_cinder_name }} --description "OpenStack Block Storage" volume
   when: service_entity_exists|failed
-  tags: workingon
 
 - name: Test if service entity v2 exists
   shell: |
@@ -58,7 +51,6 @@
   register: service_entity_exists
   ignore_errors: True
   failed_when: "'0' in service_entity_exists.stdout"
-  tags: workingon
 
 - name: Create the service entity for the Block Storage service
   shell: |
@@ -66,7 +58,6 @@
     export OS_URL=http://{{ admin_hostname }}:35357/v2.0
     openstack service create --name {{ keystone_cinder_name }}v2 --description "OpenStack Block Storage v2" volumev2
   when: service_entity_exists|failed
-  tags: workingon
 
 - name: Test if endpoint exists
   shell: |
@@ -76,7 +67,6 @@
   register: endpoint_exists
   ignore_errors: True
   failed_when: "'0' in endpoint_exists.stdout"
-  tags: workingon
 
 - name: Create the Block Storage service API endpoints
   shell: |
@@ -84,7 +74,6 @@
     export OS_URL=http://{{ admin_hostname }}:35357/v2.0
     openstack endpoint create --publicurl http://{{ admin_hostname }}:8776/v2/%\(tenant_id\)s --internalurl http://{{ admin_hostname }}:8776/v2/%\(tenant_id\)s --adminurl http://{{ admin_hostname }}:8776/v2/%\(tenant_id\)s --region {{ region_name }} volume
   when: endpoint_exists|failed
-  tags: workingon
 
 - name: Test if endpoint v2 exists
   shell: |
@@ -94,7 +83,6 @@
   register: endpoint_exists
   ignore_errors: True
   failed_when: "'0' in endpoint_exists.stdout"
-  tags: workingon
 
 - name: Create the Block Storage service API v2 endpoints
   shell: |
@@ -102,7 +90,6 @@
     export OS_URL=http://{{ admin_hostname }}:35357/v2.0
     openstack endpoint create --publicurl http://{{ admin_hostname }}:8776/v2/%\(tenant_id\)s --internalurl http://{{ admin_hostname }}:8776/v2/%\(tenant_id\)s --adminurl http://{{ admin_hostname }}:8776/v2/%\(tenant_id\)s --region {{ region_name }} volumev2
   when: endpoint_exists|failed
-  tags: workingon
 
 # To install and configure the Image Service components
 - name: Install cinder components
@@ -111,15 +98,14 @@
   - cinder-api
   - cinder-scheduler
   - python-cinderclient
-  tags: workingon
 
-- name: Configure cinder service
-  template: src=cinder.conf.j2 dest=/etc/cinder/cinder.conf owner=cinder group=cinder
-  notify:
-  - populate database
-  - restart cinder-api
-  - restart cinder-scheduler
-  tags: workingon
+# Wait until physical device has been configured
+#- name: Configure cinder service
+#  template: src=cinder.conf.j2 dest=/etc/cinder/cinder.conf owner=cinder group=cinder
+#  notify:
+#  - populate database
+#  - restart cinder-api
+#  - restart cinder-scheduler
 
 #- meta: flush_handlers
 
@@ -129,12 +115,10 @@
   with_items:
   - qemu
   - lvm2
-  tags: workingon
 
 # All LVM devices are allowed temporarily
 - name: Configure permissive lvm filters
   template: src=permissive_lvm.conf.j2 dest=/etc/lvm/lvm.conf owner=root group=root mode=0644
-  tags: workingon
 
 - name: Setup physical devices
   shell: |
@@ -142,26 +126,24 @@
            pvcreate {{ item }}
          fi
   with_items: "{{ cinder_physical_devices }}"
-  tags: workingon
 
 - name: Setup volume group
   lvg: vg=cinder-volumes pvs={{ cinder_physical_devices|join(',') }}
-  tags: workingon
 
 - name: Configure lvm filters
   template: src=lvm.conf.j2 dest=/etc/lvm/lvm.conf owner=root group=root mode=0644
-  tags: workingon
 
 - name: Install cinder components
   apt: name={{ item }} state=present
   with_items:
   - cinder-volume
   - python-mysqldb
-  tags: workingon
 
 - name: Configure cinder service
   template: src=cinder.conf.j2 dest=/etc/cinder/cinder.conf owner=cinder group=cinder
   notify:
+  - populate database
+  - restart cinder-api
+  - restart cinder-scheduler
   - restart tgt
   - restart cinder-volume
-  tags: workingon

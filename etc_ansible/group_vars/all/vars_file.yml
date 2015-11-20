@@ -45,6 +45,11 @@ keystone_neutron_name: neutron
 keystone_neutron_password: neutron
 # http://docs.openstack.org/juno/install-guide/install/apt/content/neutron-network-node.html
 metadata_secret: METADATA_SECRET
+# Cinder vars
+# http://docs.openstack.org/kilo/install-guide/install/apt/content/cinder-install-controller-node.html
+cinder_dbpass: CINDER_DBPASS
+keystone_cinder_name: cinder
+keystone_cinder_password: cinder
 
 # Time zone in horizo
 time_zone: Europe/Madrid
