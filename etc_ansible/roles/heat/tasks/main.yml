@@ -84,7 +84,7 @@
   shell: |
     export OS_TOKEN={{ administration_token }}
     export OS_URL=http://{{ admin_hostname }}:35357/v2.0
-    openstack service list | grep " heat-cfn "| wc -l
+    openstack service list | grep " heat_cfn "| wc -l
   register: service_entity_exists
   ignore_errors: True
   failed_when: "'0' in service_entity_exists.stdout"
@@ -154,16 +154,24 @@
 
 - name: Configure heat api service (TBD)
   template: src=heat.conf.j2 dest=/etc/heat/heat.conf owner=heat group=heat
+  notify:
+  - populate database
+  - restart heat-api
+  - restart heat-api-cfn
+  - restart heat-engine
   tags: workingon
 
 # To create de heat domain in Identity service
 - name:  Create heat domain in Identity service
   shell: |
-    export OS_TOKEN={{ administration_token }}
-    export OS_URL=http://{{ admin_hostname }}:35357/v2.0
+    export OS_TENANT_NAME={{ keystone_admin_tenant_name }}
+    export OS_USERNAME={{ keystone_admin_name }}
+    export OS_PASSWORD={{ keystone_admin_password }}
+    export OS_AUTH_URL=http://{{ admin_hostname }}:35357/v2.0
     heat-keystone-setup-domain --stack-user-domain-name {{ heat_user_domain }} --stack-domain-admin {{ heat_domain_admin }} --stack-domain-admin-password {{ heat_domain_admin_password }}
   notify:
   - populate database
   - restart heat-api
   - restart heat-api-cfn
   - restart heat-engine
+  tags: workingon
