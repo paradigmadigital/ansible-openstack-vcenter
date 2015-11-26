@@ -15,6 +15,14 @@
   - sysfsutils
   when: ansible_distribution == "Ubuntu" and ansible_distribution_version == "14.04"
 
+# Debian 8
+- name: Install nova packages (Debian)
+  apt: name={{ item }} state=present
+  with_items:
+  - nova-compute
+  - sysfsutils
+  when: ansible_distribution == "Debian" and ansible_distribution_version | search("^8")
+
 # CentOS 7
 - name: Install nova packages (CentOS)
   yum: name={{ item }} state=present
