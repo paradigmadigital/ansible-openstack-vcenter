@@ -48,6 +48,13 @@
   - ntp
   - swift
 
+# Ochestration service
+- hosts: heat
+  roles:
+#  - openstack-repositories
+#  - ntp
+  - heat
+
 # Adding hypervisors
 - hosts: kvm-hypervisor
   roles:
