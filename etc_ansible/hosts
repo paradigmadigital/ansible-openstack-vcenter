@@ -15,6 +15,9 @@ openstack-vcenter ansible_ssh_user=root
 [cinder]
 openstack-vcenter ansible_ssh_user=root
 
+[heat]
+openstack-vcenter ansible_ssh_user=root
+
 [dashboard]
 openstack-vcenter ansible_ssh_user=root
 
