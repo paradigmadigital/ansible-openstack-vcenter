@@ -1,7 +1,7 @@
 # ansible-openstack-vcenter
 Ansible playbooks to create a openstack vcenter.
 
-
+Liberty Release
 
 Steps:
 * Install compute node (Ubuntu 14.04) with qemu-kvm, bridge-utils and virt-manager 
@@ -193,7 +193,7 @@ iface ose inet manual
 * Configure hosts in etc_ansible/hosts
 * Run ansible-playbook -i hosts site.yml
 
-* After finishing the ansible playbook remember to create initial networks: http://docs.openstack.org/kilo/install-guide/install/apt/content/neutron-initial-networks.html
+* After finishing the ansible playbook remember to create initial networks: http://docs.openstack.org/liberty/install-guide/install/apt/content/neutron-initial-networks.html
 
 
 Restoring:
