@@ -3,7 +3,7 @@
   roles:
   - openstack-repositories
   - ntp
-  - mysql
+  - sqldatabase
   - rabbitmq
 
 # Keystone service

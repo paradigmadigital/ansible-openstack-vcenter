@@ -1,3 +1,4 @@
+relational_database: mysql
 controller_hostname: openstack-vcenter
 rabbitmq_user: openstack
 rabbitmq_password: RABBIT_PASS
