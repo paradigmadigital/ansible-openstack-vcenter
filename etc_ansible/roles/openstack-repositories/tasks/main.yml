@@ -29,7 +29,6 @@
   when: ansible_distribution == "Ubuntu" and ansible_distribution_version == "14.04"
   tags: workingon
 
-@
 # http://docs.openstack.org/kilo/install-guide/install/yum/content/ch_basic_environment.html
 # CentOS 7
 - name: Enable epel repository
