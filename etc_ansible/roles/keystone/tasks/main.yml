@@ -1,12 +1,15 @@
 # http://docs.openstack.org/juno/install-guide/install/apt/content/keystone-install.html
 - name: Create database
   mysql_db: name=keystone state=present
+  when: relational_database == "mysql"
 
 - name: Create database user to localhost
   mysql_user: name=keystone host=localhost password={{ keystone_dbpass }} priv=keystone.*:ALL,GRANT state=present
+  when: relational_database == "mysql"
 
 - name: Create database user to %
   mysql_user: name=keystone host=% password={{ keystone_dbpass }} priv=keystone.*:ALL,GRANT state=present
+  when: relational_database == "mysql"
 
 - name: Disable keystone service autostart
   template: src=keystone.override.j2 dest=/etc/init/keystone.override

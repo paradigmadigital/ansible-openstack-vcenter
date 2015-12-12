@@ -3,8 +3,8 @@
   roles:
   - openstack-repositories
   - ntp
-  - sqldatabase
-  - rabbitmq
+  - sql-database
+  - message-queue
 
 # Keystone service
 - hosts: keystone
