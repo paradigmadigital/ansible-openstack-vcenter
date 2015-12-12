@@ -7,11 +7,11 @@
   - message-queue
 
 # Keystone service
-- hosts: keystone
+- hosts: identity
   roles:
   - openstack-repositories
   - ntp
-  - keystone
+  - identity
 
 # Image service
 - hosts: glance

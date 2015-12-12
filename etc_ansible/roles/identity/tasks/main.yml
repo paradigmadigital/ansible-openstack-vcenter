@@ -2,72 +2,72 @@
 - name: Create database
   mysql_db: name=keystone state=present
   when: relational_database == "mysql"
+  tags: workingon
 
 - name: Create database user to localhost
   mysql_user: name=keystone host=localhost password={{ keystone_dbpass }} priv=keystone.*:ALL,GRANT state=present
   when: relational_database == "mysql"
+  tags: workingon
 
 - name: Create database user to %
   mysql_user: name=keystone host=% password={{ keystone_dbpass }} priv=keystone.*:ALL,GRANT state=present
   when: relational_database == "mysql"
+  tags: workingon
 
 - name: Disable keystone service autostart
   template: src=keystone.override.j2 dest=/etc/init/keystone.override
+  tags: workingon
 
 - name: Install keystone
   apt: name={{ item }} state=present
   with_items:
   - keystone
-  - python-openstackclient
   - apache2
   - libapache2-mod-wsgi
   - memcached
   - python-memcache
+  tags: workingon
 
 - name: Configure keystone service
   template: src=keystone.conf.j2 dest=/etc/keystone/keystone.conf owner=keystone group=root
   notify:
   - populate database
+  tags: workingon
+
+- meta: flush_handlers
 
 - name: Configure apache hostname
   lineinfile: dest=/etc/apache2/apache2.conf regexp='^\s*ServerName' line="ServerName {{ admin_hostname }}" owner=root group=root mode=0644
   notify:
   - restart apache2
+  tags: workingon
 
 - name: Configure apache virtualhost
   template: src=wsgi-keystone.conf.j2 dest=/etc/apache2/sites-available/wsgi-keystone.conf owner=root group=root mode=0644
   notify:
   - restart apache2
+  tags: workingon
 
 - name: Enable apache virtualhost
   file: src=/etc/apache2/sites-available/wsgi-keystone.conf dest=/etc/apache2/sites-enabled/wsgi-keystone.conf owner=root group=root state=link
   notify:
   - restart apache2
-
-- name: Create directory structure for the WSGI components
-  file: path=/var/www/cgi-bin/keystone owner=keystone group=keystone state=directory mode=0755
-  notify:
-  - restart apache2
-
-- name: Copy wsgi component to admin
-  template: src=wsgi_component.j2 dest=/var/www/cgi-bin/keystone/admin owner=keystone group=keystone mode=0755
-  notify:
-  - restart apache2
-
-- name: Copy wsgi component to main
-  template: src=wsgi_component.j2 dest=/var/www/cgi-bin/keystone/main owner=keystone group=keystone mode=0755
-  notify:
-  - restart apache2
+  tags: workingon
 
 - meta: flush_handlers
+  tags: workingon
 
+- name: Remove sqlite database
+  file: path=/var/lib/keystone/keystone.db state=absent
+  tags: workingon
 
 # Create the service entity and API endpoint
 # http://docs.openstack.org/kilo/install-guide/install/apt/content/keystone-services.html
 - name: Test if service entity exists
   shell: |
     export OS_TOKEN={{ administration_token }}
-    export OS_URL=http://{{ admin_hostname }}:35357/v2.0
+    export OS_URL=http://{{ admin_hostname }}:35357/v3
+    export OS_IDENTITY_API_VERSION=3
     openstack service list | grep " identity "| wc -l
   register: service_entity_exists
   ignore_errors: True

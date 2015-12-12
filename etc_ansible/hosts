@@ -1,7 +1,7 @@
 [databases]
 openstack-vcenter ansible_ssh_user=root
 
-[keystone]
+[identity]
 openstack-vcenter ansible_ssh_user=root
 
 [glance]
