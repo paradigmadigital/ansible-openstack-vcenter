@@ -496,7 +496,7 @@ log_dir = /var/log/keystone
 # Deprecated group/name - [sql]/connection
 #connection = <None>
 #connection = sqlite:////var/lib/keystone/keystone.db
-connection = mysql+pymysql://keystone:{{ keystone_dbpass }}@{{ controller_hostname }}/keystone
+connection = {{ relational_database_driver[relational_database] }}://keystone:{{ keystone_dbpass }}@{{ controller_hostname }}/keystone
 
 # The SQLAlchemy connection string to use to connect to the slave database.
 # (string value)

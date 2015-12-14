@@ -1,4 +1,11 @@
+# Relational database could be mysql with mysql+pymysql or
+# postgresql with postgresql+psycopg2
+# {{ relational_database_driver[relational_database] }}
 relational_database: mysql
+relational_database_driver:
+  mysql: mysql+pymysql
+  postgresl: postgresql+psycopg2
+
 controller_hostname: openstack-vcenter
 rabbitmq_user: openstack
 rabbitmq_password: RABBIT_PASS
