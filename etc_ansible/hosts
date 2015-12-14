@@ -4,7 +4,7 @@ openstack-vcenter ansible_ssh_user=root
 [identity]
 openstack-vcenter ansible_ssh_user=root
 
-[glance]
+[image]
 openstack-vcenter ansible_ssh_user=root
 
 # vcenter node *MUST* be here

@@ -14,11 +14,11 @@
   - identity
 
 # Image service
-- hosts: glance
+- hosts: image
   roles:
   - openstack-repositories
   - ntp
-  - glance
+  - image
 
 # Networking and compute services
 - hosts: networking-compute-controller
