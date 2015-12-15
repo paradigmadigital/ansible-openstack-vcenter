@@ -21,7 +21,7 @@
 
 
 - name: populate neutron database
-  shell: su -s /bin/sh -c "neutron-db-manage --config-file /etc/neutron/neutron.conf --config-file /etc/neutron/plugins/ml2/ml2_conf.ini upgrade kilo" neutron
+  shell: su -s /bin/sh -c "neutron-db-manage --config-file /etc/neutron/neutron.conf --config-file /etc/neutron/plugins/ml2/ml2_conf.ini upgrade liberty" neutron
 
 - name: restart nova-api
   service: name=nova-api state=restarted
@@ -39,8 +39,8 @@
 - name: restart openvswitch-switch
   service: name=openvswitch-switch state=restarted
 
-- name: restart neutron-plugin-openvswitch-agent
-  service: name=neutron-plugin-openvswitch-agent state=restarted
+- name: restart neutron-plugin-linuxbridge-agent
+  service: name=neutron-plugin-linuxbridge-agent state=restarted
 
 - name: restart neutron-l3-agent
   service: name=neutron-l3-agent state=restarted

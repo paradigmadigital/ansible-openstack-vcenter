@@ -215,50 +215,61 @@
 # http://docs.openstack.org/juno/install-guide/install/apt/content/section_neutron-networking.html
 # http://docs.openstack.org/juno/install-guide/install/apt/content/neutron-network-node.html
 
-- name: Enable ip forwarding
-  sysctl: name=net.ipv4.ip_forward value=1 reload=yes sysctl_set=yes
+#- name: Enable ip forwarding
+#  sysctl: name=net.ipv4.ip_forward value=1 reload=yes sysctl_set=yes
 
-- name: Disable all rp_filter
-  sysctl: name=net.ipv4.conf.all.rp_filter value=0 reload=yes sysctl_set=yes
+#- name: Disable all rp_filter
+#  sysctl: name=net.ipv4.conf.all.rp_filter value=0 reload=yes sysctl_set=yes
 
-- name: Disable default rp_filter
-  sysctl: name=net.ipv4.conf.default.rp_filter value=0 reload=yes sysctl_set=yes
+#- name: Disable default rp_filter
+#  sysctl: name=net.ipv4.conf.default.rp_filter value=0 reload=yes sysctl_set=yes
 
-- name: Install networking components
-  apt: name={{ item }} state=present
-  with_items:
-  - neutron-plugin-ml2
-  - neutron-plugin-openvswitch-agent
-  - neutron-l3-agent
-  - neutron-dhcp-agent
-  - neutron-metadata-agent
+#- name: Install networking components
+#  apt: name={{ item }} state=present
+#  with_items:
+#  - neutron-server
+#  - neutron-plugin-ml2
+#  - neutron-plugin-linuxbridge-agent
+#  - neutron-l3-agent
+#  - neutron-dhcp-agent
+#  - neutron-metadata-agent
+#  - python-neutronclient
+#  tags: workingon
 
 - name: Configure neutron server component
-  template: src={{ item }}.j2 dest=/etc/neutron/{{ item }} owner=root group=neutron mode=0644
-  with_items:
-  - neutron.conf
+  template: src=neutron.conf.j2 dest=/etc/neutron/neutron.conf owner=root group=neutron mode=0644
   notify:
   - populate neutron database
   - restart nova-api
   - restart nova-scheduler
   - restart nova-conductor
   - restart neutron-server
-  - restart neutron-plugin-openvswitch-agent
+  - restart neutron-plugin-linuxbridge-agent
   - restart neutron-l3-agent
   - restart neutron-dhcp-agent
   - restart neutron-metadata-agent
+  tags: workingon
 
 - name: Configure Modular Layer 2 (ML2) plug-in
   template: src=ml2_conf.ini.j2 dest=/etc/neutron/plugins/ml2/ml2_conf.ini owner=root group=neutron mode=0644
   notify:
-  - restart neutron-plugin-openvswitch-agent
-  - populate neutron database
+  - restart neutron-plugin-linuxbridge-agent
   - restart neutron-server
+  tags: workingon
+
+- name: Configure the Linux bridge agent
+  template: src=linuxbridge_agent.ini.j2 dest=/etc/neutron/plugins/ml2/linuxbridge_agent.ini owner=root group=neutron mode=0644
+  notify:
+  - restart neutron-plugin-linuxbridge-agent
+  - restart neutron-server
+  tags: workingon
 
 - name: Configure Layer-3 (L3) agent
   template: src=l3_agent.ini.j2 dest=/etc/neutron/l3_agent.ini owner=root group=neutron mode=0644
   notify:
   - restart neutron-l3-agent
+  - restart neutron-server
+  tags: workingon
 
 - name: Configure the DHCP agent
   template: src={{ item }}.j2 dest=/etc/neutron/{{ item }} owner=root group=root mode=0644
@@ -267,27 +278,36 @@
   - dnsmasq-neutron.conf
   notify:
   - restart neutron-dhcp-agent
-  - pkill dnsmasq
+#  - pkill dnsmasq
+  tags: workingon
 
 - name: Configure the metadata agent
   template: src=metadata_agent.ini.j2 dest=/etc/neutron/metadata_agent.ini owner=root group=root mode=0644
   notify:
   - restart neutron-metadata-agent
+  tags: workingon
 
 # Configure Open vSwitch service
-- name: Restart OVS service
-  shell: service openvswitch-switch restart; ethtool -K ose gro off
+#- name: Restart OVS service
+#  shell: service openvswitch-switch restart; ethtool -K ose gro off
+#  tags: workingon
 
-- name: Add the external bridge
-  openvswitch_bridge: bridge=br-ex state=present
+#- name: Add the external bridge
+#   openvswitch_bridge: bridge=br-ex state=present
+#  tags: workingon
 
-- name: Add a port to the external bridge that connects to the physical external network interface
-  openvswitch_port: bridge=br-ex port=ose state=present
-  notify:
-  - restart neutron-plugin-openvswitch-agent
-  - restart neutron-l3-agent
-  - restart neutron-dhcp-agent
-  - restart neutron-metadata-agent
+#- name: Add a port to the external bridge that connects to the physical external network interface
+#  openvswitch_port: bridge=br-ex port=ose state=present
+#  notify:
+#  - restart neutron-plugin-linuxbridge-agent
+#  - restart neutron-l3-agent
+#  - restart neutron-dhcp-agent
+#  - restart neutron-metadata-agent
+#  tags: workingon
+
+- name: Remove neutron sqlite database
+  file: path=/var/lib/neutron/neutron.sqlite state=absent
+  tags: workingon
 
 
 - name: Configure Nova Compute to use Networking
@@ -300,6 +320,8 @@
   - restart nova-scheduler
   - restart nova-conductor
   - restart nova-novncproxy
+  tags: workingon
 
 - name: Remove sqlite database
   file: path=/var/lib/nova/nova.sqlite state=absent
+  tags: workingon

@@ -17,16 +17,17 @@ auth_strategy = keystone
 
 my_ip = {{ ansible_osm["ipv4"]["address"] }}
 
-vnc_enabled = True
-vncserver_listen = 0.0.0.0
-vncserver_proxyclient_address = {{ ansible_osm["ipv4"]["address"] }}
-novncproxy_base_url = http://{{ admin_hostname }}:6080/vnc_auto.html
 
 network_api_class = nova.network.neutronv2.api.API
 security_group_api = neutron
-linuxnet_interface_driver = nova.network.linux_net.LinuxOVSInterfaceDriver
+linuxnet_interface_driver = nova.network.linux_net.NeutronLinuxBridgeInterfaceDriver
 firewall_driver = nova.virt.firewall.NoopFirewallDriver
 
+[vnc]
+enabled = True
+vncserver_listen = 0.0.0.0
+vncserver_proxyclient_address = {{ ansible_osm["ipv4"]["address"] }}
+novncproxy_base_url = http://{{ admin_hostname }}:6080/vnc_auto.html
 
 [oslo_messaging_rabbit]
 rabbit_host = {{ controller_hostname }}
@@ -52,11 +53,14 @@ lock_path = /var/lib/nova/tmp
 
 [neutron]
 url = http://{{ admin_hostname }}:9696
-auth_strategy = keystone
-admin_auth_url = http://{{ admin_hostname }}:35357/v2.0
-admin_tenant_name = {{ keystone_service_tenant_name }}
-admin_username = {{ keystone_neutron_name }}
-admin_password = {{ keystone_neutron_password }}
+auth_url = http://{{ admin_hostname }}:35357
+auth_plugin = password
+project_domain_id = default
+user_domain_id = default
+region_name = {{ region_name }}
+project_name = {{ keystone_service_tenant_name }}
+username = {{ keystone_nova_name }}
+password = {{ keystone_nova_password }}
 
 [libvirt]
 virt_type = kvm
