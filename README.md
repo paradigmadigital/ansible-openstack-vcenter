@@ -196,7 +196,7 @@ iface ose inet manual
 * Configure hosts in etc_ansible/hosts
 * Run ansible-playbook -i hosts site.yml
 
-* After finishing the ansible playbook remember to create initial networks: http://docs.openstack.org/liberty/install-guide/install/apt/content/neutron-initial-networks.html
+* After finishing the ansible playbook remember to create initial networks: http://docs.openstack.org/liberty/install-guide-ubuntu/launch-instance.html#create-virtual-networks
 
 
 Restoring:
