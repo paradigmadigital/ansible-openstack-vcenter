@@ -1,14 +1,33 @@
-# http://docs.openstack.org/juno/install-guide/install/apt/content/image-service-overview.html
+# http://docs.openstack.org/liberty/install-guide-ubuntu/glance.html
 
-# http://docs.openstack.org/juno/install-guide/install/apt/content/glance-install.html
+# http://docs.openstack.org/liberty/install-guide-ubuntu/glance-install.html
+# mysql
 - name: Create database
   mysql_db: name=glance state=present
+  when: relational_database == "mysql"
+  tags: workingon
 
 - name: Create database user
   mysql_user: name=glance host=localhost password={{ glance_dbpass }} priv=glance.*:ALL,GRANT state=present
+  when: relational_database == "mysql"
+  tags: workingon
 
 - name: Create database user
   mysql_user: name=glance host=% password={{ glance_dbpass }} priv=glance.*:ALL,GRANT state=present
+  when: relational_database == "mysql"
+  tags: workingon
+
+# postgresql
+- name: Create database
+  postgresql_db: name=glance
+  when: relational_database == "postgresql"
+  tags: workingon
+
+- name: Create database user
+  postgresql_user: db=glance name=glance password={{ glance_dbpass }} priv=ALL
+  when: relational_database == "postgresql"
+  tags: workingon
+
 
 - name: Create the glance user
   keystone_user:
@@ -17,6 +36,7 @@
     password={{ keystone_glance_password }}
     token={{ administration_token }}
     endpoint=http://{{ admin_hostname }}:35357/v2.0
+  tags: workingon
 
 - name: Add the admin role to the glance user
   keystone_user:
@@ -25,55 +45,74 @@
     tenant={{ keystone_service_tenant_name }}
     token={{ administration_token }}
     endpoint=http://{{ admin_hostname }}:35357/v2.0
+  tags: workingon
 
 #Create the service entity and API endpoint
 - name: Test if service entity exists
   shell: |
     export OS_TOKEN={{ administration_token }}
-    export OS_URL=http://{{ admin_hostname }}:35357/v2.0
+    export OS_URL=http://{{ admin_hostname }}:35357/v3
+    export OS_IDENTITY_API_VERSION=3
     openstack service list | grep " image "| wc -l
   register: service_entity_exists
   ignore_errors: True
   failed_when: "'0' in service_entity_exists.stdout"
+  tags: workingon
 
 - name: Create the service entity for the Image service
   shell: |
     export OS_TOKEN={{ administration_token }}
-    export OS_URL=http://{{ admin_hostname }}:35357/v2.0
+    export OS_URL=http://{{ admin_hostname }}:35357/v3
+    export OS_IDENTITY_API_VERSION=3
     openstack service create --name {{ keystone_glance_name }} --description "OpenStack Image Service" image
   when: service_entity_exists|failed
+  tags: workingon
 
 - name: Test if endpoint exists
   shell: |
     export OS_TOKEN={{ administration_token }}
-    export OS_URL=http://{{ admin_hostname }}:35357/v2.0
-    openstack endpoint list | grep image | wc -l
+    export OS_URL=http://{{ admin_hostname }}:35357/v3
+    export OS_IDENTITY_API_VERSION=3
+    openstack endpoint list | grep " image "" | wc -l
   register: endpoint_exists
   ignore_errors: True
   failed_when: "'0' in endpoint_exists.stdout"
+  tags: workingon
 
 - name: Create the Image service API endpoints
   shell: |
     export OS_TOKEN={{ administration_token }}
-    export OS_URL=http://{{ admin_hostname }}:35357/v2.0
-    openstack endpoint create --publicurl http://{{ admin_hostname }}:9292 --internalurl http://{{ admin_hostname }}:9292 --adminurl http://{{ admin_hostname }}:9292  --region {{ region_name }} image
+    export OS_URL=http://{{ admin_hostname }}:35357/v3
+    export OS_IDENTITY_API_VERSION=3
+    openstack endpoint create --region {{ region_name }} image public http://{{ admin_hostname }}:9292
+    openstack endpoint create --region {{ region_name }} image internal http://{{ admin_hostname }}:9292
+    openstack endpoint create --region {{ region_name }} image admin http://{{ admin_hostname }}:9292
   when: endpoint_exists|failed
+  tags: workingon
 
 # To install and configure the Image Service components
 - name: Install glance
   apt: name=glance state=present
+  tags: workingon
 
 - name: Install python-glanceclient
   apt: name=python-glanceclient state=present
+  tags: workingon
 
 - name: Configure glance api service
   template: src=glance-api.conf.j2 dest=/etc/glance/glance-api.conf owner=glance group=glance
   notify:
   - populate database
   - restart glance-api
+  tags: workingon
 
 - name: Configure glance registry service
   template: src=glance-registry.conf.j2 dest=/etc/glance/glance-registry.conf owner=glance group=glance
   notify:
   - populate database
   - restart glance-registry
+  tags: workingon
+
+- name: Remove sqlite database
+  file: path=/var/lib/glance/glance.sqlite state=absent
+  tags: workingon
