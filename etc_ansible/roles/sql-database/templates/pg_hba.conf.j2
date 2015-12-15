@@ -82,7 +82,7 @@
 # maintenance (custom daily cronjobs, replication, and similar tasks).
 #
 # Database administrative login by Unix domain socket
-local   all             postgres                                peer
+local   all             postgres                                trust
 
 # TYPE  DATABASE        USER            ADDRESS                 METHOD
 
@@ -99,4 +99,4 @@ host    all             all             ::1/128                 md5
 #host    replication     postgres        ::1/128                 md5
 
 # TODO: please, obtain cidr from: `sipcalc ose | grep "Network mask" | grep bits | awk '{print $NF}'`
-host    all             all             {{ ansible_osm["ipv4"]["network"] }}/24    trust
+host    all             all             {{ ansible_osm["ipv4"]["network"] }}/24    md5
