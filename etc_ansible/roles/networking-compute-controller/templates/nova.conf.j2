@@ -1,5 +1,5 @@
 [DEFAULT]
-verbose = True
+#verbose = True
 
 dhcpbridge_flagfile=/etc/nova/nova.conf
 dhcpbridge=/usr/bin/nova-dhcpbridge
@@ -11,7 +11,7 @@ libvirt_use_virtio_for_bridges=True
 verbose=True
 ec2_private_dns_show_ip=True
 api_paste_config=/etc/nova/api-paste.ini
-enabled_apis=ec2,osapi_compute,metadata
+enabled_apis=osapi_compute,metadata
 
 rpc_backend = rabbit
 
@@ -19,17 +19,19 @@ auth_strategy = keystone
 
 my_ip = {{ ansible_osm["ipv4"]["address"] }}
 
-vncserver_listen = {{ ansible_osm["ipv4"]["address"] }}
-vncserver_proxyclient_address = {{ ansible_osm["ipv4"]["address"] }}
-
 network_api_class = nova.network.neutronv2.api.API
 security_group_api = neutron
-linuxnet_interface_driver = nova.network.linux_net.LinuxOVSInterfaceDriver
+linuxnet_interface_driver = nova.network.linux_net.NeutronLinuxBridgeInterfaceDriver
 firewall_driver = nova.virt.firewall.NoopFirewallDriver
 
 
+[vnc]
+vncserver_listen = {{ ansible_osm["ipv4"]["address"] }}
+vncserver_proxyclient_address = {{ ansible_osm["ipv4"]["address"] }}
+
+
 [database]
-connection = mysql://{{ keystone_nova_name }}:{{ nova_dbpass }}@{{ admin_hostname }}/nova
+connection = {{ relational_database_driver[relational_database] }}://{{ keystone_nova_name }}:{{ nova_dbpass }}@{{ admin_hostname }}/nova
 
 
 [keystone_authtoken]
@@ -41,6 +43,7 @@ user_domain_id = default
 project_name = {{ keystone_service_tenant_name }}
 username = {{ keystone_nova_name }}
 password = {{ keystone_nova_password }}
+
 
 [glance]
 host = {{ admin_hostname }}

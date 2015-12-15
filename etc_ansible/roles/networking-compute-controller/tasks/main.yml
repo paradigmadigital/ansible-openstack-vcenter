@@ -1,14 +1,34 @@
-# http://docs.openstack.org/juno/install-guide/install/apt/content/ch_nova.html
-# http://docs.openstack.org/juno/install-guide/install/apt/content/ch_nova.html#nova-controller-install
+# http://docs.openstack.org/liberty/install-guide-ubuntu/nova.html
+# http://docs.openstack.org/liberty/install-guide-ubuntu/nova-controller-install.html
 ## Install NOVA but not configure ##
+# mysql
+
 - name: Create database
   mysql_db: name=nova state=present
+  when: relational_database == "mysql"
+  tags: workingon
 
 - name: Create database user from localhost
   mysql_user: name=nova host=localhost password={{ nova_dbpass }} priv=nova.*:ALL,GRANT state=present
+  when: relational_database == "mysql"
+  tags: workingon
 
 - name: Create database user from %
   mysql_user: name=nova host=% password={{ nova_dbpass }} priv=nova.*:ALL,GRANT state=present
+  when: relational_database == "mysql"
+  tags: workingon
+
+# postgresql
+- name: Create database
+  postgresql_db: name=nova
+  when: relational_database == "postgresql"
+  tags: workingon
+
+- name: Create database user
+  postgresql_user: db=nova name=nova password={{ nova_dbpass }} priv=ALL
+  when: relational_database == "postgresql"
+  tags: workingon
+
 
 - name: Create the nova user
   keystone_user:
@@ -17,6 +37,7 @@
     password={{ keystone_nova_password }}
     token={{ administration_token }}
     endpoint=http://{{ admin_hostname }}:35357/v2.0
+  tags: workingon
 
 - name: Add the admin role to the nova user
   keystone_user:
@@ -25,39 +46,50 @@
     tenant={{ keystone_service_tenant_name }}
     token={{ administration_token }}
     endpoint=http://{{ admin_hostname }}:35357/v2.0
+  tags: workingon
 
 #Create the service entity and API endpoint
 - name: Test if service entity exists
   shell: |
     export OS_TOKEN={{ administration_token }}
-    export OS_URL=http://{{ admin_hostname }}:35357/v2.0
+    export OS_URL=http://{{ admin_hostname }}:35357/v3
+    export OS_IDENTITY_API_VERSION=3
     openstack service list | grep " compute " | wc -l
   register: service_entity_exists
   ignore_errors: True
   failed_when: "'0' in service_entity_exists.stdout"
+  tags: workingon
 
 - name: Create the service entity for the Nova service
   shell: |
     export OS_TOKEN={{ administration_token }}
-    export OS_URL=http://{{ admin_hostname }}:35357/v2.0
+    export OS_URL=http://{{ admin_hostname }}:35357/v3
+    export OS_IDENTITY_API_VERSION=3
     openstack service create --name {{ keystone_nova_name }} --description "OpenStack Compute" compute
   when: service_entity_exists|failed
+  tags: workingon
 
 - name: Test if endpoint exists
   shell: |
     export OS_TOKEN={{ administration_token }}
-    export OS_URL=http://{{ admin_hostname }}:35357/v2.0
-    openstack endpoint list | grep ' compute' | wc -l
+    export OS_URL=http://{{ admin_hostname }}:35357/v3
+    export OS_IDENTITY_API_VERSION=3
+    openstack endpoint list | grep ' compute ' | wc -l
   register: endpoint_exists
   ignore_errors: True
   failed_when: "'0' in endpoint_exists.stdout"
+  tags: workingon
 
 - name: Create the Compute service API endpoints
   shell: |
     export OS_TOKEN={{ administration_token }}
-    export OS_URL=http://{{ admin_hostname }}:35357/v2.0
-    openstack endpoint create --publicurl http://{{ admin_hostname }}:8774/v2/%\(tenant_id\)s --internalurl http://{{ admin_hostname }}:8774/v2/%\(tenant_id\)s --adminurl http://{{ admin_hostname }}:8774/v2/%\(tenant_id\)s  --region {{ region_name }} compute
+    export OS_URL=http://{{ admin_hostname }}:35357/v3
+    export OS_IDENTITY_API_VERSION=3
+    openstack endpoint create --region {{ region_name }} compute public http://{{ admin_hostname }}:8774/v2/%\(tenant_id\)s
+    openstack endpoint create --region {{ region_name }} compute internal http://{{ admin_hostname }}:8774/v2/%\(tenant_id\)s
+    openstack endpoint create --region {{ region_name }} compute admin http://{{ admin_hostname }}:8774/v2/%\(tenant_id\)s
   when: endpoint_exists|failed
+  tags: workingon
 
 # To install and configure the Compute controller components
 - name: Install nova packages
@@ -70,19 +102,40 @@
   - nova-novncproxy
   - nova-scheduler
   - python-novaclient
+  tags: workingon
 
 
-# http://docs.openstack.org/juno/install-guide/install/apt/content/section_neutron-networking.html
-# http://docs.openstack.org/juno/install-guide/install/apt/content/neutron-controller-node.html
+# http://docs.openstack.org/liberty/install-guide-ubuntu/neutron.html
+# http://docs.openstack.org/liberty/install-guide-ubuntu/neutron-controller-install.html
 ## Install NEUTRON controller but no configure ##
+# mysql
 - name: Create database
   mysql_db: name=neutron state=present
+  when: relational_database == "mysql"
+  tags: workingon
 
 - name: Create database user from localhost
   mysql_user: name=neutron host=localhost password={{ neutron_dbpass }} priv=neutron.*:ALL,GRANT state=present
+  when: relational_database == "mysql"
+  tags: workingon
 
 - name: Create database user from %
   mysql_user: name=neutron host=% password={{ neutron_dbpass }} priv=neutron.*:ALL,GRANT state=present
+  when: relational_database == "mysql"
+  tags: workingon
+
+
+# postgresql
+- name: Create database
+  postgresql_db: name=neutron
+  when: relational_database == "postgresql"
+  tags: workingon
+
+- name: Create database user
+  postgresql_user: db=neutron name=neutron password={{ neutron_dbpass }} priv=ALL
+  when: relational_database == "postgresql"
+  tags: workingon
+
 
 - name: Create the neutron user
   keystone_user:
@@ -91,6 +144,7 @@
     password={{ keystone_neutron_password }}
     token={{ administration_token }}
     endpoint=http://{{ admin_hostname }}:35357/v2.0
+  tags: workingon
 
 - name: Add the admin role to the neutron user
   keystone_user:
@@ -99,47 +153,63 @@
     tenant={{ keystone_service_tenant_name }}
     token={{ administration_token }}
     endpoint=http://{{ admin_hostname }}:35357/v2.0
+  tags: workingon
 
 #Create the service entity and API endpoint
 - name: Test if service entity exists
   shell: |
     export OS_TOKEN={{ administration_token }}
-    export OS_URL=http://{{ admin_hostname }}:35357/v2.0
+    export OS_URL=http://{{ admin_hostname }}:35357/v3
+    export OS_IDENTITY_API_VERSION=3
     openstack service list | grep " network "| wc -l
   register: service_entity_exists
   ignore_errors: True
   failed_when: "'0' in service_entity_exists.stdout"
+  tags: workingon
 
 - name: Create the service entity for the Neutron service
   shell: |
     export OS_TOKEN={{ administration_token }}
-    export OS_URL=http://{{ admin_hostname }}:35357/v2.0
+    export OS_URL=http://{{ admin_hostname }}:35357/v3
+    export OS_IDENTITY_API_VERSION=3
     openstack service create --name {{ keystone_neutron_name }} --description "OpenStack Networking" network
   when: service_entity_exists|failed
+  tags: workingon
 
 - name: Test if network service API endpoint exists
   shell: |
     export OS_TOKEN={{ administration_token }}
-    export OS_URL=http://{{ admin_hostname }}:35357/v2.0
+    export OS_URL=http://{{ admin_hostname }}:35357/v3
+    export OS_IDENTITY_API_VERSION=3
     openstack endpoint list | grep ' network ' | wc -l
   register: endpoint_exists
   ignore_errors: True
   failed_when: "'0' in endpoint_exists.stdout"
+  tags: workingon
 
 - name: Create the Compute service API endpoints
   shell: |
     export OS_TOKEN={{ administration_token }}
-    export OS_URL=http://{{ admin_hostname }}:35357/v2.0
-    openstack endpoint create --publicurl http://{{ admin_hostname }}:9696 --internalurl http://{{ admin_hostname }}:9696 --adminurl http://{{ admin_hostname }}:9696 --region {{ region_name }} network
+    export OS_URL=http://{{ admin_hostname }}:35357/v3
+    export OS_IDENTITY_API_VERSION=3
+    openstack endpoint create --region {{ region_name }} network public http://{{ admin_hostname }}:9696
+    openstack endpoint create --region {{ region_name }} network internal http://{{ admin_hostname }}:9696
+    openstack endpoint create --region {{ region_name }} network admin http://{{ admin_hostname }}:9696
   when: endpoint_exists|failed
+  tags: workingon
 
-# To install and configure the Compute controller components
+# http://docs.openstack.org/liberty/install-guide-ubuntu/neutron-controller-install-option2.html
 - name: Install networking components
   apt: name={{ item }} state=present
   with_items:
   - neutron-server
   - neutron-plugin-ml2
+  - neutron-plugin-linuxbridge-agent
+  - neutron-l3-agent
+  - neutron-dhcp-agent
+  - neutron-metadata-agent
   - python-neutronclient
+  tags: workingon
 
 ## Install NEUTRON component and configure it ##
 # http://docs.openstack.org/juno/install-guide/install/apt/content/section_neutron-networking.html
@@ -230,3 +300,6 @@
   - restart nova-scheduler
   - restart nova-conductor
   - restart nova-novncproxy
+
+- name: Remove sqlite database
+  file: path=/var/lib/nova/nova.sqlite state=absent
