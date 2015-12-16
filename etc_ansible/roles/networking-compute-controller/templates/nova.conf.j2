@@ -1,5 +1,6 @@
 [DEFAULT]
-#verbose = True
+verbose = True
+debug = True
 
 dhcpbridge_flagfile=/etc/nova/nova.conf
 dhcpbridge=/usr/bin/nova-dhcpbridge
@@ -8,7 +9,6 @@ state_path=/var/lib/nova
 lock_path=/var/lock/nova
 force_dhcp_release=True
 libvirt_use_virtio_for_bridges=True
-verbose=True
 ec2_private_dns_show_ip=True
 api_paste_config=/etc/nova/api-paste.ini
 enabled_apis=osapi_compute,metadata
@@ -24,6 +24,9 @@ security_group_api = neutron
 linuxnet_interface_driver = nova.network.linux_net.NeutronLinuxBridgeInterfaceDriver
 firewall_driver = nova.virt.firewall.NoopFirewallDriver
 
+# http://docs.openstack.org/liberty/config-reference/content/section_compute-scheduler.html#diskfilter
+# Allow to do "disk overbooking"
+disk_allocation_ratio = 2.0
 
 [vnc]
 vncserver_listen = {{ ansible_osm["ipv4"]["address"] }}
