@@ -1,7 +1,9 @@
 # http://docs.openstack.org/kilo/install-guide/install/apt/content/ch_basic_environment.html#basics-packages
 - name: Install rabbitmq server
   apt: name=rabbitmq-server state=present
-  tags: workingon
+  tags:
+  - appliance
+  - workingon
 
 - name: Create openstack rabbitmq user
   rabbitmq_user:
