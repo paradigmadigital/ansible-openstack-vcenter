@@ -251,7 +251,6 @@
   - restart neutron-dhcp-agent
   - restart neutron-metadata-agent
   tags:
-  - appliance
   - workingon
 
 - name: Configure Modular Layer 2 (ML2) plug-in
