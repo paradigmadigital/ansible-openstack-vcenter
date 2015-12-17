@@ -1,6 +1,13 @@
 [mysqld]
 # OpenStack settings from http://docs.openstack.org/liberty/install-guide-ubuntu/environment-sql-database.html
+{% if network_type == "openvswitch" %}
 bind-address = {{ ansible_osm["ipv4"]["address"] }}
+{% endif %}
+{% if network_type == "vxlan" %}
+bind-address = {{ ansible_eth0["ipv4"]["address"] }}
+{% endif %}
+
+
 
 default-storage-engine = innodb
 innodb_file_per_table

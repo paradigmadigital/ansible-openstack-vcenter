@@ -15,8 +15,12 @@ rpc_backend = rabbit
 
 auth_strategy = keystone
 
+{% if network_type == "openvswitch" %}
 my_ip = {{ ansible_osm["ipv4"]["address"] }}
-
+{% endif %}
+{% if network_type == "vxlan" %}
+my_ip = {{ ansible_eth0["ipv4"]["address"] }}
+{% endif %}#
 
 network_api_class = nova.network.neutronv2.api.API
 security_group_api = neutron
@@ -25,8 +29,14 @@ firewall_driver = nova.virt.firewall.NoopFirewallDriver
 
 [vnc]
 enabled = True
-vncserver_listen = 0.0.0.0
+{% if network_type == "openvswitch" %}
+vncserver_listen = {{ ansible_osm["ipv4"]["address"] }}
 vncserver_proxyclient_address = {{ ansible_osm["ipv4"]["address"] }}
+{% endif %}
+{% if network_type == "vxlan" %}
+vncserver_listen = {{ ansible_eth0["ipv4"]["address"] }}
+vncserver_proxyclient_address = {{ ansible_eth0["ipv4"]["address"] }}
+{% endif %}
 novncproxy_base_url = http://{{ admin_hostname }}:6080/vnc_auto.html
 
 [oslo_messaging_rabbit]

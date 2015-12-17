@@ -33,6 +33,7 @@
   when: ansible_distribution == "Ubuntu" and ansible_distribution_version == "14.04"
   tags:
   - appliance
+  - workingon
 
 - name: Install the OpenStack client
   apt: name=python-openstackclient state=latest

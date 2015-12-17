@@ -126,7 +126,12 @@ enable_security_group = True
 enable_ipset = True
 
 [ovs]
+{% if network_type == "openvswitch" %}
 local_ip = {{ ansible_osm["ipv4"]["address"] }}
+{% endif %}
+{% if network_type == "vxlan" %}
+local_ip = {{ ansible_eth0["ipv4"]["address"] }}
+{% endif %}
 # To remove:
 # enable_tunneling = True
 bridge_mappings = external:br-ex

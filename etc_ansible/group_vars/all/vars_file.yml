@@ -6,6 +6,10 @@ relational_database_driver:
   mysql: mysql+pymysql
   postgresql: postgresql+psycopg2
 
+# vxlan with physical servers
+# openvswitch with appliance
+network_type: vxlan
+
 controller_hostname: openstack-vcenter
 rabbitmq_user: openstack
 rabbitmq_password: RABBIT_PASS

@@ -99,4 +99,9 @@ host    all             all             ::1/128                 md5
 #host    replication     postgres        ::1/128                 md5
 
 # TODO: please, obtain cidr from: `sipcalc ose | grep "Network mask" | grep bits | awk '{print $NF}'`
+{% if network_type == "openvswitch" %}
 host    all             all             {{ ansible_osm["ipv4"]["network"] }}/24    md5
+{% endif %}
+{% if network_type == "vxlan" %}
+host    all             all             {{ ansible_eth0["ipv4"]["network"] }}/24    md5
+{% endif %}

@@ -16,8 +16,12 @@ enabled_apis=osapi_compute,metadata
 rpc_backend = rabbit
 
 auth_strategy = keystone
-
+{% if network_type == "openvswitch" %}
 my_ip = {{ ansible_osm["ipv4"]["address"] }}
+{% endif %}
+{% if network_type == "vxlan" %}
+my_ip = {{ ansible_eth0["ipv4"]["address"] }}
+{% endif %}
 
 network_api_class = nova.network.neutronv2.api.API
 security_group_api = neutron
@@ -29,8 +33,15 @@ firewall_driver = nova.virt.firewall.NoopFirewallDriver
 disk_allocation_ratio = 2.0
 
 [vnc]
+{% if network_type == "openvswitch" %}
 vncserver_listen = {{ ansible_osm["ipv4"]["address"] }}
 vncserver_proxyclient_address = {{ ansible_osm["ipv4"]["address"] }}
+{% endif %}
+{% if network_type == "vxlan" %}
+vncserver_listen = {{ ansible_eth0["ipv4"]["address"] }}
+vncserver_proxyclient_address = {{ ansible_eth0["ipv4"]["address"] }}
+{% endif %}
+
 
 
 [database]

@@ -8,7 +8,12 @@
 #
 # physical_interface_mappings =
 # Example: physical_interface_mappings = physnet1:eth1
+{% if network_type == "openvswitch" %}
+physical_interface_mappings = public:eth1
+{% endif %}
+{% if network_type == "vxlan" %}
 physical_interface_mappings = public:ose
+{% endif %}
 
 [vxlan]
 # (BoolOpt) enable VXLAN on the agent
@@ -32,8 +37,12 @@ enable_vxlan = True
 #
 # (StrOpt) Local IP address to use for VXLAN endpoints (required)
 # local_ip =
+{% if network_type == "openvswitch" %}
 local_ip = {{ ansible_osm["ipv4"]["address"] }}
-#
+{% endif %}
+{% if network_type == "vxlan" %}
+local_ip = {{ ansible_eth0["ipv4"]["address"] }}
+{% endif %}#
 # (BoolOpt) Flag to enable l2population extension. This option should be used
 # in conjunction with ml2 plugin l2population mechanism driver (in that case,
 # both linuxbridge and l2population mechanism drivers should be loaded).
