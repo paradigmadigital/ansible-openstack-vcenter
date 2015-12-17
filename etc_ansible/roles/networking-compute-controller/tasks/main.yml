@@ -102,7 +102,9 @@
   - nova-novncproxy
   - nova-scheduler
   - python-novaclient
-  tags: workingon
+  tags:
+  - appliance
+  - workingon
 
 
 # http://docs.openstack.org/liberty/install-guide-ubuntu/neutron.html
@@ -248,7 +250,9 @@
   - restart neutron-l3-agent
   - restart neutron-dhcp-agent
   - restart neutron-metadata-agent
-  tags: workingon
+  tags:
+  - appliance
+  - workingon
 
 - name: Configure Modular Layer 2 (ML2) plug-in
   template: src=ml2_conf.ini.j2 dest=/etc/neutron/plugins/ml2/ml2_conf.ini owner=root group=neutron mode=0644

@@ -2,39 +2,53 @@
 - name: Install mysql server
   apt: name=mysql-server state=present
   when: relational_database == "mysql"
-  tags: workingon
+  tags:
+  - appliance
+  - workingon
 
 - name: Configure mysql server
   template: src=mysqld_openstack.cnf.j2 dest=/etc/mysql/conf.d/mysqld_openstack.cnf
   notify: restart mysql
   when: relational_database == "mysql"
-  tags: workingon
+  tags:
+  - appliance
+  - workingon
 
 - name: Install python-mysqldb
   apt: name=python-mysqldb state=latest
   when: relational_database == "mysql"
-  tags: workingon
+  tags:
+  - appliance
+  - workingon
 
 # Postgresql https://fosskb.wordpress.com/2014/06/06/using-postgresql-with-openstack/
 - name: Install Postgresql
   apt: name=postgresql state=present
   when: relational_database == "postgresql"
-  tags: workingon
+  tags:
+  - appliance
+  - workingon
 # TODO: please, obtain cidr from: `sipcalc ose | grep "Network mask" | grep bits | awk '{print $NF}'`
 
 - name: Configure access from management networking
   template: src=pg_hba.conf.j2 dest=/etc/postgresql/9.3/main/pg_hba.conf owner=postgres group=postgres mode=0640
   notify: restart postgresql
   when: relational_database == "postgresql"
-  tags: workingon
-- name: Configure listening address interface
+  tags:
+  - appliance
+  - workingon
 
+- name: Configure listening address interface
   template: src=postgresql.conf.j2 dest=/etc/postgresql/9.3/main/postgresql.conf owner=postgres group=postgres mode=0644
   notify: restart postgresql
   when: relational_database == "postgresql"
-  tags: workingon
+  tags:
+  - appliance
+  - workingon
 
 - name: Install python postgresql client
   apt: name=python-psycopg2 state=present
   when: relational_database == "postgresql"
-  tags: workingon
+  tags:
+  - appliance
+  - workingon

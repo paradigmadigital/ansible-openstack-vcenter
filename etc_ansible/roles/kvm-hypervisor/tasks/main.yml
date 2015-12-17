@@ -13,7 +13,9 @@
   - nova-compute
   - sysfsutils
   when: ansible_distribution == "Ubuntu" and ansible_distribution_version == "14.04"
-  tags: workingon
+  tags:
+  - appliance
+  - workingon
 
 # CentOS 7
 - name: Install nova packages (CentOS)
@@ -53,7 +55,9 @@
   with_items:
   - neutron-plugin-linuxbridge-agent
   when: ansible_distribution == "Ubuntu" and ansible_distribution_version == "14.04"
-  tags: workingon
+  tags:
+  - appliance
+  - workingon
 
 - name: Install networking components (CentOS)
   yum: name={{ item }} state=present

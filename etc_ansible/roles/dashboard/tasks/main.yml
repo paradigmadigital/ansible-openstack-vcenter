@@ -7,7 +7,9 @@
   - libapache2-mod-wsgi
   - memcached
   - python-memcache
-  tags: workingon
+  tags:
+  - appliance
+  - workingon
 
 - name: Configure horizon
   template: src=local_settings.py.j2 dest=/etc/openstack-dashboard/local_settings.py owner=root group=root mode=0644

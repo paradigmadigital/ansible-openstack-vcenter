@@ -3,31 +3,43 @@
 - name: Install ubuntu cloud keyring
   apt: name=ubuntu-cloud-keyring state=latest
   when: ansible_distribution == "Ubuntu" and ansible_distribution_version == "14.04"
-  tags: workingon
+  tags:
+  - appliance
+  - workingon
 
 - name: Add apt_repository dependency
   apt: name=python-pycurl state=latest
   when: ansible_distribution == "Ubuntu" and ansible_distribution_version == "14.04"
-  tags: workingon
+  tags:
+  - appliance
+  - workingon
 
 - name: Remove kilo cloud repository
   apt_repository: repo='deb http://ubuntu-cloud.archive.canonical.com/ubuntu trusty-updates/kilo main' state=absent
   when: ansible_distribution == "Ubuntu" and ansible_distribution_version == "14.04"
-  tags: workingon
+  tags:
+  - appliance
+  - workingon
 
 - name: Add ubuntu cloud repository
   apt_repository: repo='deb http://ubuntu-cloud.archive.canonical.com/ubuntu trusty-updates/liberty main' state=present update_cache=yes
   when: ansible_distribution == "Ubuntu" and ansible_distribution_version == "14.04"
-  tags: workingon
+  tags:
+  - appliance
+  - workingon
 
 - name: Upgrade distribution
   apt: upgrade=dist
   when: ansible_distribution == "Ubuntu" and ansible_distribution_version == "14.04"
+  tags:
+  - appliance
 
 - name: Install the OpenStack client
   apt: name=python-openstackclient state=latest
   when: ansible_distribution == "Ubuntu" and ansible_distribution_version == "14.04"
-  tags: workingon
+  tags:
+  - appliance
+  - workingon
 
 # http://docs.openstack.org/kilo/install-guide/install/yum/content/ch_basic_environment.html
 # CentOS 7

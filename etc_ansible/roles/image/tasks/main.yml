@@ -93,11 +93,15 @@
 # To install and configure the Image Service components
 - name: Install glance
   apt: name=glance state=present
-  tags: workingon
+  tags:
+  - appliance
+  - workingon
 
 - name: Install python-glanceclient
   apt: name=python-glanceclient state=present
-  tags: workingon
+  tags:
+  - appliance
+  - workingon
 
 - name: Configure glance api service
   template: src=glance-api.conf.j2 dest=/etc/glance/glance-api.conf owner=glance group=glance
