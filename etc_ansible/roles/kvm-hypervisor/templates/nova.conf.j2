@@ -20,7 +20,7 @@ my_ip = {{ ansible_osm["ipv4"]["address"] }}
 {% endif %}
 {% if network_type == "vxlan" %}
 my_ip = {{ ansible_eth0["ipv4"]["address"] }}
-{% endif %}#
+{% endif %}
 
 network_api_class = nova.network.neutronv2.api.API
 security_group_api = neutron
