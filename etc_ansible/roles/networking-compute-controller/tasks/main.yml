@@ -211,7 +211,9 @@
   - neutron-dhcp-agent
   - neutron-metadata-agent
   - python-neutronclient
-  tags: workingon
+  tags:
+  - appliance
+  - workingon
 
 ## Install NEUTRON component and configure it ##
 # http://docs.openstack.org/juno/install-guide/install/apt/content/section_neutron-networking.html
