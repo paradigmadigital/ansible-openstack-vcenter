@@ -84,7 +84,6 @@ flat_networks = public
 [ml2_type_gre]
 # (ListOpt) Comma-separated list of <tun_min>:<tun_max> tuples enumerating ranges of GRE tunnel IDs that are available for tenant network allocation
 # tunnel_id_ranges =
-tunnel_id_ranges = 1:1000
 
 [ml2_type_vxlan]
 # (ListOpt) Comma-separated list of <vni_min>:<vni_max> tuples enumerating
@@ -119,22 +118,8 @@ vni_ranges = 1:1000
 [securitygroup]
 # Controls if neutron security group is enabled or not.
 # It should be false when you use nova security group.
-enable_security_group = True
+# enable_security_group = True
 
 # Use ipset to speed-up the iptables security groups. Enabling ipset support
 # requires that ipset is installed on L2 agent node.
 enable_ipset = True
-
-[ovs]
-{% if network_type == "openvswitch" %}
-local_ip = {{ ansible_osm["ipv4"]["address"] }}
-{% endif %}
-{% if network_type == "vxlan" %}
-local_ip = {{ ansible_eth0["ipv4"]["address"] }}
-{% endif %}
-# To remove:
-# enable_tunneling = True
-bridge_mappings = external:br-ex
-
-[agent]
-tunnel_types = gre
