@@ -42,7 +42,6 @@
   notify: restart postgresql
   when: relational_database == "postgresql"
   tags:
-  - appliance
   - workingon
 
 - name: Install python postgresql client
