@@ -27,6 +27,7 @@ security_group_api = neutron
 linuxnet_interface_driver = nova.network.linux_net.NeutronLinuxBridgeInterfaceDriver
 firewall_driver = nova.virt.firewall.NoopFirewallDriver
 
+
 [vnc]
 enabled = True
 {% if network_type == "openvswitch" %}
@@ -39,10 +40,12 @@ vncserver_proxyclient_address = {{ ansible_eth0["ipv4"]["address"] }}
 {% endif %}
 novncproxy_base_url = http://{{ admin_hostname }}:6080/vnc_auto.html
 
+
 [oslo_messaging_rabbit]
 rabbit_host = {{ controller_hostname }}
 rabbit_userid = {{ rabbitmq_user}}
 rabbit_password = {{ rabbitmq_password }}
+
 
 [keystone_authtoken]
 auth_uri = http://{{ admin_hostname }}:5000
@@ -58,8 +61,10 @@ password = {{ keystone_nova_password }}
 [glance]
 host = {{ controller_hostname }}
 
+
 [oslo_concurrency]
 lock_path = /var/lib/nova/tmp
+
 
 [neutron]
 url = http://{{ admin_hostname }}:9696
@@ -71,6 +76,3 @@ region_name = {{ region_name }}
 project_name = {{ keystone_service_tenant_name }}
 username = {{ keystone_nova_name }}
 password = {{ keystone_nova_password }}
-
-[libvirt]
-virt_type = kvm
