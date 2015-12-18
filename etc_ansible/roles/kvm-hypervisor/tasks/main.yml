@@ -89,12 +89,12 @@
   when: ansible_distribution == "CentOS" and ansible_distribution_version | search("^7")
 
 
-- name: Configure Modular Layer 2 (ML2) plug-in (Ubuntu)
-  template: src=ml2_conf.ini.j2 dest=/etc/neutron/plugins/ml2/ml2_conf.ini owner=root group=neutron mode=0644
-  notify:
-  - restart neutron-plugin-linuxbridge-agent
-  when: ansible_distribution == "Ubuntu" and ansible_distribution_version == "14.04"
-  tags: workingon
+#- name: Configure Modular Layer 2 (ML2) plug-in (Ubuntu)
+#  template: src=ml2_conf.ini.j2 dest=/etc/neutron/plugins/ml2/ml2_conf.ini owner=root group=neutron mode=0644
+#  notify:
+#  - restart neutron-plugin-linuxbridge-agent
+#  when: ansible_distribution == "Ubuntu" and ansible_distribution_version == "14.04"
+#  tags: workingon
 
 - name: Configure Modular Layer 2 (ML2) plug-in (CentOS)
   template: src=ml2_conf.ini_centos7.j2 dest=/etc/neutron/plugins/ml2/ml2_conf.ini owner=root group=neutron mode=0644
