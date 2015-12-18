@@ -6,6 +6,8 @@
 - name: Create database
   mysql_db: name=nova state=present
   when: relational_database == "mysql"
+  notify:
+  - populate neutron database
   tags: workingon
 
 - name: Create database user from localhost
@@ -22,6 +24,8 @@
 - name: Create database
   postgresql_db: name=nova
   when: relational_database == "postgresql"
+  notify:
+  - populate neutron database
   tags: workingon
 
 - name: Create database user
@@ -114,6 +118,8 @@
 - name: Create database
   mysql_db: name=neutron state=present
   when: relational_database == "mysql"
+  notify:
+  - populate nova database
   tags: workingon
 
 - name: Create database user from localhost
@@ -131,6 +137,8 @@
 - name: Create database
   postgresql_db: name=neutron
   when: relational_database == "postgresql"
+  notify:
+  - populate nova database
   tags: workingon
 
 - name: Create database user
