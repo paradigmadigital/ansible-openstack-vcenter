@@ -3,7 +3,6 @@
   apt: name=rabbitmq-server state=present
   tags:
   - appliance
-  - workingon
 
 - name: Create openstack rabbitmq user
   rabbitmq_user:
@@ -15,4 +14,3 @@
     write_priv=.*
     state=present
   notify: restart rabbitmq-server
-  tags: workingon

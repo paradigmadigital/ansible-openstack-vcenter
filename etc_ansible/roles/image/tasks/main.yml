@@ -5,28 +5,23 @@
 - name: Create database
   mysql_db: name=glance state=present
   when: relational_database == "mysql"
-  tags: workingon
 
 - name: Create database user
   mysql_user: name=glance host=localhost password={{ glance_dbpass }} priv=glance.*:ALL,GRANT state=present
   when: relational_database == "mysql"
-  tags: workingon
 
 - name: Create database user
   mysql_user: name=glance host=% password={{ glance_dbpass }} priv=glance.*:ALL,GRANT state=present
   when: relational_database == "mysql"
-  tags: workingon
 
 # postgresql
 - name: Create database
   postgresql_db: name=glance
   when: relational_database == "postgresql"
-  tags: workingon
 
 - name: Create database user
   postgresql_user: db=glance name=glance password={{ glance_dbpass }} priv=ALL
   when: relational_database == "postgresql"
-  tags: workingon
 
 
 - name: Create the glance user
@@ -36,7 +31,6 @@
     password={{ keystone_glance_password }}
     token={{ administration_token }}
     endpoint=http://{{ admin_hostname }}:35357/v2.0
-  tags: workingon
 
 - name: Add the admin role to the glance user
   keystone_user:
@@ -45,7 +39,6 @@
     tenant={{ keystone_service_tenant_name }}
     token={{ administration_token }}
     endpoint=http://{{ admin_hostname }}:35357/v2.0
-  tags: workingon
 
 #Create the service entity and API endpoint
 - name: Test if service entity exists
@@ -57,7 +50,6 @@
   register: service_entity_exists
   ignore_errors: True
   failed_when: "'0' in service_entity_exists.stdout"
-  tags: workingon
 
 - name: Create the service entity for the Image service
   shell: |
@@ -66,7 +58,6 @@
     export OS_IDENTITY_API_VERSION=3
     openstack service create --name {{ keystone_glance_name }} --description "OpenStack Image Service" image
   when: service_entity_exists|failed
-  tags: workingon
 
 - name: Test if endpoint exists
   shell: |
@@ -77,7 +68,6 @@
   register: endpoint_exists
   ignore_errors: True
   failed_when: "'0' in endpoint_exists.stdout"
-  tags: workingon
 
 - name: Create the Image service API endpoints
   shell: |
@@ -88,35 +78,29 @@
     openstack endpoint create --region {{ region_name }} image internal http://{{ admin_hostname }}:9292
     openstack endpoint create --region {{ region_name }} image admin http://{{ admin_hostname }}:9292
   when: endpoint_exists|failed
-  tags: workingon
 
 # To install and configure the Image Service components
 - name: Install glance
   apt: name=glance state=present
   tags:
   - appliance
-  - workingon
 
 - name: Install python-glanceclient
   apt: name=python-glanceclient state=present
   tags:
   - appliance
-  - workingon
 
 - name: Configure glance api service
   template: src=glance-api.conf.j2 dest=/etc/glance/glance-api.conf owner=glance group=glance
   notify:
   - populate database
   - restart glance-api
-  tags: workingon
 
 - name: Configure glance registry service
   template: src=glance-registry.conf.j2 dest=/etc/glance/glance-registry.conf owner=glance group=glance
   notify:
   - populate database
   - restart glance-registry
-  tags: workingon
 
 - name: Remove sqlite database
   file: path=/var/lib/glance/glance.sqlite state=absent
-  tags: workingon
