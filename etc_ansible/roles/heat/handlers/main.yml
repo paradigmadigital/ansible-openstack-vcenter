@@ -9,4 +9,3 @@
 
 - name: restart heat-engine
   service: name=heat-engine state=restarted
-

@@ -1,14 +1,33 @@
-#http://docs.openstack.org/kilo/install-guide/install/yum/content/ch_heat.html
+# http://docs.openstack.org/liberty/install-guide-ubuntu/heat.html
 
-#http://docs.openstack.org/kilo/install-guide/install/yum/content/heat-install-controller-node.html
+# http://docs.openstack.org/liberty/install-guide-ubuntu/heat-install.html
+# mysql
 - name: Create database
   mysql_db: name=heat state=present
+  when: relational_database == "mysql"
+  tags: workingon
 
 - name: Create database user
   mysql_user: name=heat host=localhost password={{ heat_dbpass }} priv=heat.*:ALL,GRANT state=present
+  when: relational_database == "mysql"
+  tags: workingon
 
 - name: Create database user
   mysql_user: name=heat host=% password={{ heat_dbpass }} priv=heat.*:ALL,GRANT state=present
+  when: relational_database == "mysql"
+  tags: workingon
+# postgresql
+
+- name: Create database
+  postgresql_db: name=heat
+  when: relational_database == "postgresql"
+  tags: workingon
+
+- name: Create database user
+  postgresql_user: db=heat name=heat password={{ heat_dbpass }} priv=ALL
+  when: relational_database == "postgresql"
+  tags: workingon
+
 
 - name: Create the heat user
   keystone_user:
@@ -17,6 +36,7 @@
     password={{ keystone_heat_password }}
     token={{ administration_token }}
     endpoint=http://{{ admin_hostname }}:35357/v2.0
+  tags: workingon
 
 - name: Add the admin role to the heat user
   keystone_user:
@@ -25,113 +45,179 @@
     tenant={{ keystone_service_tenant_name }}
     token={{ administration_token }}
     endpoint=http://{{ admin_hostname }}:35357/v2.0
+  tags: workingon
 
-- name: Create heat_stack_owner role and add the heat_stack_owner role to the demo project and user
-  keystone_user:
-    role={{ keystone_heat_stack_owner_role }}
-    user={{ keystone_user_name }}
-    tenant={{ keystone_user_tenant_name }}
-    token={{ administration_token }}
-    endpoint=http://{{ admin_hostname }}:35357/v2.0
-
-#
-#- name: Create the heat_stack_user role
-#  keystone_user:
-#    role={{ keystone_heat_stack_user_role }}
-#    token={{ administration_token }}
-#    endpoint=http://{{ admin_hostname }}:35357/v2.0
-#
-# failed: [openstack-vcenter] => {"failed": true}
-# msg: exception: Code should never reach here
-#
-# FATAL: all hosts have already failed -- aborting
-#
-# so create inside tenant and remove from tenant
-- name: Create the heat_stack_user role
-  shell: |
-    export OS_TOKEN={{ administration_token }}
-    export OS_URL=http://{{ admin_hostname }}:35357/v2.0
-    openstack role create {{ keystone_heat_stack_user_role }}
-  ignore_errors: True
 
 #Create the service entity and API endpoint
 - name: Test if service entity exists
   shell: |
     export OS_TOKEN={{ administration_token }}
-    export OS_URL=http://{{ admin_hostname }}:35357/v2.0
+    export OS_URL=http://{{ admin_hostname }}:35357/v3
+    export OS_IDENTITY_API_VERSION=3
     openstack service list | grep " heat "| wc -l
   register: service_entity_exists
   ignore_errors: True
   failed_when: "'0' in service_entity_exists.stdout"
+  tags: workingon
 
 - name: Create the service entity for the heat service
   shell: |
     export OS_TOKEN={{ administration_token }}
-    export OS_URL=http://{{ admin_hostname }}:35357/v2.0
+    export OS_URL=http://{{ admin_hostname }}:35357/v3
+    export OS_IDENTITY_API_VERSION=3
     openstack service create --name heat --description "Orchestration" orchestration
   when: service_entity_exists|failed
+  tags: workingon
 
 - name: Test if service entity exists
   shell: |
     export OS_TOKEN={{ administration_token }}
-    export OS_URL=http://{{ admin_hostname }}:35357/v2.0
+    export OS_URL=http://{{ admin_hostname }}:35357/v3
+    export OS_IDENTITY_API_VERSION=3
     openstack service list | grep " heat_cfn "| wc -l
   register: service_entity_exists
   ignore_errors: True
   failed_when: "'0' in service_entity_exists.stdout"
+  tags: workingon
 
 - name: Create the service entity for the heat-cfn service
   shell: |
     export OS_TOKEN={{ administration_token }}
-    export OS_URL=http://{{ admin_hostname }}:35357/v2.0
+    export OS_URL=http://{{ admin_hostname }}:35357/v3
+    export OS_IDENTITY_API_VERSION=3
     openstack service create --name heat_cfn --description "Orchestration" cloudformation
   when: service_entity_exists|failed
+  tags: workingon
+
 
 # Create the Orchestration service API endpoints
 - name: Test if endpoint exists
   shell: |
     export OS_TOKEN={{ administration_token }}
-    export OS_URL=http://{{ admin_hostname }}:35357/v2.0
+    export OS_URL=http://{{ admin_hostname }}:35357/v3
+    export OS_IDENTITY_API_VERSION=3
     openstack endpoint list | grep " heat " | wc -l
   register: endpoint_exists
   ignore_errors: True
   failed_when: "'0' in endpoint_exists.stdout"
+  tags: workingon
 
 - name: Create the Heat service API endpoints
   shell: |
     export OS_TOKEN={{ administration_token }}
-    export OS_URL=http://{{ admin_hostname }}:35357/v2.0
-    openstack endpoint create --publicurl http://{{ admin_hostname }}:8004/v1/%\(tenant_id\)s --internalurl http://{{ admin_hostname }}:8004/v1/%\(tenant_id\)s --adminurl http://{{ admin_hostname }}:8004/v1/%\(tenant_id\)s --region {{ region_name }} orchestration
+    export OS_URL=http://{{ admin_hostname }}:35357/v3
+    export OS_IDENTITY_API_VERSION=3
+    openstack endpoint create --region {{ region_name }} orchestration public http://{{ admin_hostname }}:8004/v1/%\(tenant_id\)s
+    openstack endpoint create --region {{ region_name }} orchestration internal http://{{ admin_hostname }}:8004/v1/%\(tenant_id\)s
+    openstack endpoint create --region {{ region_name }} orchestration admin http://{{ admin_hostname }}:8004/v1/%\(tenant_id\)s
   when: endpoint_exists|failed
+  tags: workingon
 
 - name: Test if endpoint exists
   shell: |
     export OS_TOKEN={{ administration_token }}
-    export OS_URL=http://{{ admin_hostname }}:35357/v2.0
+    export OS_URL=http://{{ admin_hostname }}:35357/v3
+    export OS_IDENTITY_API_VERSION=3
     openstack endpoint list | grep " heat-cfn " | wc -l
   register: endpoint_exists
   ignore_errors: True
   failed_when: "'0' in endpoint_exists.stdout"
+  tags: workingon
 
 - name: Create the Heat-cfn service API endpoints
   shell: |
     export OS_TOKEN={{ administration_token }}
-    export OS_URL=http://{{ admin_hostname }}:35357/v2.0
-    openstack endpoint create --publicurl http://{{ admin_hostname }}:8000/v1 --internalurl http://{{ admin_hostname }}:8000/v1 --adminurl http://{{ admin_hostname }}:8000/v1 --region {{ region_name }} cloudformation
+    export OS_URL=http://{{ admin_hostname }}:35357/v3
+    export OS_IDENTITY_API_VERSION=3
+    openstack endpoint create --region {{ region_name }} cloudformation public http://{{ admin_hostname }}:8000/v1
+    openstack endpoint create --region {{ region_name }} cloudformation internal http://{{ admin_hostname }}:8000/v1
+    openstack endpoint create --region {{ region_name }} cloudformation admin http://{{ admin_hostname }}:8000/v1
   when: endpoint_exists|failed
+  tags: workingon
+
+
+- name: Test if heat domain exists
+  shell: |
+    export OS_TOKEN={{ administration_token }}
+    export OS_URL=http://{{ admin_hostname }}:35357/v3
+    export OS_IDENTITY_API_VERSION=3
+    openstack domain list | grep " heat " | wc -l
+  register: domain_exists
+  ignore_errors: True
+  failed_when: "'0' in domain_exists.stdout"
+  tags: workingon
+
+- name: Create the heat domain
+  shell: |
+    export OS_TOKEN={{ administration_token }}
+    export OS_URL=http://{{ admin_hostname }}:35357/v3
+    export OS_IDENTITY_API_VERSION=3
+    openstack domain create --description "Stack projects and users" heat
+  when: domain_exists|failed
+  tags: workingon
+
+
+
+# Ansible OpenStack module < 2.0 cannot handle openstack domains
+#- name: Create heat_stack_owner role and add the heat_stack_owner role to the demo project and user
+#  keystone_user:
+#    role={{ keystone_heat_stack_owner_role }}
+#    user={{ keystone_user_name }}
+#    tenant={{ keystone_user_tenant_name }}
+#    token={{ administration_token }}
+#    endpoint=http://{{ admin_hostname }}:35357/v2.0
+#
+- name: Test if heat_domain_admin user exists
+  shell: |
+    export OS_TOKEN={{ administration_token }}
+    export OS_URL=http://{{ admin_hostname }}:35357/v3
+    export OS_IDENTITY_API_VERSION=3
+    openstack user list | grep " {{ heat_domain_admin }} " | wc -l
+  register: user_exists
+  ignore_errors: True
+  failed_when: "'0' in user_exists.stdout"
+  tags: workingon
+
+- name: Create the heat_domain_admin user
+  shell: |
+    export OS_TOKEN={{ administration_token }}
+    export OS_URL=http://{{ admin_hostname }}:35357/v3
+    export OS_IDENTITY_API_VERSION=3
+    openstack user create --domain heat --password {{ heat_domain_admin_password }} {{ heat_domain_admin }}
+    openstack role add --domain heat --user {{ heat_domain_admin }} admin
+  when: user_exists|failed
+  tags: workingon
+
+- name: Create the heat_stack_owner role
+  shell: |
+    export OS_TOKEN={{ administration_token }}
+    export OS_URL=http://{{ admin_hostname }}:35357/v3
+    export OS_IDENTITY_API_VERSION=3
+    openstack role create {{ keystone_heat_stack_owner_role }}
+  ignore_errors: True
+  tags: workingon
+
+- name: Create the heat_stack_user role
+  shell: |
+    export OS_TOKEN={{ administration_token }}
+    export OS_URL=http://{{ admin_hostname }}:35357/v3
+    export OS_IDENTITY_API_VERSION=3
+    openstack role create {{ keystone_heat_stack_user_role }}
+  ignore_errors: True
+  tags: workingon
+
 
 # To install and configure the Orchestration components
-- name: Install heat-api
-  apt: name=heat-api state=present
-
-- name: Install heat-api-cfn
-  apt: name=heat-api-cfn state=present
-
-- name: Install heat-engine
-  apt: name=heat-engine state=present
-
-- name: Install python-heatclient
-  apt: name=python-heatclient state=present
+- name: Install heat packages
+  apt: name={{ item }} state=present
+  with_items:
+  - heat-api
+  - heat-api-cfn
+  - heat-engine
+  - python-heatclient
+  tags:
+  - appliance
+  - workingon
 
 - name: Configure heat api service (TBD)
   template: src=heat.conf.j2 dest=/etc/heat/heat.conf owner=heat group=heat
@@ -140,17 +226,4 @@
   - restart heat-api
   - restart heat-api-cfn
   - restart heat-engine
-
-# To create de heat domain in Identity service
-- name:  Create heat domain in Identity service
-  shell: |
-    export OS_TENANT_NAME={{ keystone_admin_tenant_name }}
-    export OS_USERNAME={{ keystone_admin_name }}
-    export OS_PASSWORD={{ keystone_admin_password }}
-    export OS_AUTH_URL=http://{{ admin_hostname }}:35357/v2.0
-    heat-keystone-setup-domain --stack-user-domain-name {{ heat_user_domain }} --stack-domain-admin {{ heat_domain_admin }} --stack-domain-admin-password {{ heat_domain_admin_password }}
-  notify:
-  - populate database
-  - restart heat-api
-  - restart heat-api-cfn
-  - restart heat-engine
+  tags: workingon
