@@ -12,7 +12,7 @@ openstack-vcenter ansible_ssh_user=root
 [networking-compute-controller]
 openstack-vcenter ansible_ssh_user=root
 
-[cinder]
+[block-storage]
 openstack-vcenter ansible_ssh_user=root
 
 [heat]

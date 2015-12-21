@@ -35,11 +35,11 @@
   - dashboard
 
 # Block Storage service
-- hosts: cinder
+- hosts: block-storage
   roles:
   - openstack-repositories
 #  - ntp
-  - cinder
+  - block-storage
 
 # Ochestration service
 - hosts: heat
