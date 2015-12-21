@@ -40,7 +40,9 @@
   - libapache2-mod-wsgi
   - memcached
   - python-memcache
-  tags: workingon
+  tags:
+  - workingon
+  - appliance
 
 - name: Configure keystone service
   template: src=keystone.conf.j2 dest=/etc/keystone/keystone.conf owner=keystone group=root

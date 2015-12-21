@@ -240,7 +240,9 @@
   - neutron-l3-agent
   - neutron-dhcp-agent
   - neutron-metadata-agent
-#  tags: workingon
+  tags:
+  - workingon
+  - appliance
 
 - name: Configure neutron server component
   template: src=neutron.conf.j2 dest=/etc/neutron/neutron.conf owner=root group=neutron mode=0644
