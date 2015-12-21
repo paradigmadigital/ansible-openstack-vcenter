@@ -12,19 +12,27 @@ volumes_dir = /var/lib/cinder/volumes
 
 rpc_backend = rabbit
 
+{% if network_type == "openvswitch" %}
 my_ip = {{ ansible_osm["ipv4"]["address"] }}
+{% endif %}
+{% if network_type == "vxlan" %}
+my_ip = {{ ansible_eth0["ipv4"]["address"] }}
+{% endif %}
 
 enabled_backends = lvm
 
 glance_host = {{ admin_hostname }}
 
+
 [database]
-connection = mysql://{{ keystone_cinder_name }}:{{ cinder_dbpass }}@{{ admin_hostname }}/cinder
+connection = {{ relational_database_driver[relational_database] }}://{{ keystone_cinder_name }}:{{ cinder_dbpass }}@{{ admin_hostname }}/cinder
+
 
 [oslo_messaging_rabbit]
 rabbit_host = {{ admin_hostname }}
 rabbit_userid = {{ rabbitmq_user}}
 rabbit_password = {{ rabbitmq_password }}
+
 
 [keystone_authtoken]
 auth_uri = http://{{ admin_hostname }}:5000
@@ -36,8 +44,10 @@ project_name = {{ keystone_service_tenant_name }}
 username = {{ keystone_cinder_name }}
 password = {{ keystone_cinder_password }}
 
+
 [oslo_concurrency]
-lock_path = /var/lock/cinder
+lock_path = /var/lib/cinder/tmp
+
 
 [lvm]
 volume_driver = cinder.volume.drivers.lvm.LVMVolumeDriver

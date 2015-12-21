@@ -1,6 +1,9 @@
 - name: populate database
   shell: su -s /bin/sh -c "cinder-manage db sync" cinder
 
+- name: restart nova-api
+  service: name=nova-api state=restarted
+
 - name: restart cinder-api
   service: name=cinder-api state=restarted
 

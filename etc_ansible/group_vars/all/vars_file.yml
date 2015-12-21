@@ -65,7 +65,7 @@ keystone_cinder_password: cinder
 
 # Separate physical devices with commas
 cinder_physical_devices:
-- /dev/vda3
+- /dev/vda
 
 # Time zone in horizon
 time_zone: Europe/Madrid
