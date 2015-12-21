@@ -14,7 +14,7 @@
 # Example of interface_driver option for OVS based plugins(OVS, Ryu, NEC, NVP,
 # BigSwitch/Floodlight)
 # interface_driver = neutron.agent.linux.interface.OVSInterfaceDriver
-interface_driver = neutron.agent.linux.interface.BridgeInterfaceDriver
+interface_driver = neutron.agent.linux.interface.OVSInterfaceDriver
 
 # Name of Open vSwitch bridge to use
 # ovs_integration_bridge = br-int
@@ -102,7 +102,7 @@ dnsmasq_config_file = /etc/neutron/dnsmasq-neutron.conf
 # This should not be a problem any more.  Refer to bug:
 # https://bugs.launchpad.net/neutron/+bug/1418079
 # This option is deprecated and will be removed in the M release
-# dhcp_delete_namespaces = True
+dhcp_delete_namespaces = True
 
 # Timeout for ovs-vsctl commands.
 # If the timeout expires, ovs commands will fail with ALARMCLOCK error.

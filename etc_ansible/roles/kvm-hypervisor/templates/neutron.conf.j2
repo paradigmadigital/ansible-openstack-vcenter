@@ -76,6 +76,7 @@ core_plugin = ml2
 #
 # service_plugins =
 # Example: service_plugins = router,firewall,lbaas,vpnaas,metering,qos
+service_plugins = router
 
 # Paste configuration file
 # api_paste_config = api-paste.ini
@@ -130,6 +131,7 @@ auth_strategy = keystone
 # Attention: the following parameter MUST be set to False if Neutron is
 # being used in conjunction with nova security groups
 # allow_overlapping_ips = False
+allow_overlapping_ips = True
 # Ensure that configured gateway is on subnet. For IPv6, validate only if
 # gateway is not a link local address. Deprecated, to be removed during the
 # K release, at which point the check will be mandatory.
