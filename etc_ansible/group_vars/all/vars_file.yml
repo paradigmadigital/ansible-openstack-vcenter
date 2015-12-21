@@ -63,7 +63,7 @@ cinder_dbpass: CINDER_DBPASS
 keystone_cinder_name: cinder
 keystone_cinder_password: cinder
 
-# Separate physical devices with commas
+# List of physical devices for block storage use
 cinder_physical_devices:
 - /dev/vda
 
