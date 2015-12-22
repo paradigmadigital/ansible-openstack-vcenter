@@ -16,6 +16,7 @@
   tags:
   - appliance
 
+# http://docs.openstack.org/liberty/install-guide-rdo/nova-compute-install.html
 # CentOS 7
 - name: Install nova packages (CentOS)
   yum: name={{ item }} state=present
@@ -23,8 +24,10 @@
   - openstack-nova-compute
   - sysfsutils
   when: ansible_distribution == "CentOS" and ansible_distribution_version | search("^7")
+  tags:
+  - appliance
 
-- name: Ensure openstack-nova-compute start automatically (CentOS)
+- name: Ensure openstack-nova-compute starts automatically (CentOS)
   service: name=openstack-nova-compute enabled=yes
   when: ansible_distribution == "CentOS" and ansible_distribution_version | search("^7")
 
