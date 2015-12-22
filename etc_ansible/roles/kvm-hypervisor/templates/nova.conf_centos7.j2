@@ -122,7 +122,12 @@ rpc_backend=rabbit
 
 # IP address of this host (string value)
 #my_ip=10.0.0.1
+{% if network_type == "openvswitch" %}
 my_ip = {{ ansible_osm["ipv4"]["address"] }}
+{% endif %}
+{% if network_type == "vxlan" %}
+my_ip = {{ ansible_eth0["ipv4"]["address"] }}
+{% endif %}
 
 # Block storage IP address of this host (string value)
 #my_block_storage_ip=$my_ip
@@ -1744,7 +1749,7 @@ security_group_api = neutron
 # Fail instance boot if vif plugging fails (boolean value)
 #vif_plugging_is_fatal=true
 # WTF!!! Thanks: https://bugs.launchpad.net/nova/+bug/1467734/comments/2
-vif_plugging_is_fatal=false
+#vif_plugging_is_fatal=false
 
 # Number of seconds to wait for neutron vif plugging events to
 # arrive before continuing or failing (see
@@ -1831,12 +1836,23 @@ novncproxy_base_url = http://{{ admin_hostname }}:6080/vnc_auto.html
 # IP address on which instance vncservers should listen
 # (string value)
 #vncserver_listen=127.0.0.1
-vncserver_listen=0.0.0.0
+{% if network_type == "openvswitch" %}
+vncserver_listen = {{ ansible_osm["ipv4"]["address"] }}
+{% endif %}
+{% if network_type == "vxlan" %}
+vncserver_listen = {{ ansible_eth0["ipv4"]["address"] }}
+{% endif %}
 
 # The address to which proxy clients (like nova-xvpvncproxy)
 # should connect (string value)
 #vncserver_proxyclient_address=127.0.0.1
+{% if network_type == "openvswitch" %}
 vncserver_proxyclient_address = {{ ansible_osm["ipv4"]["address"] }}
+{% endif %}
+{% if network_type == "vxlan" %}
+vncserver_proxyclient_address = {{ ansible_eth0["ipv4"]["address"] }}
+{% endif %}
+
 
 # Enable VNC related features (boolean value)
 vnc_enabled=true
@@ -2500,7 +2516,7 @@ host = {{ controller_hostname }}
 #admin_username=<None>
 
 # Ironic keystone admin password. (string value)
-#admin_password=%SERVICE_PASSWORD%
+#admin_password=<None>
 
 # Ironic keystone auth token. (string value)
 #admin_auth_token=<None>
@@ -2515,7 +2531,7 @@ host = {{ controller_hostname }}
 #client_log_level=<None>
 
 # Ironic keystone tenant name. (string value)
-#admin_tenant_name=%SERVICE_TENANT_NAME%
+#admin_tenant_name=<None>
 
 # How many retries when a request does conflict. (integer
 # value)
@@ -2564,7 +2580,7 @@ password = {{ keystone_nova_password }}
 #auth_uri=<None>
 
 # API version of the admin Identity API endpoint. (string value)
-#auth_version=v2.0
+#auth_version=<None>
 
 # Do not handle authorization requests within the middleware, but delegate the
 # authorization decision to downstream WSGI components. (boolean value)
@@ -2705,7 +2721,7 @@ password = {{ keystone_nova_password }}
 #admin_token=<None>
 
 # Service username. (string value)
-#admin_user=%SERVICE_USER%
+#admin_user=<None>
 
 # Service user password. (string value)
 #admin_password=<None>
@@ -3059,6 +3075,14 @@ virt_type=kvm
 # URL for connecting to neutron (string value)
 #url=http://127.0.0.1:9696
 url = http://{{ admin_hostname }}:9696
+auth_url = http://{{ admin_hostname }}:35357
+auth_plugin = password
+project_domain_id = default
+user_domain_id = default
+region_name = {{ region_name }}
+project_name = {{ keystone_service_tenant_name }}
+username = {{ keystone_nova_name }}
+password = {{ keystone_nova_password }}
 
 # User id for connecting to neutron in admin context.
 # DEPRECATED: specify an auth_plugin and appropriate
@@ -3069,13 +3093,11 @@ url = http://{{ admin_hostname }}:9696
 # DEPRECATED: specify an auth_plugin and appropriate
 # credentials instead. (string value)
 #admin_username=<None>
-admin_username = {{ keystone_neutron_name }}
 
 # Password for connecting to neutron in admin context
 # DEPRECATED: specify an auth_plugin and appropriate
 # credentials instead. (string value)
 #admin_password=<None>
-admin_password = {{ keystone_neutron_password }}
 
 # Tenant id for connecting to neutron in admin context
 # DEPRECATED: specify an auth_plugin and appropriate
@@ -3088,7 +3110,6 @@ admin_password = {{ keystone_neutron_password }}
 # within a domain. DEPRECATED: specify an auth_plugin and
 # appropriate credentials instead. (string value)
 #admin_tenant_name=<None>
-admin_tenant_name = {{ keystone_service_tenant_name }}
 
 # Region name for connecting to neutron in admin context
 # (string value)
@@ -3098,13 +3119,12 @@ admin_tenant_name = {{ keystone_service_tenant_name }}
 # context. DEPRECATED: specify an auth_plugin and appropriate
 # credentials instead. (string value)
 #admin_auth_url=http://localhost:5000/v2.0
-admin_auth_url = http://{{ admin_hostname }}:35357/v2.0
 
 # Authorization strategy for connecting to neutron in admin
 # context. DEPRECATED: specify an auth_plugin and appropriate
 # credentials instead. If an auth_plugin is specified strategy
 # will be ignored. (string value)
-auth_strategy=keystone
+#auth_strategy=keystone
 
 # Name of Integration Bridge used by Open vSwitch (string
 # value)
