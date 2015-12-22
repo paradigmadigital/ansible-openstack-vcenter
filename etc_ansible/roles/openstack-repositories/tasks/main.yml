@@ -42,12 +42,16 @@
   yum: name=http://dl.fedoraproject.org/pub/epel/7/x86_64/e/epel-release-7-5.noarch.rpm state=present
   when: ansible_distribution == "CentOS" and ansible_distribution_version | search("^7")
 
-- name: Enable kilo repository
-  yum: name=http://rdo.fedorapeople.org/openstack-kilo/rdo-release-kilo.rpm state=present
+- name: Enable liberty repository
+  yum: name=centos-release-openstack-liberty state=present
   when: ansible_distribution == "CentOS" and ansible_distribution_version | search("^7")
 
 - name: Upgrade distribucion
   yum: name=* state=latest
+  when: ansible_distribution == "CentOS" and ansible_distribution_version | search("^7")
+
+- name: Install OpenStack client
+  yum: name=python-openstackclient state=present
   when: ansible_distribution == "CentOS" and ansible_distribution_version | search("^7")
 
 - name: Manage SELinux policies for OpenStack services
