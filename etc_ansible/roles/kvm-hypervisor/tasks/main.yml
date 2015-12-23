@@ -67,7 +67,11 @@
   - openstack-neutron
   - openstack-neutron-ml2
   - openstack-neutron-openvswitch
+  - ebtables
+  - ipset
   when: ansible_distribution == "CentOS" and ansible_distribution_version | search("^7")
+  tags:
+  - appliance
 
 - name: Ensure openvswitch starts automatically (CentOS)
   service: name={{ item }} enabled=yes
