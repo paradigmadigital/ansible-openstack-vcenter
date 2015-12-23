@@ -2,9 +2,10 @@
 # http://docs.openstack.org/liberty/install-guide-ubuntu/nova-compute-install.html
 
 # TODO: configure firewalld to allow comunication between instances
-- name: Disable firewalld service (CentOS)
+- name: Disable firewalld service if installed (CentOS)
   service: name=firewalld enabled=no state=stopped
   when: ansible_distribution == "CentOS" and ansible_distribution_version | search("^7")
+  ignore_errors: True
 
 # Ubuntu 14.04
 - name: Install nova packages (Ubuntu)
