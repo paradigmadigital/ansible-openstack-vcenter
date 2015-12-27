@@ -2,25 +2,25 @@
 
 # http://docs.openstack.org/liberty/install-guide-ubuntu/cinder-controller-install.html
 # mysql
-- name: Create database
+- name: Create mysql database
   mysql_db: name=cinder state=present
   when: relational_database == "mysql"
 
-- name: Create database user
+- name: Create mysql database user
   mysql_user: name=cinder host=localhost password={{ cinder_dbpass }} priv=cinder.*:ALL,GRANT state=present
   when: relational_database == "mysql"
 
-- name: Create database user
+- name: Create mysql database user
   mysql_user: name=cinder host=% password={{ cinder_dbpass }} priv=cinder.*:ALL,GRANT state=present
   when: relational_database == "mysql"
 
 
 # postgresql
-- name: Create database
+- name: Create postgresql database
   postgresql_db: name=cinder
   when: relational_database == "postgresql"
 
-- name: Create database user
+- name: Create postgresql database user
   postgresql_user: db=cinder name=cinder password={{ cinder_dbpass }} priv=ALL
   when: relational_database == "postgresql"
 

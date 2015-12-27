@@ -3,28 +3,28 @@
 ## Install NOVA but not configure ##
 # mysql
 
-- name: Create database
+- name: Create mysql database
   mysql_db: name=nova state=present
   when: relational_database == "mysql"
   notify:
   - populate neutron database
 
-- name: Create database user from localhost
+- name: Create mysql database user from localhost
   mysql_user: name=nova host=localhost password={{ nova_dbpass }} priv=nova.*:ALL,GRANT state=present
   when: relational_database == "mysql"
 
-- name: Create database user from %
+- name: Create mysql database user from %
   mysql_user: name=nova host=% password={{ nova_dbpass }} priv=nova.*:ALL,GRANT state=present
   when: relational_database == "mysql"
 
 # postgresql
-- name: Create database
+- name: Create postgresql database
   postgresql_db: name=nova
   when: relational_database == "postgresql"
   notify:
   - populate neutron database
 
-- name: Create database user
+- name: Create postgresql database user
   postgresql_user: db=nova name=nova password={{ nova_dbpass }} priv=ALL
   when: relational_database == "postgresql"
 

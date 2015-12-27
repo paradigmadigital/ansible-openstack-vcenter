@@ -2,28 +2,28 @@
 
 # http://docs.openstack.org/liberty/install-guide-ubuntu/heat-install.html
 # mysql
-- name: Create database
+- name: Create mysql database
   mysql_db: name=heat state=present
   when: relational_database == "mysql"
   tags: workingon
 
-- name: Create database user
+- name: Create mysql database user
   mysql_user: name=heat host=localhost password={{ heat_dbpass }} priv=heat.*:ALL,GRANT state=present
   when: relational_database == "mysql"
   tags: workingon
 
-- name: Create database user
+- name: Create mysql database user
   mysql_user: name=heat host=% password={{ heat_dbpass }} priv=heat.*:ALL,GRANT state=present
   when: relational_database == "mysql"
   tags: workingon
 # postgresql
 
-- name: Create database
+- name: Create postgresql database
   postgresql_db: name=heat
   when: relational_database == "postgresql"
   tags: workingon
 
-- name: Create database user
+- name: Create postgresql database user
   postgresql_user: db=heat name=heat password={{ heat_dbpass }} priv=ALL
   when: relational_database == "postgresql"
   tags: workingon
