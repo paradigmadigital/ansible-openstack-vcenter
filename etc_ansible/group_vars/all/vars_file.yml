@@ -1,3 +1,15 @@
+# Relational database could be mysql with mysql+pymysql or
+# postgresql with postgresql+psycopg2
+# {{ relational_database_driver[relational_database] }}
+relational_database: postgresql
+relational_database_driver:
+  mysql: mysql+pymysql
+  postgresql: postgresql+psycopg2
+
+# vxlan with physical servers
+# openvswitch with appliance
+network_type: openvswitch
+
 controller_hostname: openstack-vcenter
 rabbitmq_user: openstack
 rabbitmq_password: RABBIT_PASS
@@ -51,9 +63,9 @@ cinder_dbpass: CINDER_DBPASS
 keystone_cinder_name: cinder
 keystone_cinder_password: cinder
 
-# Separate physical devices with commas
+# List of physical devices for block storage use
 cinder_physical_devices:
-- /dev/vda3
+- /dev/vda
 
 # Time zone in horizon
 time_zone: Europe/Madrid

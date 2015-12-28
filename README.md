@@ -1,10 +1,10 @@
 # ansible-openstack-vcenter
 Ansible playbooks to create a openstack vcenter.
 
-
+Liberty Release
 
 Steps:
-* Install compute node (Ubuntu 14.04) with qemu-kvm, bridge-utils and virt-manager 
+* Install compute node (Ubuntu 14.04) with qemu-kvm, bridge-utils and virt-manager
 * You need two network interfaces configured as external (ose) and management (osm).
   *  For a development environment osm and ose network interfaces interface does not need to be "connected" to any physical device so you can use your physical network interfaces with network manager. Supose you are using a 10.42.84.0/24 management network and a 10.10.10.0/24 external network:
 ```
@@ -12,19 +12,22 @@ Steps:
 auto lo
 iface lo inet loopback
 
-# OpenStack External network
 auto ose
-iface ose inet static
+iface ose inet manual
+    up ip link set dev $IFACE up
+    down ip link set dev $IFACE down
+    bridge_ports none
+    bridge_maxwait 0
+
+auto oseg
+iface oseg inet static
     address 10.10.10.1
     netmask 255.255.255.0
     bridge_ports none
-    bridge_stp off
-    bridge_fd 0
     bridge_maxwait 0
-    up iptables -t nat -o ose -A POSTROUTING -s 10.10.10.0/24 ! -d 10.10.10.0/24 -j MASQUERADE
-    down iptables -t nat -o ose -D POSTROUTING -s 10.10.10.0/24 ! -d 10.10.10.0/24 -j MASQUERADE
+    up iptables -t nat -o oseg -A POSTROUTING -s 10.10.10.0/24 ! -d 10.10.10.0/24 -j MASQUERADE
+    down iptables -t nat -o oseg -D POSTROUTING -s 10.10.10.0/24 ! -d 10.10.10.0/24 -j MASQUERADE
 
-# OpenStack Management network
 auto osm
 iface osm inet static
     address 10.42.84.1
@@ -32,10 +35,10 @@ iface osm inet static
     bridge_ports none
     bridge_stp off
     bridge_fd 0
-    up iptables -t nat -o osm -A POSTROUTING -s 10.42.84.0/24 ! -d 10.42.84.0/24 -j MASQUERADE
-    down iptables -t nat -o osm -D POSTROUTING -s 10.42.84.0/24 ! -d 10.42.84.0/24 -j MASQUERADE
-
+    up iptables -t nat -A POSTROUTING -s 10.42.84.0/24 ! -d 10.42.84.0/24 -j MASQUERADE
+    down iptables -t nat -D POSTROUTING -s 10.42.84.0/24 ! -d 10.42.84.0/24 -j MASQUERADE
 ```
+
   * For a production environment you will need a server with two network interfaces (all servers I know have them) and connect both interfaces to the physical interfaces with "bridge_ports". Remember that the physical server is not the gateway so you don't need to NAT:
 ```
 # interfaces(5) file used by ifup(8) and ifdown(8)
@@ -193,7 +196,7 @@ iface ose inet manual
 * Configure hosts in etc_ansible/hosts
 * Run ansible-playbook -i hosts site.yml
 
-* After finishing the ansible playbook remember to create initial networks: http://docs.openstack.org/kilo/install-guide/install/apt/content/neutron-initial-networks.html
+* After finishing the ansible playbook remember to create initial networks: http://docs.openstack.org/liberty/install-guide-ubuntu/launch-instance.html#create-virtual-networks
 
 
 Restoring:

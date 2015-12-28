@@ -1,0 +1,174 @@
+# http://docs.openstack.org/liberty/install-guide-ubuntu/keystone.html
+# http://docs.openstack.org/liberty/install-guide-ubuntu/keystone-install.html
+# mysql
+- name: Create mysql database
+  mysql_db: name=keystone state=present
+  when: relational_database == "mysql"
+
+- name: Create mysql database user to localhost
+  mysql_user: name=keystone host=localhost password={{ keystone_dbpass }} priv=keystone.*:ALL,GRANT state=present
+  when: relational_database == "mysql"
+
+- name: Create mysql database user to %
+  mysql_user: name=keystone host=% password={{ keystone_dbpass }} priv=keystone.*:ALL,GRANT state=present
+  when: relational_database == "mysql"
+
+# postgresql
+- name: Create postgresql database
+  postgresql_db: name=keystone
+  when: relational_database == "postgresql"
+
+- name: Create postgresql database user
+  postgresql_user: db=keystone name=keystone password={{ keystone_dbpass }} priv=ALL
+  when: relational_database == "postgresql"
+
+
+- name: Disable keystone service autostart
+  template: src=keystone.override.j2 dest=/etc/init/keystone.override
+
+- name: Install keystone
+  apt: name={{ item }} state=present
+  with_items:
+  - keystone
+  - apache2
+  - libapache2-mod-wsgi
+  - memcached
+  - python-memcache
+  tags:
+  - appliance
+
+- name: Configure keystone service
+  template: src=keystone.conf.j2 dest=/etc/keystone/keystone.conf owner=keystone group=root
+  notify:
+  - populate database
+
+- meta: flush_handlers
+
+- name: Configure apache hostname
+  lineinfile: dest=/etc/apache2/apache2.conf regexp='^\s*ServerName' line="ServerName {{ admin_hostname }}" owner=root group=root mode=0644
+  notify:
+  - restart apache2
+
+- name: Configure apache virtualhost
+  template: src=wsgi-keystone.conf.j2 dest=/etc/apache2/sites-available/wsgi-keystone.conf owner=root group=root mode=0644
+  notify:
+  - restart apache2
+
+- name: Enable apache virtualhost
+  file: src=/etc/apache2/sites-available/wsgi-keystone.conf dest=/etc/apache2/sites-enabled/wsgi-keystone.conf owner=root group=root state=link
+  notify:
+  - restart apache2
+
+- meta: flush_handlers
+
+- name: Remove sqlite database
+  file: path=/var/lib/keystone/keystone.db state=absent
+
+# Create the service entity and API endpoint
+# http://docs.openstack.org/liberty/install-guide-ubuntu/keystone-services.html
+- name: Test if service entity exists
+  shell: |
+    export OS_TOKEN={{ administration_token }}
+    export OS_URL=http://{{ admin_hostname }}:35357/v3
+    export OS_IDENTITY_API_VERSION=3
+    openstack service list | grep " identity "| wc -l
+  register: service_entity_exists
+  ignore_errors: True
+  failed_when: "'0' in service_entity_exists.stdout"
+
+- name: Create the service entity for the Identity service
+  shell: |
+    export OS_TOKEN={{ administration_token }}
+    export OS_URL=http://{{ admin_hostname }}:35357/v3
+    export OS_IDENTITY_API_VERSION=3
+    openstack service create --name {{ keystone_keystone_name }} --description "OpenStack Identity" identity
+  when: service_entity_exists|failed
+
+- name: Test if endpoints exists
+  shell: |
+    export OS_TOKEN={{ administration_token }}
+    export OS_URL=http://{{ admin_hostname }}:35357/v3
+    export OS_IDENTITY_API_VERSION=3
+    openstack endpoint list | grep " identity " | wc -l
+  register: endpoint_exists
+  ignore_errors: True
+  failed_when: "'0' in endpoint_exists.stdout"
+  # TODO: Maybe matching publicurl to all endpoints instead look for identity endpoint above could be the best choice
+
+- name: Create the Identity service API endpoints
+  shell: |
+    export OS_TOKEN={{ administration_token }}
+    export OS_URL=http://{{ admin_hostname }}:35357/v3
+    export OS_IDENTITY_API_VERSION=3
+    openstack endpoint create --region {{ region_name }} identity public http://{{ admin_hostname }}:5000/v2.0
+    openstack endpoint create --region {{ region_name }} identity internal http://{{ admin_hostname }}:5000/v2.0
+    openstack endpoint create --region {{ region_name }} identity admin http://{{ admin_hostname }}:5000/v2.0
+  when: endpoint_exists|failed
+
+
+# Create projects, users and roles
+# http://docs.openstack.org/liberty/install-guide-ubuntu/keystone-users.html
+- name: Create the admin project
+  keystone_user:
+    tenant={{ keystone_admin_tenant_name }}
+    tenant_description="{{ keystone_admin_tenant_description }}"
+    token={{ administration_token }}
+    endpoint=http://{{ admin_hostname }}:35357/v2.0
+
+- name: Create the admin user
+  keystone_user:
+    user={{ keystone_admin_name }}
+    tenant={{ keystone_admin_tenant_name }}
+    password={{ keystone_admin_password }}
+    email={{ keystone_admin_email }}
+    token={{ administration_token }}
+    endpoint=http://{{ admin_hostname }}:35357/v2.0
+
+- name: Create admin role and add the admin role to the admin project and user
+  keystone_user:
+    role={{ keystone_admin_role }}
+    user={{ keystone_admin_name }}
+    tenant={{ keystone_admin_tenant_name }}
+    token={{ administration_token }}
+    endpoint=http://{{ admin_hostname }}:35357/v2.0
+
+# Create the service project
+- name: Create the service project
+  keystone_user:
+    tenant={{ keystone_service_tenant_name }}
+    tenant_description={{ keystone_service_tenant_description }}
+    token={{ administration_token }}
+    endpoint=http://{{ admin_hostname }}:35357/v2.0
+
+# Non admin project, user and role
+- name: Create the non admin project
+  keystone_user:
+    tenant={{ keystone_user_tenant_name }}
+    tenant_description="{{ keystone_user_tenant_description }}"
+    token={{ administration_token }}
+    endpoint=http://{{ admin_hostname }}:35357/v2.0
+
+- name: Create the non admin user
+  keystone_user:
+    user={{ keystone_user_name }}
+    tenant={{ keystone_user_tenant_name }}
+    password={{ keystone_user_password }}
+    email={{ keystone_user_email }}
+    token={{ administration_token }}
+    endpoint=http://{{ admin_hostname }}:35357/v2.0
+
+- name: Create user role and add the non admin role to the non admin tenant and user
+  keystone_user:
+    role=user
+    user={{ keystone_user_name }}
+    tenant={{ keystone_user_tenant_name }}
+    token={{ administration_token }}
+    endpoint=http://{{ admin_hostname }}:35357/v2.0
+
+# http://docs.openstack.org/liberty/install-guide-ubuntu/keystone-openrc.html
+#  Create OpenStack client environment scripts
+- name: Create admin-openrc.sh environment script
+  template: src=admin-openrc.sh.j2 dest=/root/{{ keystone_admin_name }}-openrc.sh
+
+- name: Create {{ keystone_user_name }} environment script
+  template: src=user-openrc.sh.j2 dest=/root/{{ keystone_user_name }}-openrc.sh

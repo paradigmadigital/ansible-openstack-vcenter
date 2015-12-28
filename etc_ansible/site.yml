@@ -3,22 +3,22 @@
   roles:
   - openstack-repositories
   - ntp
-  - mysql
-  - rabbitmq
+  - sql-database
+  - message-queue
 
 # Keystone service
-- hosts: keystone
+- hosts: identity
   roles:
   - openstack-repositories
   - ntp
-  - keystone
+  - identity
 
 # Image service
-- hosts: glance
+- hosts: image
   roles:
   - openstack-repositories
   - ntp
-  - glance
+  - image
 
 # Networking and compute services
 - hosts: networking-compute-controller
@@ -35,11 +35,11 @@
   - dashboard
 
 # Block Storage service
-- hosts: cinder
+- hosts: block-storage
   roles:
   - openstack-repositories
 #  - ntp
-  - cinder
+  - block-storage
 
 # Ochestration service
 - hosts: heat

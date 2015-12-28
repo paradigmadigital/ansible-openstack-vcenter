@@ -1,5 +1,6 @@
 - name: populate database
   shell: su -s /bin/sh -c "heat-manage db_sync" heat
+  ignore_errors: True
 
 - name: restart heat-api
   service: name=heat-api state=restarted
@@ -9,4 +10,3 @@
 
 - name: restart heat-engine
   service: name=heat-engine state=restarted
-
