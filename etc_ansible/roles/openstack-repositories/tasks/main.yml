@@ -37,6 +37,10 @@
   - appliance
 
 # Debian 8
+- name: Install python and python-apt
+  shell: apt-get -y install python python-apt python-pycurl
+  when: ansible_distribution == "Debian" and ansible_distribution_version | search("^8")
+
 # https://raw.githubusercontent.com/openstack/openstack-manuals/stable/liberty/doc/install-guide/source/environment-packages.rst
 - name: Add debian-jessie backports
   apt_repository: repo='deb http://http.debian.net/debian jessie-backports main' state=present update_cache=yes

@@ -58,9 +58,11 @@
 
 - name: Enable net.bridge.bridge-nf-call-iptables
   sysctl: name=net.bridge.bridge-nf-call-iptables value=1 reload=yes sysctl_set=yes
+  when: ansible_distribution != "Debian" and ansible_distribution_version | search("^8")
 
 - name: Enable net.bridge.bridge-nf-call-ip6tables
   sysctl: name=net.bridge.bridge-nf-call-ip6tables value=1 reload=yes sysctl_set=yes
+  when: ansible_distribution != "Debian" and ansible_distribution_version | search("^8")
 
 
 - name: Install networking components (Ubuntu)

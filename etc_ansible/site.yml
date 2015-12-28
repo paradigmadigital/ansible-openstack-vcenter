@@ -47,6 +47,7 @@
 #  - openstack-repositories
 #  - ntp
   - heat
+  tags: workingon
 
 # Adding hypervisors
 - hosts: kvm-hypervisor
