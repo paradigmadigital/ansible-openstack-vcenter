@@ -1,14 +1,14 @@
 # http://docs.openstack.org/juno/install-guide/install/apt/content/ch_basic_environment.html#basics-packages
 # Ubuntu 14.04
-- name: Install ntp (Ubuntu and Debian)
+- name: Install ntp (Ubuntu)
   apt: name=ntp state=latest
-  when: (ansible_distribution == "Ubuntu") or (ansible_distribution == "Debian")
+  when: ansible_distribution == "Ubuntu"
   tags:
   - appliance
 
 - name: Start ntp service (Ubuntu)
   service: name=ntp state=started enabled=yes
-  when: (ansible_distribution == "Ubuntu") or (ansible_distribution == "Debian")
+  when: ansible_distribution == "Ubuntu"
 
 
 - name: Install ntp (CentOS)

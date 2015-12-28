@@ -36,12 +36,6 @@
   tags:
   - appliance
 
-# Debian 8
-# https://raw.githubusercontent.com/openstack/openstack-manuals/stable/liberty/doc/install-guide/source/environment-packages.rst
-- name: Add debian-jessie backports
-  apt_repository: repo='deb http://http.debian.net/debian jessie-backports main' state=present update_cache=yes
-  when: ansible_distribution == "Debian" and ansible_distribution_version | search("^8")
-
 # http://docs.openstack.org/kilo/install-guide/install/yum/content/ch_basic_environment.html
 # CentOS 7
 - name: Enable epel repository
