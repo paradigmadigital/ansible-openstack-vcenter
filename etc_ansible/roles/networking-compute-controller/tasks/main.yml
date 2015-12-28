@@ -260,6 +260,18 @@
   notify:
   - restart neutron-metadata-agent
 
+- name: Configure the lbaas agent
+  template: src=lbaas_agent.ini.j2 dest=/etc/neutron/lbaas_agent.ini owner=root group=root mode=0644
+  notify:
+  - restart neutron-lbaas-agent
+  - restart neutron-server
+
+- name: Configure neutron to use lbaas agent
+  template: src=neutron_lbaas.conf.j2 dest=/etc/neutron/neutron_lbaas.conf owner=root group=root mode=0644
+  notify:
+  - restart neutron-lbaas-agent
+  - restart neutron-server
+
 # Configure Open vSwitch service
 - name: Restart OVS service
   shell: service openvswitch-switch restart; ethtool -K ose gro off
@@ -300,8 +312,3 @@
   tags:
   - appliance
 
-- name: Configure the lbaas agent
-  template: src=lbaas_agent.ini.j2 dest=/etc/neutron/lbaas_agent.ini owner=root group=root mode=0644
-  notify:
-  - restart neutron-lbaas-agent
-  - restart neutron-server
