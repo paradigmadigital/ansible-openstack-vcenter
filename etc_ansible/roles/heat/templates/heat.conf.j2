@@ -212,7 +212,7 @@ stack_user_domain_name ={{ heat_user_domain }}
 # Deprecated group/name - [DATABASE]/sql_connection
 # Deprecated group/name - [sql]/connection
 #connection = <None>
-connection = {{ relational_database_driver[relational_database] }}://{{ keystone_cinder_name }}:{{ cinder_dbpass }}@{{ admin_hostname }}/cinder
+connection = {{ relational_database_driver[relational_database] }}://{{ keystone_heat_name }}:{{ heat_dbpass }}@{{ admin_hostname }}/heat
 
 # The SQLAlchemy connection string to use to connect to the slave database.
 # (string value)
