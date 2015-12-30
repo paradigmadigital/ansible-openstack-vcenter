@@ -2,9 +2,10 @@
 # http://docs.openstack.org/juno/install-guide/install/apt/content/ch_nova.html#nova-compute-install
 
 # TODO: configure firewalld to allow comunication between instances
-- name: Disable firewalld service (CentOS)
+- name: Disable firewalld service if installed (CentOS)
   service: name=firewalld enabled=no state=stopped
   when: ansible_distribution == "CentOS" and ansible_distribution_version | search("^7")
+  ignore_errors: True
 
 # To install and configure the Compute controller components
 # Ubuntu 14.04
