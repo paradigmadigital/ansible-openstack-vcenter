@@ -189,6 +189,7 @@
   template: src=l3_agent.ini.j2 dest=/etc/neutron/l3_agent.ini owner=root group=neutron mode=0644
   notify:
   - restart neutron-l3-agent
+  - restart neutron-server
 
 - name: Configure the DHCP agent
   template: src={{ item }}.j2 dest=/etc/neutron/{{ item }} owner=root group=root mode=0644
@@ -219,6 +220,9 @@
   - restart neutron-dhcp-agent
   - restart neutron-metadata-agent
 
+- name: Remove neutron sqlite database
+  file: path=/var/lib/neutron/neutron.sqlite state=absent
+
 
 - name: Configure Nova Compute to use Networking
   template: src=nova.conf.j2 dest=/etc/nova/nova.conf owner=nova group=nova
@@ -230,3 +234,19 @@
   - restart nova-scheduler
   - restart nova-conductor
   - restart nova-novncproxy
+
+- name: Remove sqlite database
+  file: path=/var/lib/nova/nova.sqlite state=absent
+
+# Add lbaas.
+# Thanks to: https://ask.openstack.org/en/question/82555/proper-installation-guide-for-lbaas-in-juno/?answer=82558#post-id-82558
+- name: Install the lbaas agent
+  apt: name=neutron-lbaas-agent state=present
+  tags:
+  - appliance
+
+- name: Configure the lbaas agent
+  template: src=lbaas_agent.ini.j2 dest=/etc/neutron/lbaas_agent.ini owner=root group=root mode=0644
+  notify:
+  - restart neutron-lbaas-agent
+  - restart neutron-server

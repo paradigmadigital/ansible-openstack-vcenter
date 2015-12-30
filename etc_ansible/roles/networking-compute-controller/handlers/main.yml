@@ -54,3 +54,6 @@
 
 - name: restart neutron-metadata-agent
   service: name=neutron-metadata-agent state=restarted
+
+- name: restart neutron-lbaas-agent
+  service: name=neutron-lbaas-agent state=restarted
