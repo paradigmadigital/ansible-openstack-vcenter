@@ -20,18 +20,19 @@ administration_token: 4f8df8a0581622075047
 keystone_admin_name: admin
 keystone_admin_password: admin
 keystone_admin_email: admin@localhost
-keystone_admin_tenant_name: admin
-keystone_admin_tenant_description: Admin Tenant
+keystone_admin_project_name: admin
+keystone_admin_project_description: Admin Project
 keystone_admin_role: admin
 keystone_user_name: demo
 keystone_user_password: demo
 keystone_user_email: demo@localhost
-keystone_user_tenant_name: demo
-keystone_user_tenant_description: Demo Tenant
+keystone_user_project_name: demo
+keystone_user_project_description: Demo Project
 keystone_keystone_name: keystone
 keystone_keystone_password: keystone
-keystone_service_tenant_name: service
-keystone_service_tenant_description: service
+keystone_service_project_name: service
+keystone_service_project_description: service
+keystone_default_domain_name: default
 # --publicurl http://openstack-vcenter:5000/v2.0
 public_hostname: openstack-vcenter
 # --internalurl http://openstack-vcenter:5000/v2.0

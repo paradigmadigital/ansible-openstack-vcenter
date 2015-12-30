@@ -108,12 +108,34 @@
 
 # Create projects, users and roles
 # http://docs.openstack.org/liberty/install-guide-ubuntu/keystone-users.html
+#- name: Create the admin project
+#  keystone_user:
+#    tenant={{ keystone_admin_tenant_name }}
+#    tenant_description="{{ keystone_admin_tenant_description }}"
+#    token={{ administration_token }}
+#    endpoint=http://{{ admin_hostname }}:35357/v2.0
+#  tags: workingon
+- name: Test if admin project exists
+  shell: |
+    export OS_TOKEN={{ administration_token }}
+    export OS_URL=http://{{ admin_hostname }}:35357/v3
+    export OS_IDENTITY_API_VERSION=3
+    openstack project list | grep " admin " | wc -l
+  register: endpoint_exists
+  ignore_errors: True
+  failed_when: "'0' in endpoint_exists.stdout"
+  # TODO: Maybe matching publicurl to all endpoints instead look for identity endpoint above could be the best choice
+  tags: workingon
+
 - name: Create the admin project
-  keystone_user:
-    tenant={{ keystone_admin_tenant_name }}
-    tenant_description="{{ keystone_admin_tenant_description }}"
-    token={{ administration_token }}
-    endpoint=http://{{ admin_hostname }}:35357/v2.0
+  shell: |
+    export OS_TOKEN={{ administration_token }}
+    export OS_URL=http://{{ admin_hostname }}:35357/v3
+    export OS_IDENTITY_API_VERSION=3
+    openstack project create --domain {{ keystone_default_domain_name }} --description "{{ keystone_admin_project_description }}" {{ keystone_admin_project_name}}
+  when: endpoint_exists|failed
+  tags: workingon
+
 
 - name: Create the admin user
   keystone_user:
@@ -169,6 +191,8 @@
 #  Create OpenStack client environment scripts
 - name: Create admin-openrc.sh environment script
   template: src=admin-openrc.sh.j2 dest=/root/{{ keystone_admin_name }}-openrc.sh
+  tags: workingon
 
 - name: Create {{ keystone_user_name }} environment script
   template: src=user-openrc.sh.j2 dest=/root/{{ keystone_user_name }}-openrc.sh
+  tags: workingon
