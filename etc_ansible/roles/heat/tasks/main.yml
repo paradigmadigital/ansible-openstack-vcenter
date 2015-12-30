@@ -108,7 +108,7 @@
   shell: |
     export OS_TOKEN={{ administration_token }}
     export OS_URL=http://{{ admin_hostname }}:35357/v2.0
-    openstack endpoint list | grep " heat-cfn " | wc -l
+    openstack endpoint list | grep " heat_cfn " | wc -l
   register: endpoint_exists
   ignore_errors: True
   failed_when: "'0' in endpoint_exists.stdout"
