@@ -109,31 +109,10 @@ iface ose inet manual
 	bridge_maxwait 0
 ```
 #### Install software
-* Install git:
+* Install git and ansible:
 ```
-sudo apt-get install git
+sudo apt-get install git ansible
 ```
-* Install _ansible 2_ (today there are not packages so ...):
-```
-sudo apt-get install python-virtualenv
-virtualenv ansible-virtualenv
-source ansible-virtualenv/bin/activate
-sudo apt-get install python-dev python-pip libyaml-dev
-pip install paramiko PyYAML Jinja2 httplib2 six
-git clone git://github.com/ansible/ansible.git --recursive
-cd ./ansible
-source ./hacking/env-setup
-cd ..
-ansible --version
-```
-Remember to run
-```
-source ansible-virtualenv/bin/activate
-cd ./ansible
-source ./hacking/env-setup
-cd ..
-```
-always when login.
 * /etc/hosts in compute an vcenter _must_ have this lines or be DNS resolvable:
 ```
 10.42.84.2	openstack-vcenter

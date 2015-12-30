@@ -36,22 +36,6 @@
   tags:
   - appliance
 
-- name: Install shade (tricky)
-  apt: name={{ item }} state=present
-  with_items:
-  - python-cinderclient
-  - python-glanceclient
-  - python-ironicclient
-  - python-httplib2
-  - python-keystoneclient
-  - python-neutronclient
-  - python-novaclient
-  - python-openstackclient
-  - python-os-client-config
-  - python-swiftclient
-  notify:
-  - install shade
-
 # http://docs.openstack.org/kilo/install-guide/install/yum/content/ch_basic_environment.html
 # CentOS 7
 - name: Enable epel repository

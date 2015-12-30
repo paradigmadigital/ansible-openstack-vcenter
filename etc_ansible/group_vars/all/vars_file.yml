@@ -28,6 +28,8 @@ keystone_user_password: demo
 keystone_user_email: demo@localhost
 keystone_user_project_name: demo
 keystone_user_project_description: Demo Project
+keystone_user_role: user
+
 keystone_keystone_name: keystone
 keystone_keystone_password: keystone
 keystone_service_project_name: service
