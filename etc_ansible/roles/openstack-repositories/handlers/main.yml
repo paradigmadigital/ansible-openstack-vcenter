@@ -1,0 +1,2 @@
+- name: install shade
+  shell: pip install shade
