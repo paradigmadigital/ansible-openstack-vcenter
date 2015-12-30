@@ -4,27 +4,33 @@
 - name: Create mysql database
   mysql_db: name=keystone state=present
   when: relational_database == "mysql"
+  tags: workingon
 
 - name: Create mysql database user to localhost
   mysql_user: name=keystone host=localhost password={{ keystone_dbpass }} priv=keystone.*:ALL,GRANT state=present
   when: relational_database == "mysql"
+  tags: workingon
 
 - name: Create mysql database user to %
   mysql_user: name=keystone host=% password={{ keystone_dbpass }} priv=keystone.*:ALL,GRANT state=present
   when: relational_database == "mysql"
+  tags: workingon
 
 # postgresql
 - name: Create postgresql database
   postgresql_db: name=keystone
   when: relational_database == "postgresql"
+  tags: workingon
 
 - name: Create postgresql database user
   postgresql_user: db=keystone name=keystone password={{ keystone_dbpass }} priv=ALL
   when: relational_database == "postgresql"
+  tags: workingon
 
 
 - name: Disable keystone service autostart
   template: src=keystone.override.j2 dest=/etc/init/keystone.override
+  tags: workingon
 
 - name: Install keystone
   apt: name={{ item }} state=present
@@ -36,33 +42,41 @@
   - python-memcache
   tags:
   - appliance
+  tags: workingon
 
 - name: Configure keystone service
   template: src=keystone.conf.j2 dest=/etc/keystone/keystone.conf owner=keystone group=root
   notify:
   - populate database
+  tags: workingon
 
 - meta: flush_handlers
+  tags: workingon
 
 - name: Configure apache hostname
   lineinfile: dest=/etc/apache2/apache2.conf regexp='^\s*ServerName' line="ServerName {{ admin_hostname }}" owner=root group=root mode=0644
   notify:
   - restart apache2
+  tags: workingon
 
 - name: Configure apache virtualhost
   template: src=wsgi-keystone.conf.j2 dest=/etc/apache2/sites-available/wsgi-keystone.conf owner=root group=root mode=0644
   notify:
   - restart apache2
+  tags: workingon
 
 - name: Enable apache virtualhost
   file: src=/etc/apache2/sites-available/wsgi-keystone.conf dest=/etc/apache2/sites-enabled/wsgi-keystone.conf owner=root group=root state=link
   notify:
   - restart apache2
+  tags: workingon
 
 - meta: flush_handlers
+  tags: workingon
 
 - name: Remove sqlite database
   file: path=/var/lib/keystone/keystone.db state=absent
+  tags: workingon
 
 # Create the service entity and API endpoint
 # http://docs.openstack.org/liberty/install-guide-ubuntu/keystone-services.html
@@ -75,6 +89,7 @@
   register: service_entity_exists
   ignore_errors: True
   failed_when: "'0' in service_entity_exists.stdout"
+  tags: workingon
 
 - name: Create the service entity for the Identity service
   shell: |
@@ -83,6 +98,7 @@
     export OS_IDENTITY_API_VERSION=3
     openstack service create --name {{ keystone_keystone_name }} --description "OpenStack Identity" identity
   when: service_entity_exists|failed
+  tags: workingon
 
 - name: Test if endpoints exists
   shell: |
@@ -94,6 +110,7 @@
   ignore_errors: True
   failed_when: "'0' in endpoint_exists.stdout"
   # TODO: Maybe matching publicurl to all endpoints instead look for identity endpoint above could be the best choice
+  tags: workingon
 
 - name: Create the Identity service API endpoints
   shell: |
@@ -104,6 +121,7 @@
     openstack endpoint create --region {{ region_name }} identity internal http://{{ admin_hostname }}:5000/v2.0
     openstack endpoint create --region {{ region_name }} identity admin http://{{ admin_hostname }}:5000/v2.0
   when: endpoint_exists|failed
+  tags: workingon
 
 
 # Create projects, users and roles
