@@ -51,9 +51,15 @@ cinder_dbpass: CINDER_DBPASS
 keystone_cinder_name: cinder
 keystone_cinder_password: cinder
 
-# Separate physical devices with commas
+# List of physical devices for block storage use
 cinder_physical_devices:
-- /dev/vda3
+- /dev/vda
+operating_system_physical_devices:
+- /dev/sda # Operating system
+- /dev/vdb # Swift
+- /dev/vdc # Ceilometer
+- /dev/vdd # Glance
+
 
 # Time zone in horizon
 time_zone: Europe/Madrid

@@ -67,7 +67,7 @@ devices {
     # By default we accept every block device:
     #filter = [ "a/.*/" ]
     # Reject cinder devices but accept any other device
-    filter = [ {% for device in cinder_physical_devices %}"a/{{ device.split("/")[2] }}/", {% endfor %}"r/.*/"]
+    filter = [ {% for device in cinder_physical_devices %}"a/{{ device.split("/")[2] }}/", {% endfor %}{% for device in operating_system_physical_devices %}"a/{{ device.split("/")[2] }}/", {% endfor %}"r/.*/"]
 
     # Exclude the cdrom drive
     # filter = [ "r|/dev/cdrom|" ]
