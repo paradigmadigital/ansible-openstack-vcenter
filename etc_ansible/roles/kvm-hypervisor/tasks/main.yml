@@ -123,3 +123,41 @@
   - restart openstack-nova-compute
   - restart neutron-openvswitch-agent
   when: ansible_distribution == "CentOS" and ansible_distribution_version | search("^7")
+
+# http://docs.openstack.org/kilo/install-guide/install/apt/content/ceilometer-nova.html
+# Ubuntu
+- name: Install ceilometer agent (Ubuntu)
+  apt: name=ceilometer-agent-compute state=present
+  when: ansible_distribution == "Ubuntu" and ansible_distribution_version == "14.04"
+  tags:
+  - appliance
+
+# http://docs.openstack.org/kilo/install-guide/install/yum/content/ceilometer-nova.html
+# CentOS 7
+- name: Install nova packages (CentOS)
+  yum: name={{ item }} state=present
+  with_items:
+  - openstack-ceilometer-compute
+  - python-ceilometerclient
+  - python-pecan
+  when: ansible_distribution == "CentOS" and ansible_distribution_version | search("^7")
+  tags:
+  - appliance
+
+- name: Ensure openstack-nova-compute start automatically
+  service: name=openstack-ceilometer-compute enabled=yes
+  when: ansible_distribution == "CentOS" and ansible_distribution_version | search("^7")
+
+- name: Configure Compute to use Networking (Ubuntu)
+  template: src=ceilometer.conf.j2 dest=/etc/ceilometer/ceilometer.conf owner=ceilometer group=ceilometer mode=0644
+  notify:
+  - restart ceilometer-agent-compute
+  - restart nova-compute
+  when: ansible_distribution == "Ubuntu" and ansible_distribution_version == "14.04"
+
+- name: Configure Compute to use Networking (CentOS)
+  template: src=ceilometer.conf_centos7.j2 dest=/etc/ceilometer/ceilometer.conf owner=root group=ceilometer mode=0640
+  notify:
+  - restart openstack-ceilometer-compute
+  - restart openstack-nova-compute
+  when: ansible_distribution == "CentOS" and ansible_distribution_version | search("^7")

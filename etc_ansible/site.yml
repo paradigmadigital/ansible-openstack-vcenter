@@ -5,6 +5,7 @@
   - ntp
   - mysql
   - rabbitmq
+  - mongodb
 
 # Keystone service
 - hosts: keystone
@@ -47,6 +48,13 @@
 #  - openstack-repositories
 #  - ntp
   - heat
+
+# Telemetry service
+- hosts: ceilometer
+  roles:
+#  - openstack-repositories
+#  - ntp
+  - ceilometer
 
 # Adding hypervisors
 - hosts: kvm-hypervisor

@@ -1,0 +1,80 @@
+# http://docs.openstack.org/kilo/install-guide/install/apt/content/ch_ceilometer.html
+
+# http://docs.openstack.org/kilo/install-guide/install/apt/content/ceilometer-controller-install.html
+- name: Create database and user
+  mongodb_user: database=ceilometer name={{ keystone_ceilometer_name }} password={{ ceilometer_dbpass }} roles='readWrite,dbAdmin' state=present login_host={{ admin_hostname }}
+
+- name: Create the ceilometer user
+  keystone_user:
+    user={{ keystone_ceilometer_name }}
+    tenant={{ keystone_service_tenant_name }}
+    password={{ keystone_ceilometer_password }}
+    token={{ administration_token }}
+    endpoint=http://{{ admin_hostname }}:35357/v2.0
+
+- name: Add the admin role to the cinder user
+  keystone_user:
+    role={{ keystone_admin_role }}
+    user={{ keystone_ceilometer_name }}
+    tenant={{ keystone_service_tenant_name }}
+    token={{ administration_token }}
+    endpoint=http://{{ admin_hostname }}:35357/v2.0
+
+#Create the service entity and API endpoint
+- name: Test if service entity exists
+  shell: |
+    export OS_TOKEN={{ administration_token }}
+    export OS_URL=http://{{ admin_hostname }}:35357/v2.0
+    openstack service list | grep " metering "| wc -l
+  register: service_entity_exists
+  ignore_errors: True
+  failed_when: "'0' in service_entity_exists.stdout"
+
+- name: Create the service entity for the ceilometer service
+  shell: |
+    export OS_TOKEN={{ administration_token }}
+    export OS_URL=http://{{ admin_hostname }}:35357/v2.0
+    openstack service create --name {{ keystone_ceilometer_name }} --description "Telemetry" metering
+  when: service_entity_exists|failed
+
+
+- name: Test if endpoint exists
+  shell: |
+    export OS_TOKEN={{ administration_token }}
+    export OS_URL=http://{{ admin_hostname }}:35357/v2.0
+    openstack endpoint list | grep " metering " | wc -l
+  register: endpoint_exists
+  ignore_errors: True
+  failed_when: "'0' in endpoint_exists.stdout"
+
+- name: Create the ceilometer service API endpoints
+  shell: |
+    export OS_TOKEN={{ administration_token }}
+    export OS_URL=http://{{ admin_hostname }}:35357/v2.0
+    openstack endpoint create --publicurl http://{{ admin_hostname }}:8777 --internalurl http://{{ admin_hostname }}:8777 --adminurl http://{{ admin_hostname }}:8777 --region {{ region_name }} metering
+  when: endpoint_exists|failed
+
+
+# To install and configure the Telemetry module components
+- name: Install ceilometer components
+  apt: name={{ item }} state=present
+  with_items:
+  - ceilometer-api
+  - ceilometer-collector
+  - ceilometer-agent-central
+  - ceilometer-agent-notification
+  - ceilometer-alarm-evaluator
+  - ceilometer-alarm-notifier
+  - python-ceilometerclient
+  tags:
+  - appliance
+
+- name: Configure ceilometer service
+  template: src=ceilometer.conf.j2 dest=/etc/ceilometer/ceilometer.conf owner=ceilometer group=ceilometer mode=0644
+  notify:
+  - restart ceilometer-agent-central
+  - restart ceilometer-agent-notification
+  - restart ceilometer-api
+  - restart ceilometer-collector
+  - restart ceilometer-alarm-evaluator
+  - restart ceilometer-alarm-notifier

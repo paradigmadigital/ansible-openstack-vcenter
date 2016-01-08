@@ -43,6 +43,7 @@
 
 # Driver or drivers to handle sending notifications. (multi valued)
 #notification_driver =
+notification_driver = messagingv2
 
 # AMQP topic used for OpenStack notifications. (list value)
 # Deprecated group;name - [rpc_notifier2]/topics
@@ -147,6 +148,7 @@ my_ip = {{ ansible_osm["ipv4"]["address"] }}
 # changes, or "vm_and_task_state" for notifications on VM and
 # task state changes. (string value)
 #notify_on_state_change=<None>
+notify_on_state_change = vm_and_task_state
 
 # If set, send api.fault notifications on caught exceptions in
 # the API service. (boolean value)
@@ -349,6 +351,7 @@ my_ip = {{ ansible_osm["ipv4"]["address"] }}
 # Time period to generate instance usages for.  Time period
 # must be hour, day, month or year (string value)
 #instance_usage_audit_period=month
+instance_usage_audit_period = hour
 
 # Path to the rootwrap configuration file to use for running
 # commands as root (string value)
@@ -755,6 +758,7 @@ auth_strategy=keystone
 # Generate periodic compute.instance.exists notifications
 # (boolean value)
 #instance_usage_audit=false
+instance_usage_audit=True
 
 # Number of 1 second retries needed in live_migration (integer
 # value)

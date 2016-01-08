@@ -1,0 +1,15 @@
+# http://docs.openstack.org/kilo/install-guide/install/apt/content/ceilometer-controller-install.html
+- name: Install mongodb server
+  apt: name={{ item }} state=present
+  with_items:
+  - mongodb-server
+  - mongodb-clients
+  - python-pymongo
+  tags:
+  - appliance
+  - workingon
+
+- name: Configure mongodb server
+  template: src=mongodb.conf.j2 dest=/etc/mongodb.conf
+  notify: restart mongodb
+  tags: workingon

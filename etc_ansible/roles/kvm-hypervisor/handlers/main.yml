@@ -8,6 +8,9 @@
 - name: restart neutron-plugin-openvswitch-agent
   service: name=neutron-plugin-openvswitch-agent state=restarted
 
+- name: restart ceilometer-agent-compute
+  service: name=ceilometer-agent-compute state=restarted
+
 # CentOS
 - name: restart openvswitch
   service: name=openvswitch state=restarted
@@ -20,3 +23,6 @@
 
 - name: restart libvirtd
   service: name=libvirtd state=restarted
+
+- name: restart openstack-ceilometer-compute
+  service: name=openstack-ceilometer-compute state=restarted

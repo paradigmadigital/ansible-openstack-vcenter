@@ -73,3 +73,9 @@ heat_domain_admin: heat_domain_admin
 heat_domain_admin_password: HEAT_DOMAIN_PASS
 keystone_heat_stack_user_role: heat_stack_user_role
 keystone_heat_stack_owner_role: heat_stack_owner_role
+
+# Ceilometer vars
+ceilometer_dbpass: CEILOMETER_DBPASS
+keystone_ceilometer_name: ceilometer
+keystone_ceilometer_password: ceilometer
+telemetry_secret: c2058430c294994a8f73
