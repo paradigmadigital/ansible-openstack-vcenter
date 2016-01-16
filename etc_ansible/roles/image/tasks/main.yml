@@ -27,7 +27,7 @@
 - name: Create the glance user
   keystone_user:
     user={{ keystone_glance_name }}
-    tenant={{ keystone_service_tenant_name }}
+    tenant={{ keystone_service_project_name }}
     password={{ keystone_glance_password }}
     token={{ administration_token }}
     endpoint=http://{{ admin_hostname }}:35357/v2.0
@@ -36,7 +36,7 @@
   keystone_user:
     role={{ keystone_admin_role }}
     user={{ keystone_glance_name }}
-    tenant={{ keystone_service_tenant_name }}
+    tenant={{ keystone_service_project_name }}
     token={{ administration_token }}
     endpoint=http://{{ admin_hostname }}:35357/v2.0
 
