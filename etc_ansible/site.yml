@@ -65,11 +65,11 @@
   - block-storage
 
 # Ochestration service
-- hosts: heat
+- hosts: orchestation
   roles:
 #  - openstack-repositories
 #  - ntp
-  - heat
+  - orchestation
   tags:
   - heat
   - orchestation

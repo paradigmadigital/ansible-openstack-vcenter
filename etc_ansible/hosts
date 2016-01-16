@@ -15,7 +15,7 @@ openstack-vcenter ansible_ssh_user=root
 [block-storage]
 openstack-vcenter ansible_ssh_user=root
 
-[heat]
+[orchestation]
 openstack-vcenter ansible_ssh_user=root
 
 [dashboard]
