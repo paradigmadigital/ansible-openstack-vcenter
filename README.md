@@ -129,13 +129,18 @@ git clone https://github.com/elmanytas/ansible-openstack-vcenter.git
 * Configure hosts in etc_ansible/hosts
 * Run ansible-playbook -i hosts site.yml
 
-* After finishing the ansible playbook remember to create initial networks: http://docs.openstack.org/liberty/install-guide-ubuntu/launch-instance.html#create-virtual-networks
-
+* After finishing the ansible playbook remember to create initial networks with *kilo* guide ( http://docs.openstack.org/kilo/install-guide/install/apt/content/neutron_initial-external-network.html ). Suppose a external network CIDR like 10.20.30.0/24:
+```
+neutron net-create public --router:external --provider:physical_network external --provider:network_type flat
+neutron subnet-create public 10.20.30.0/24 --name public --allocation-pool start=10.20.30.10,end=10.20.30.200 --disable-dhcp --gateway 10.20.30.1
+```
 
 Restoring:
-* In KVM node:
+* In Ubuntu KVM node:
   * apt-get -y remove --purge neutron-plugin-ml2 neutron-plugin-openvswitch-agent nova-compute neutron-plugin-openvswitch-agent python-neutron python-neutronclient neutron-common openvswitch-common openvswitch-switch
   * apt-get -y autoremove --purge
   * rm -rf /var/log/neutron /var/lib/neutron/lock /var/log/openvswitch /var/log/nova /var/lib/nova/instances
+* In CentOS KVM node:
+  * yum -y remove remove openstack-neutron-common openstack-neutron-openvswith python-neutron python-neutronclient openstack-neutron-ml2 openstack-nova-common openstack-nova-compute python-novaclient python-nova python-openvswitch openvswitch
 
 If this KVM node is hosting vCenter, destroy vCenter virtual machine with virt-manager.
