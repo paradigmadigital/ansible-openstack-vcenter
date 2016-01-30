@@ -22,5 +22,7 @@ openstack-vcenter ansible_ssh_user=root
 openstack-vcenter ansible_ssh_user=root
 
 [kvm-hypervisor]
-openstack-compute-01 ansible_ssh_user=root
-openstack-compute-02 ansible_ssh_user=root
+openstack-compute ansible_ssh_user=root
+
+[lxd-hypervisor]
+os-lxd-01 ansible_ssh_user=root
