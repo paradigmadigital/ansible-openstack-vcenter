@@ -74,7 +74,7 @@
   - heat
   - orchestation
   - cloudformation
-  
+
 # Adding hypervisors
 - hosts: kvm-hypervisor
   roles:
@@ -83,4 +83,13 @@
   - kvm-hypervisor
   tags:
   - kvm-hypervisor
+  - compute
+
+- hosts: lxd-hypervisor
+  roles:
+  - openstack-repositories
+  - ntp
+  - lxd-hypervisor
+  tags:
+  - lxd-hypervisor
   - compute

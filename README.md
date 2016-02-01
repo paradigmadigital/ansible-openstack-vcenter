@@ -135,6 +135,12 @@ neutron net-create public --router:external --provider:physical_network external
 neutron subnet-create public 10.20.30.0/24 --name public --allocation-pool start=10.20.30.10,end=10.20.30.200 --disable-dhcp --gateway 10.20.30.1
 ```
 
+LXD hypervisor requires special image upload from command line:
+```
+wget http://cloud-images.ubuntu.com/trusty/current/trusty-server-cloudimg-amd64-root.tar.gz
+glance image-create --name="LXD Ubuntu 14.04 Trusty" --visibility public --progress --container-format=bare --disk-format=root-tar --property architecture="x86_64" --property hypervisor_type=lxc --file /tmp/trusty-server-cloudimg-amd64-root.tar.gz
+```
+
 Restoring:
 * In Ubuntu KVM node:
   * apt-get -y remove --purge neutron-plugin-ml2 neutron-plugin-openvswitch-agent nova-compute neutron-plugin-openvswitch-agent python-neutron python-neutronclient neutron-common openvswitch-common openvswitch-switch
