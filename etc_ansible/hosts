@@ -25,4 +25,5 @@ openstack-vcenter ansible_ssh_user=root
 openstack-compute ansible_ssh_user=root
 
 [lxd-hypervisor]
-os-lxd-01 ansible_ssh_user=root
+openstack-compute-lxd ansible_ssh_user=root
+

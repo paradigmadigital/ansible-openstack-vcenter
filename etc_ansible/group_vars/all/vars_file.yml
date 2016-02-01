@@ -10,16 +10,16 @@ relational_database_driver:
 # openvswitch with appliance
 network_type: openvswitch
 
-controller_hostname: openstack-vcenter
+controller_hostname: openstack.paradigmadigital.com
 rabbitmq_user: openstack
-rabbitmq_password: RABBIT_PASS
+rabbitmq_password: RABBIT_PASS_paradigma
 #TODO: mysql_root_password: MYSQL_ROOT_PASS
 # keystone section vars: http://docs.openstack.org/juno/install-guide/install/apt/content/ch_keystone.html
-keystone_dbpass: KEYSTONE_DBPASS
-administration_token: 4f8df8a0581622075047
+keystone_dbpass: KEYSTONE_DBPASS_paradigma
+administration_token: 5f9df9a1692733186158
 keystone_admin_name: admin
 keystone_admin_password: admin
-keystone_admin_email: admin@localhost
+keystone_admin_email: asistemas@paradigmadigital.com
 keystone_admin_project_name: admin
 keystone_admin_project_description: Admin Project
 keystone_admin_role: admin
@@ -31,57 +31,54 @@ keystone_user_project_description: Demo Project
 keystone_user_role: user
 
 keystone_keystone_name: keystone
-keystone_keystone_password: keystone
+keystone_keystone_password: keystone_paradigma
 keystone_service_project_name: service
 keystone_service_project_description: service
 keystone_default_domain_name: default
 # --publicurl http://openstack-vcenter:5000/v2.0
-public_hostname: openstack-vcenter
+public_hostname: openstack.paradigmadigital.com
 # --internalurl http://openstack-vcenter:5000/v2.0
-internal_hostname: openstack-vcenter
+internal_hostname: openstack.paradigmadigital.com
 # --adminurl http://openstack-vcenter:35357/v2.0
-admin_hostname: openstack-vcenter
+admin_hostname: openstack.paradigmadigital.com
 region_name: RegionOne
 
 # Glance vars
 # http://docs.openstack.org/juno/install-guide/install/apt/content/ch_glance.html
-glance_dbpass: GLANCE_DBPASS
+glance_dbpass: GLANCE_DBPASS_paradigma
 keystone_glance_name: glance
-keystone_glance_password: glance
+keystone_glance_password: glance_paradigma
 # Nova vars
 # http://docs.openstack.org/juno/install-guide/install/apt/content/ch_nova.html
-nova_dbpass: NOVA_DBPASS
+nova_dbpass: NOVA_DBPASS_paradigma
 keystone_nova_name: nova
-keystone_nova_password: nova
+keystone_nova_password: nova_paradigma
 # Neutron vars
 # http://docs.openstack.org/juno/install-guide/install/apt/content/neutron-controller-node.html
-neutron_dbpass: NEUTRON_DBPASS
+neutron_dbpass: NEUTRON_DBPASS_paradigma
 keystone_neutron_name: neutron
-keystone_neutron_password: neutron
+keystone_neutron_password: neutron_paradigma
 # http://docs.openstack.org/juno/install-guide/install/apt/content/neutron-network-node.html
-metadata_secret: METADATA_SECRET
+metadata_secret: METADATA_SECRET_paradigma
 # Cinder vars
 # http://docs.openstack.org/kilo/install-guide/install/apt/content/cinder-install-controller-node.html
-cinder_dbpass: CINDER_DBPASS
+cinder_dbpass: CINDER_DBPASS_paradigma
 keystone_cinder_name: cinder
-keystone_cinder_password: cinder
+keystone_cinder_password: cinder_paradigma
 
 # List of physical devices for block storage use
 cinder_physical_devices:
-- /dev/vda
+- /dev/sdc
 operating_system_physical_devices:
-- /dev/sda # Operating system
-- /dev/vdb # Swift
-- /dev/vdc # Ceilometer
-- /dev/vdd # Glance
+- /dev/sdb # glance
 
 # Time zone in horizon
 time_zone: Europe/Madrid
 
 # Heat vars
-heat_dbpass: HEAT_DBPASS
+heat_dbpass: HEAT_DBPASS_paradigma
 keystone_heat_name: heat
-keystone_heat_password: heat
+keystone_heat_password: heat_paradigma
 heat_user_domain: heat_user_domain
 heat_domain_admin: heat_domain_admin
 heat_domain_admin_password: HEAT_DOMAIN_PASS
