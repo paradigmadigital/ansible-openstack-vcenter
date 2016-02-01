@@ -136,3 +136,13 @@
 
 - name: Remove sqlite database
   file: path=/var/lib/nova/nova.sqlite state=absent
+
+# Configure ssh keys in user nova (server migration)
+- name: Create .ssh directory
+  file: path=/var/lib/nova/.ssh state=directory mode=0700 owner=nova group=nova
+
+- name: Copy keys
+  copy: src={{ item }} dest=/var/lib/nova/.ssh/{{ item }} mode=0600 owner=nova group=nova
+  with_items:
+  - id_rsa
+  - id_rsa.pub
