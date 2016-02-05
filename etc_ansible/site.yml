@@ -3,21 +3,34 @@
   roles:
   - openstack-repositories
   - ntp
+  - sql-database
+  - message-queue
+  tags:
+  - databases
+  - sql-database
+  - postgresql
   - mysql
+  - message-queue
   - rabbitmq
 
 # Keystone service
-- hosts: keystone
+- hosts: identity
   roles:
   - openstack-repositories
   - ntp
+  - identity
+  tags:
+  - identity
   - keystone
 
 # Image service
-- hosts: glance
+- hosts: image
   roles:
   - openstack-repositories
   - ntp
+  - image
+  tags:
+  - image
   - glance
 
 # Networking and compute services
@@ -26,6 +39,10 @@
   - openstack-repositories
   - ntp
   - networking-compute-controller
+  tags:
+  - networking-compute-controller
+  - controller
+  - networking
 
 # Dashboard service
 - hosts: dashboard
@@ -33,20 +50,30 @@
   - openstack-repositories
 #  - ntp
   - dashboard
+  tags:
+  - dashboard
+  - horizon
 
 # Block Storage service
-- hosts: cinder
+- hosts: block-storage
   roles:
   - openstack-repositories
 #  - ntp
+  - block-storage
+  tags:
   - cinder
+  - block-storage
 
 # Ochestration service
-- hosts: heat
+- hosts: orchestation
   roles:
 #  - openstack-repositories
 #  - ntp
+  - orchestation
+  tags:
   - heat
+  - orchestation
+  - cloudformation
 
 # Adding hypervisors
 - hosts: kvm-hypervisor
@@ -54,10 +81,15 @@
   - openstack-repositories
   - ntp
   - kvm-hypervisor
+  tags:
+  - kvm-hypervisor
+  - compute
 
-# Adding hypervisors
-#- hosts: lxc-hypervisor
-#  roles:
-#  - openstack-repositories
-#  - ntp
-#  - lxc-hypervisor
+- hosts: lxd-hypervisor
+  roles:
+  - openstack-repositories
+  - ntp
+  - lxd-hypervisor
+  tags:
+  - lxd-hypervisor
+  - compute

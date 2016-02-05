@@ -1,12 +1,12 @@
-# http://docs.openstack.org/juno/install-guide/install/apt/content/ch_nova.html
-# http://docs.openstack.org/juno/install-guide/install/apt/content/ch_nova.html#nova-compute-install
+# http://docs.openstack.org/liberty/install-guide-ubuntu/nova.html
+# http://docs.openstack.org/liberty/install-guide-ubuntu/nova-compute-install.html
 
 # TODO: configure firewalld to allow comunication between instances
-- name: Disable firewalld service (CentOS)
+- name: Disable firewalld service if installed (CentOS)
   service: name=firewalld enabled=no state=stopped
   when: ansible_distribution == "CentOS" and ansible_distribution_version | search("^7")
+  ignore_errors: True
 
-# To install and configure the Compute controller components
 # Ubuntu 14.04
 - name: Install nova packages (Ubuntu)
   apt: name={{ item }} state=present
@@ -14,7 +14,10 @@
   - nova-compute
   - sysfsutils
   when: ansible_distribution == "Ubuntu" and ansible_distribution_version == "14.04"
+  tags:
+  - appliance
 
+# http://docs.openstack.org/liberty/install-guide-rdo/nova-compute-install.html
 # CentOS 7
 - name: Install nova packages (CentOS)
   yum: name={{ item }} state=present
@@ -22,8 +25,10 @@
   - openstack-nova-compute
   - sysfsutils
   when: ansible_distribution == "CentOS" and ansible_distribution_version | search("^7")
+  tags:
+  - appliance
 
-- name: Ensure openstack-nova-compute start automatically
+- name: Ensure openstack-nova-compute starts automatically (CentOS)
   service: name=openstack-nova-compute enabled=yes
   when: ansible_distribution == "CentOS" and ansible_distribution_version | search("^7")
 
@@ -32,8 +37,8 @@
 #  template: src=nova.conf.j2 dest=/etc/nova/nova.conf owner=nova group=nova
 #  notify: restart nova-compute
 
-# http://docs.openstack.org/juno/install-guide/install/apt/content/section_neutron-networking.html
-# http://docs.openstack.org/juno/install-guide/install/apt/content/neutron-compute-node.html
+# http://docs.openstack.org/liberty/install-guide-ubuntu/neutron.html
+# http://docs.openstack.org/liberty/install-guide-ubuntu/neutron-compute-install.html
 
 - name: Disable net.ipv4.conf.all.rp_filter
   sysctl: name=net.ipv4.conf.all.rp_filter value=0 reload=yes sysctl_set=yes
@@ -54,6 +59,8 @@
   - neutron-plugin-ml2
   - neutron-plugin-openvswitch-agent
   when: ansible_distribution == "Ubuntu" and ansible_distribution_version == "14.04"
+  tags:
+  - appliance
 
 - name: Install networking components (CentOS)
   yum: name={{ item }} state=present
@@ -61,9 +68,13 @@
   - openstack-neutron
   - openstack-neutron-ml2
   - openstack-neutron-openvswitch
+  - ebtables
+  - ipset
   when: ansible_distribution == "CentOS" and ansible_distribution_version | search("^7")
+  tags:
+  - appliance
 
-- name: Ensure openvswitch starts automatically
+- name: Ensure openvswitch starts automatically (CentOS)
   service: name={{ item }} enabled=yes
   with_items:
   - openvswitch
@@ -122,3 +133,6 @@
   - restart openstack-nova-compute
   - restart neutron-openvswitch-agent
   when: ansible_distribution == "CentOS" and ansible_distribution_version | search("^7")
+
+- name: Remove sqlite database
+  file: path=/var/lib/nova/nova.sqlite state=absent

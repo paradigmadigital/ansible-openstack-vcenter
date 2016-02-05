@@ -3,18 +3,38 @@
 - name: Install ubuntu cloud keyring
   apt: name=ubuntu-cloud-keyring state=latest
   when: ansible_distribution == "Ubuntu" and ansible_distribution_version == "14.04"
+  tags:
+  - appliance
 
 - name: Add apt_repository dependency
   apt: name=python-pycurl state=latest
   when: ansible_distribution == "Ubuntu" and ansible_distribution_version == "14.04"
+  tags:
+  - appliance
+
+- name: Remove kilo cloud repository
+  apt_repository: repo='deb http://ubuntu-cloud.archive.canonical.com/ubuntu trusty-updates/kilo main' state=absent
+  when: ansible_distribution == "Ubuntu" and ansible_distribution_version == "14.04"
+  tags:
+  - appliance
 
 - name: Add ubuntu cloud repository
-  apt_repository: repo='deb http://ubuntu-cloud.archive.canonical.com/ubuntu trusty-updates/kilo main' state=present update_cache=yes
+  apt_repository: repo='deb http://ubuntu-cloud.archive.canonical.com/ubuntu trusty-updates/liberty main' state=present update_cache=yes
   when: ansible_distribution == "Ubuntu" and ansible_distribution_version == "14.04"
+  tags:
+  - appliance
 
 - name: Upgrade distribution
   apt: upgrade=dist
   when: ansible_distribution == "Ubuntu" and ansible_distribution_version == "14.04"
+  tags:
+  - appliance
+
+- name: Install the OpenStack client
+  apt: name=python-openstackclient state=latest
+  when: ansible_distribution == "Ubuntu" and ansible_distribution_version == "14.04"
+  tags:
+  - appliance
 
 # http://docs.openstack.org/kilo/install-guide/install/yum/content/ch_basic_environment.html
 # CentOS 7
@@ -22,12 +42,16 @@
   yum: name=http://dl.fedoraproject.org/pub/epel/7/x86_64/e/epel-release-7-5.noarch.rpm state=present
   when: ansible_distribution == "CentOS" and ansible_distribution_version | search("^7")
 
-- name: Enable kilo repository
-  yum: name=http://rdo.fedorapeople.org/openstack-kilo/rdo-release-kilo.rpm state=present
+- name: Enable liberty repository
+  yum: name=centos-release-openstack-liberty state=present
   when: ansible_distribution == "CentOS" and ansible_distribution_version | search("^7")
 
-- name: Upgrade distribucion
+- name: Upgrade distribution
   yum: name=* state=latest
+  when: ansible_distribution == "CentOS" and ansible_distribution_version | search("^7")
+
+- name: Install OpenStack client
+  yum: name=python-openstackclient state=present
   when: ansible_distribution == "CentOS" and ansible_distribution_version | search("^7")
 
 - name: Manage SELinux policies for OpenStack services

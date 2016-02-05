@@ -1,3 +1,15 @@
+# Relational database could be mysql with mysql+pymysql or
+# postgresql with postgresql+psycopg2
+# {{ relational_database_driver[relational_database] }}
+relational_database: postgresql
+relational_database_driver:
+  mysql: mysql+pymysql
+  postgresql: postgresql+psycopg2
+
+# vxlan with physical servers
+# openvswitch with appliance
+network_type: openvswitch
+
 controller_hostname: openstack-vcenter
 rabbitmq_user: openstack
 rabbitmq_password: RABBIT_PASS
@@ -8,18 +20,21 @@ administration_token: 4f8df8a0581622075047
 keystone_admin_name: admin
 keystone_admin_password: admin
 keystone_admin_email: admin@localhost
-keystone_admin_tenant_name: admin
-keystone_admin_tenant_description: Admin Tenant
+keystone_admin_project_name: admin
+keystone_admin_project_description: Admin Project
 keystone_admin_role: admin
 keystone_user_name: demo
 keystone_user_password: demo
 keystone_user_email: demo@localhost
-keystone_user_tenant_name: demo
-keystone_user_tenant_description: Demo Tenant
+keystone_user_project_name: demo
+keystone_user_project_description: Demo Project
+keystone_user_role: user
+
 keystone_keystone_name: keystone
 keystone_keystone_password: keystone
-keystone_service_tenant_name: service
-keystone_service_tenant_description: service
+keystone_service_project_name: service
+keystone_service_project_description: service
+keystone_default_domain_name: default
 # --publicurl http://openstack-vcenter:5000/v2.0
 public_hostname: openstack-vcenter
 # --internalurl http://openstack-vcenter:5000/v2.0
@@ -51,9 +66,14 @@ cinder_dbpass: CINDER_DBPASS
 keystone_cinder_name: cinder
 keystone_cinder_password: cinder
 
-# Separate physical devices with commas
+# List of physical devices for block storage use
 cinder_physical_devices:
-- /dev/vda3
+- /dev/vda
+operating_system_physical_devices:
+- /dev/sda # Operating system
+- /dev/vdb # Swift
+- /dev/vdc # Ceilometer
+- /dev/vdd # Glance
 
 # Time zone in horizon
 time_zone: Europe/Madrid

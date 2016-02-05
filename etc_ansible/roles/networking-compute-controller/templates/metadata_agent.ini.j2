@@ -19,7 +19,7 @@ auth_region = {{ region_name }}
 auth_plugin = password
 project_domain_id = default
 user_domain_id = default
-project_name = {{ keystone_service_tenant_name }}
+project_name = {{ keystone_service_project_name }}
 username = {{ keystone_neutron_name }}
 password = {{ keystone_neutron_password }}
 
@@ -57,7 +57,7 @@ metadata_proxy_shared_secret = {{ metadata_secret }}
 # Location of Metadata Proxy UNIX domain socket
 # metadata_proxy_socket = $state_path/metadata_proxy
 
-# Metadata Proxy UNIX domain socket mode, 3 values allowed:
+# Metadata Proxy UNIX domain socket mode, 4 values allowed:
 # 'deduce': deduce mode from metadata_proxy_user/group values,
 # 'user': set metadata proxy socket mode to 0o644, to use when
 # metadata_proxy_user is agent effective user or root,
@@ -78,3 +78,7 @@ metadata_proxy_shared_secret = {{ metadata_secret }}
 # Otherwise default_ttl specifies time in seconds a cache entry is valid for.
 # No cache is used in case no value is passed.
 # cache_url = memory://?default_ttl=5
+
+[AGENT]
+# Log agent heartbeats from this Metadata agent
+# log_agent_heartbeats = False

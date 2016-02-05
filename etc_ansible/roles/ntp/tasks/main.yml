@@ -3,14 +3,19 @@
 - name: Install ntp (Ubuntu)
   apt: name=ntp state=latest
   when: ansible_distribution == "Ubuntu"
+  tags:
+  - appliance
 
 - name: Start ntp service (Ubuntu)
   service: name=ntp state=started enabled=yes
   when: ansible_distribution == "Ubuntu"
 
+
 - name: Install ntp (CentOS)
   yum: name=ntp state=latest
   when: ansible_distribution == "CentOS"
+  tags:
+  - appliance
 
 - name: Start ntp service (CentOS)
   service: name=ntpd state=started enabled=yes

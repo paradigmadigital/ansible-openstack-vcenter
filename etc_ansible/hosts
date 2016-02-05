@@ -1,10 +1,10 @@
 [databases]
 openstack-vcenter ansible_ssh_user=root
 
-[keystone]
+[identity]
 openstack-vcenter ansible_ssh_user=root
 
-[glance]
+[image]
 openstack-vcenter ansible_ssh_user=root
 
 # vcenter node *MUST* be here
@@ -12,10 +12,10 @@ openstack-vcenter ansible_ssh_user=root
 [networking-compute-controller]
 openstack-vcenter ansible_ssh_user=root
 
-[cinder]
+[block-storage]
 openstack-vcenter ansible_ssh_user=root
 
-[heat]
+[orchestation]
 openstack-vcenter ansible_ssh_user=root
 
 [dashboard]
@@ -24,6 +24,6 @@ openstack-vcenter ansible_ssh_user=root
 [kvm-hypervisor]
 openstack-compute ansible_ssh_user=root
 
-# This does not work
-#[lxc-hypervisor]
-#openstack-compute ansible_ssh_user=root
+[lxd-hypervisor]
+openstack-compute-lxd ansible_ssh_user=root
+

@@ -1,0 +1,11 @@
+export OS_PROJECT_DOMAIN_ID=default
+export OS_USER_DOMAIN_ID=default
+export OS_PROJECT_NAME={{ keystone_user_project_name }}
+export OS_TENANT_NAME={{ keystone_user_project_name }}
+export OS_USERNAME={{ keystone_user_name }}
+export OS_PASSWORD={{ keystone_user_password }}
+export OS_AUTH_URL=http://{{ admin_hostname }}:5000/v3
+export OS_URL=http://{{ admin_hostname }}:35357/v3
+export OS_IDENTITY_API_VERSION=3
+export OS_IMAGE_API_VERSION=2
+export OS_VOLUME_API_VERSION=2

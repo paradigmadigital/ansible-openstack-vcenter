@@ -1,0 +1,56 @@
+[DEFAULT]
+rootwrap_config = /etc/cinder/rootwrap.conf
+api_paste_confg = /etc/cinder/api-paste.ini
+iscsi_helper = tgtadm
+volume_name_template = volume-%s
+volume_group = cinder-volumes
+verbose = True
+auth_strategy = keystone
+state_path = /var/lib/cinder
+lock_path = /var/lock/cinder
+volumes_dir = /var/lib/cinder/volumes
+
+rpc_backend = rabbit
+
+{% if network_type == "openvswitch" %}
+my_ip = {{ ansible_osm["ipv4"]["address"] }}
+{% endif %}
+{% if network_type == "vxlan" %}
+my_ip = {{ ansible_eth0["ipv4"]["address"] }}
+{% endif %}
+
+enabled_backends = lvm
+
+glance_host = {{ admin_hostname }}
+
+
+[database]
+connection = {{ relational_database_driver[relational_database] }}://{{ keystone_cinder_name }}:{{ cinder_dbpass }}@{{ admin_hostname }}/cinder
+
+
+[oslo_messaging_rabbit]
+rabbit_host = {{ admin_hostname }}
+rabbit_userid = {{ rabbitmq_user}}
+rabbit_password = {{ rabbitmq_password }}
+
+
+[keystone_authtoken]
+auth_uri = http://{{ admin_hostname }}:5000
+auth_url = http://{{ admin_hostname }}:35357
+auth_plugin = password
+project_domain_id = default
+user_domain_id = default
+project_name = {{ keystone_service_project_name }}
+username = {{ keystone_cinder_name }}
+password = {{ keystone_cinder_password }}
+
+
+[oslo_concurrency]
+lock_path = /var/lib/cinder/tmp
+
+
+[lvm]
+volume_driver = cinder.volume.drivers.lvm.LVMVolumeDriver
+volume_group = cinder-volumes
+iscsi_protocol = iscsi
+iscsi_helper = tgtadm

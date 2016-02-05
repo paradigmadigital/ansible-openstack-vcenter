@@ -1,0 +1,11 @@
+- name: populate database
+  shell: su -s /bin/sh -c "heat-manage db_sync" heat
+
+- name: restart heat-api
+  service: name=heat-api state=restarted
+
+- name: restart heat-api-cfn
+  service: name=heat-api-cfn state=restarted
+
+- name: restart heat-engine
+  service: name=heat-engine state=restarted
