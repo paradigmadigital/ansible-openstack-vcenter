@@ -305,10 +305,45 @@
 - name: Remove sqlite database
   file: path=/var/lib/nova/nova.sqlite state=absent
 
+# Create external net
+- name: Test if public network exists
+  shell: |
+    . /root/admin-openrc.sh
+    neutron net-list | grep ' public ' | wc -l
+  register: net_exists
+  ignore_errors: True
+  failed_when: "'0' in net_exists.stdout"
+  tags: workingon
+
+- name: Create the public network
+  shell: |
+    . /root/admin-openrc.sh
+    neutron net-create public --router:external --provider:physical_network external --provider:network_type flat
+  when: net_exists|failed
+  tags: workingon
+
+# Create external subnet
+- name: Test if public subnet exists
+  shell: |
+    . /root/admin-openrc.sh
+    neutron subnet-list | grep ' public ' | wc -l
+  register: subnet_exists
+  ignore_errors: True
+  failed_when: "'0' in subnet_exists.stdout"
+  tags: workingon
+
+- name: Create the public network
+  shell: |
+    . /root/admin-openrc.sh
+    neutron subnet-create public {{ public_cidr }} --name public --allocation-pool start={{ public_allocation_pool.split(",")[0] }},end={{ public_allocation_pool.split(",")[-1] }} --disable-dhcp --gateway {{ public_gateway }}
+  when: subnet_exists|failed
+  tags: workingon
+
+
+
 # Add lbaas.
 # Thanks to: https://ask.openstack.org/en/question/82555/proper-installation-guide-for-lbaas-in-juno/?answer=82558#post-id-82558
 - name: Install the lbaas agent
   apt: name=neutron-lbaas-agent state=present
   tags:
   - appliance
-
