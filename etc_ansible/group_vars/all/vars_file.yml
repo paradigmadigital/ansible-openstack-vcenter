@@ -68,12 +68,12 @@ keystone_cinder_password: cinder
 
 # List of physical devices for block storage use
 cinder_physical_devices:
-- /dev/vda
+- /dev/vdb
 operating_system_physical_devices:
 - /dev/sda # Operating system
-- /dev/vdb # Swift
-- /dev/vdc # Ceilometer
-- /dev/vdd # Glance
+- /dev/vdc # Swift
+- /dev/vdd # Ceilometer
+- /dev/vda # Glance
 
 # Time zone in horizon
 time_zone: Europe/Madrid
