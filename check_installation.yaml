@@ -51,6 +51,29 @@ resources:
             port_range_max: %port%
 
 
+   private_net:
+     type: OS::Neutron::Net
+
+   private_subnet:
+     type: OS::Neutron::Subnet
+     properties:
+       network_id: { get_resource: private_net }
+       cidr: "10.8.1.0/24"
+       dns_nameservers: [ "8.8.8.8", "8.8.4.4" ]
+       ip_version: 4
+
+   private_router:
+     type: OS::Neutron::Router
+     properties:
+       external_gateway_info: { network: public }
+
+   private_router_interface:
+     type: OS::Neutron::RouterInterface
+     properties:
+       router_id: { get_resource: private_router }
+       subnet: { get_resource: private_subnet }
+
+
   perconadb-01_port:
     type: OS::Neutron::Port
     properties:
@@ -198,10 +221,31 @@ resources:
        floating_ip: { get_resource: nginx-02_floating_ip }
        server_id: { get_resource: nginx-02 }
 
-  deployer:
+
+  haproxy_port:
+    type: OS::Neutron::Port
+    properties:
+       network: private
+       fixed_ips:
+         - subnet_id: "private-subnet"
+
+  haproxy:
     type: OS::Nova::Server
     properties:
       key_name: { get_param: key_name }
       image: { get_param: image_id }
       flavor: { get_param: instance_type }
-      depends_on: [drupal-01, drupal-02]
+      depends_on: [nginx-01, nginx-02]
+      networks:
+        port: { get_resource: haproxy_port }
+
+  haproxy_floating_ip:
+    type: OS::Nova::FloatingIP
+    properties:
+      pool: public
+
+  haproxy_association:
+     type: OS::Nova::FloatingIPAssociation
+     properties:
+       floating_ip: { get_resource: haproxy_floating_ip }
+       server_id: { get_resource: haproxy }
