@@ -60,6 +60,10 @@ keystone_neutron_name: neutron
 keystone_neutron_password: neutron
 # http://docs.openstack.org/juno/install-guide/install/apt/content/neutron-network-node.html
 metadata_secret: METADATA_SECRET
+# External network configuration
+public_cidr: 10.20.30.0/24
+public_gateway: 10.20.30.1
+public_allocation_pool: 10.20.30.10,10.20.30.200
 # Cinder vars
 # http://docs.openstack.org/kilo/install-guide/install/apt/content/cinder-install-controller-node.html
 cinder_dbpass: CINDER_DBPASS
@@ -68,12 +72,12 @@ keystone_cinder_password: cinder
 
 # List of physical devices for block storage use
 cinder_physical_devices:
-- /dev/vda
+- /dev/vdb
 operating_system_physical_devices:
 - /dev/sda # Operating system
-- /dev/vdb # Swift
-- /dev/vdc # Ceilometer
-- /dev/vdd # Glance
+- /dev/vdc # Swift
+- /dev/vdd # Ceilometer
+- /dev/vda # Glance
 
 # Time zone in horizon
 time_zone: Europe/Madrid
