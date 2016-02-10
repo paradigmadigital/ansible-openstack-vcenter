@@ -25,6 +25,8 @@
 
 - name: Disable keystone service autostart
   template: src=keystone.override.j2 dest=/etc/init/keystone.override
+  tags:
+  - appliance
 
 - name: Install keystone
   apt: name={{ item }} state=present

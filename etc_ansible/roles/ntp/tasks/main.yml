@@ -1,7 +1,7 @@
 # http://docs.openstack.org/juno/install-guide/install/apt/content/ch_basic_environment.html#basics-packages
 # Ubuntu 14.04
 - name: Install ntp (Ubuntu)
-  apt: name=ntp state=latest
+  apt: name=ntp state=present
   when: ansible_distribution == "Ubuntu"
   tags:
   - appliance
@@ -12,7 +12,7 @@
 
 
 - name: Install ntp (CentOS)
-  yum: name=ntp state=latest
+  yum: name=ntp state=present
   when: ansible_distribution == "CentOS"
   tags:
   - appliance
