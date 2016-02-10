@@ -59,6 +59,29 @@ iface osm inet static
 
 ## vCenter virtual node
 ### Create vCenter machine
+#### Alternative 1: Download the appliance
+Stop libvirtd:
+```
+service libvirt-bin stop
+```
+Download the appliance:
+```
+cd /var/lib/libvirt/images
+wget http://elmanytas.es/filesblog/informatica/virtualizacion/20161102-OpenStack/openstack-vcenter.tgz
+```
+Uncompress the appliance:
+```
+tar -zxvf openstack-vcenter.tgz
+```
+Copy the config file to libvirt:
+```
+cp etc/libvirt/qemu/openstack-vcenter.xml /etc/libvirt/qemu/
+```
+Start libvirt:
+```
+service libvirt-bin start
+```
+#### Alternative 1: Build the appliance
 Create vcenter machine as a KVM virtual machine (Ubuntu 14.04) in compute node with two network interfaces attached to ose and osm bridges. Stop libvirtd, copy the configuration openstack-vcenter.xml in /etc/libvirt/qemu/openstack-vcenter.xml and create disks this way.
 ```
 sudo su -
