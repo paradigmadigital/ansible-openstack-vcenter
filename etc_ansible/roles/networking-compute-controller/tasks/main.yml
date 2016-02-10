@@ -312,6 +312,8 @@
 - name: Remove sqlite database
   file: path=/var/lib/nova/nova.sqlite state=absent
 
+- meta: flush_handlers
+
 # Create external net
 - name: Test if public network exists
   shell: |
