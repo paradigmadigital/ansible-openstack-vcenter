@@ -1,6 +1,6 @@
 # http://docs.openstack.org/liberty/install-guide-ubuntu/horizon.html
 - name: Install packages
-  apt: name={{ item }} state=latest
+  apt: name={{ item }} state=present
   with_items:
   - openstack-dashboard
   - apache2
