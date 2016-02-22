@@ -75,6 +75,16 @@
   - orchestation
   - cloudformation
 
+# Barbican service
+- hosts: barbican
+  roles:
+#  - openstack-repositories
+#  - ntp
+  - barbican
+  tags:
+  - barbican
+  
+
 # Adding hypervisors
 - hosts: kvm-hypervisor
   roles:
