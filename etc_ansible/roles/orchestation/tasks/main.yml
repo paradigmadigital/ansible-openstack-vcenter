@@ -136,7 +136,7 @@
     export OS_TOKEN={{ administration_token }}
     export OS_URL=http://{{ admin_hostname }}:35357/v3
     export OS_IDENTITY_API_VERSION=3
-    openstack domain create --description "Stack projects and users" heat
+    openstack domain create --description "Stack projects and users" {{ heat_user_domain }}
   when: domain_exists|failed
 
 
@@ -165,8 +165,8 @@
     export OS_TOKEN={{ administration_token }}
     export OS_URL=http://{{ admin_hostname }}:35357/v3
     export OS_IDENTITY_API_VERSION=3
-    openstack user create --domain heat --password {{ heat_domain_admin_password }} {{ heat_domain_admin }}
-    openstack role add --domain heat --user {{ heat_domain_admin }} admin
+    openstack user create --domain {{ heat_user_domain }} --password {{ heat_domain_admin_password }} {{ heat_domain_admin }}
+    openstack role add --domain {{ heat_user_domain }} --user {{ heat_domain_admin }} admin
   when: user_exists|failed
 
 - name: Create the heat_stack_owner role
