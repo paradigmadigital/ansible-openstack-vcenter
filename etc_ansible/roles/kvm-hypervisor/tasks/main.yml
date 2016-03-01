@@ -40,6 +40,15 @@
 # http://docs.openstack.org/liberty/install-guide-ubuntu/neutron.html
 # http://docs.openstack.org/liberty/install-guide-ubuntu/neutron-compute-install.html
 
+- name: Ensure br_netfilter is loaded
+  modprobe: name=br_netfilter state=present
+  when: ansible_distribution == "Ubuntu"
+  ignore_errors: True
+
+- name: Ensure br_netfilter is loaded at boot time
+  lineinfile: dest=/etc/modules line=br_netfilter state=present
+  when: ansible_distribution == "Ubuntu"
+
 - name: Disable net.ipv4.conf.all.rp_filter
   sysctl: name=net.ipv4.conf.all.rp_filter value=0 reload=yes sysctl_set=yes
 
