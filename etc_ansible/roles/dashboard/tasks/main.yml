@@ -5,8 +5,6 @@
   - openstack-dashboard
   - apache2
   - libapache2-mod-wsgi
-  - memcached
-  - python-memcache
   tags:
   - appliance
 
