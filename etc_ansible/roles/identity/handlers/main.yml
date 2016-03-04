@@ -1,5 +1,8 @@
 - name: populate database
   shell: su -s /bin/sh -c 'keystone-manage db_sync' keystone
 
+- name: fernet setup
+  shell: keystone-manage fernet_setup --keystone-user keystone --keystone-group keystone
+
 - name: restart apache2
   service: name=apache2 state=restarted
