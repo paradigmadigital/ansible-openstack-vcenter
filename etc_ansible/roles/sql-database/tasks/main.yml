@@ -22,15 +22,16 @@
   when: relational_database == "postgresql"
   tags:
   - appliance
+
 # TODO: please, obtain cidr from: `sipcalc ose | grep "Network mask" | grep bits | awk '{print $NF}'`
 
 - name: Configure access from management networking
-  template: src=pg_hba.conf.j2 dest=/etc/postgresql/9.3/main/pg_hba.conf owner=postgres group=postgres mode=0640
+  template: src=pg_hba.conf.j2 dest=/etc/postgresql/9.5/main/pg_hba.conf owner=postgres group=postgres mode=0640
   notify: restart postgresql
   when: relational_database == "postgresql"
 
 - name: Configure listening address interface
-  template: src=postgresql.conf.j2 dest=/etc/postgresql/9.3/main/postgresql.conf owner=postgres group=postgres mode=0644
+  template: src=postgresql.conf.j2 dest=/etc/postgresql/9.5/main/postgresql.conf owner=postgres group=postgres mode=0644
   notify: restart postgresql
   when: relational_database == "postgresql"
 
