@@ -86,7 +86,7 @@ time_zone: Europe/Madrid
 heat_dbpass: HEAT_DBPASS
 keystone_heat_name: heat
 keystone_heat_password: heat
-heat_user_domain: heat_user_domain
+heat_user_domain: heat
 heat_domain_admin: heat_domain_admin
 heat_domain_admin_password: HEAT_DOMAIN_PASS
 keystone_heat_stack_user_role: heat_stack_user_role

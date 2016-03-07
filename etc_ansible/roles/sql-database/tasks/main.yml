@@ -39,3 +39,5 @@
   when: relational_database == "postgresql"
   tags:
   - appliance
+
+- meta: flush_handlers
