@@ -4,10 +4,12 @@
   - openstack-repositories
   - ntp
   - sql-database
+  - nosql-database
   - message-queue
   tags:
   - databases
   - sql-database
+  - nosql-database
   - postgresql
   - mysql
   - message-queue

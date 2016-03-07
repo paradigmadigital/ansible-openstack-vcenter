@@ -1,0 +1,14 @@
+# http://docs.openstack.org/liberty/install-guide-ubuntu/environment-nosql-database.html
+- name: Install mongodb server
+  apt: name=mysql-server state=present
+  with_items:
+  - mongodb-server
+  - mongodb-clients
+  - python-pymongo
+  tags:
+  - appliance
+  - workingon
+
+- name: Configure mongodb server
+  template: src=mongodb.conf.j2 dest=/etc/mongodb.conf
+  notify: restart mongodb
