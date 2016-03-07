@@ -1,10 +1,11 @@
-# Databases services
+#
+# Database services
 - hosts: databases
   roles:
-  - openstack-repositories
   - ntp
   - sql-database
   - message-queue
+  - memcached
   tags:
   - databases
   - sql-database
@@ -12,13 +13,17 @@
   - mysql
   - message-queue
   - rabbitmq
+  - memcached
 
 # Keystone service
 - hosts: identity
   roles:
-  - openstack-repositories
   - ntp
   - identity
+  environment:
+    OS_TOKEN: "{{ administration_token }}"
+    OS_URL: "http://{{ admin_hostname }}:35357/v3"
+    OS_IDENTITY_API_VERSION: 3
   tags:
   - identity
   - keystone
@@ -26,9 +31,12 @@
 # Image service
 - hosts: image
   roles:
-  - openstack-repositories
   - ntp
   - image
+  environment:
+    OS_TOKEN: "{{ administration_token }}"
+    OS_URL: "http://{{ admin_hostname }}:35357/v3"
+    OS_IDENTITY_API_VERSION: 3
   tags:
   - image
   - glance
@@ -36,7 +44,6 @@
 # Networking and compute services
 - hosts: networking-compute-controller
   roles:
-  - openstack-repositories
   - ntp
   - networking-compute-controller
   tags:
@@ -47,7 +54,6 @@
 # Dashboard service
 - hosts: dashboard
   roles:
-  - openstack-repositories
 #  - ntp
   - dashboard
   tags:
@@ -57,7 +63,6 @@
 # Block Storage service
 - hosts: block-storage
   roles:
-  - openstack-repositories
 #  - ntp
   - block-storage
   tags:
@@ -67,7 +72,6 @@
 # Ochestration service
 - hosts: orchestation
   roles:
-#  - openstack-repositories
 #  - ntp
   - orchestation
   tags:
@@ -78,7 +82,6 @@
 # Adding hypervisors
 - hosts: kvm-hypervisor
   roles:
-  - openstack-repositories
   - ntp
   - kvm-hypervisor
   tags:
@@ -87,7 +90,6 @@
 
 - hosts: lxd-hypervisor
   roles:
-  - openstack-repositories
   - ntp
   - lxd-hypervisor
   tags:
