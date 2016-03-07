@@ -5,102 +5,126 @@
 - name: Create database
   mysql_db: name=glance state=present
   when: relational_database == "mysql"
+  tags: workingon
 
 - name: Create database user
   mysql_user: name=glance host=localhost password={{ glance_dbpass }} priv=glance.*:ALL,GRANT state=present
   when: relational_database == "mysql"
+  tags: workingon
 
 - name: Create database user
   mysql_user: name=glance host=% password={{ glance_dbpass }} priv=glance.*:ALL,GRANT state=present
   when: relational_database == "mysql"
+  tags: workingon
 
 # postgresql
 - name: Create database
   postgresql_db: name=glance
   when: relational_database == "postgresql"
+  tags: workingon
 
 - name: Create database user
   postgresql_user: db=glance name=glance password={{ glance_dbpass }} priv=ALL
   when: relational_database == "postgresql"
+  tags: workingon
 
+# http://blog.oddbit.com/2015/10/26/ansible-20-new-openstack-modules/
+- name: Install shade to manage OpenStack objects with ansible
+  package: name=python-shade state=present
+  tags: workingon
+
+# This does not work :'(
+#- name: Create the glance user
+#  os_user:
+#    cloud: openstack-vcenter
+##    auth:
+##      auth_url: "http://{{ public_hostname }}:5000/v2.0"
+##      username: "{{ keystone_admin_name }}"
+##      password: "{{ keystone_admin_password }}"
+##      project_name: "{{ keystone_admin_project_name }}"
+#    name: "{{ keystone_glance_name }}"
+#    password: "{{ keystone_glance_password }}"
+#    domain: "{{ keystone_default_domain_name }}"
+#    default_project: "service"
+#  tags: workingon
+
+# Create glance user
+- name: Test if glance user exists
+  shell: |
+    openstack user list | grep " glance " | wc -l
+  register: glance_user_exists
+  ignore_errors: True
+  failed_when: "'0' in glance_user_exists.stdout"
+  tags: workingon
 
 - name: Create the glance user
-  keystone_user:
-    user={{ keystone_glance_name }}
-    tenant={{ keystone_service_project_name }}
-    password={{ keystone_glance_password }}
-    token={{ administration_token }}
-    endpoint=http://{{ admin_hostname }}:35357/v2.0
+  shell: |
+    openstack user create --domain {{ keystone_default_domain_name }} --password {{ keystone_glance_password }} {{ keystone_glance_name }}
+    openstack role add --project {{ keystone_service_project_name }} --user {{ keystone_glance_name}} {{ keystone_admin_role }}
+  when: glance_user_exists|failed
+  tags: workingon
 
-- name: Add the admin role to the glance user
-  keystone_user:
-    role={{ keystone_admin_role }}
-    user={{ keystone_glance_name }}
-    tenant={{ keystone_service_project_name }}
-    token={{ administration_token }}
-    endpoint=http://{{ admin_hostname }}:35357/v2.0
 
 #Create the service entity and API endpoint
 - name: Test if service entity exists
   shell: |
-    export OS_TOKEN={{ administration_token }}
-    export OS_URL=http://{{ admin_hostname }}:35357/v3
-    export OS_IDENTITY_API_VERSION=3
     openstack service list | grep " image "| wc -l
   register: service_entity_exists
   ignore_errors: True
   failed_when: "'0' in service_entity_exists.stdout"
+  tags: workingon
 
-- name: Create the service entity for the Image service
+- name: Create the glance service entity
   shell: |
-    export OS_TOKEN={{ administration_token }}
-    export OS_URL=http://{{ admin_hostname }}:35357/v3
-    export OS_IDENTITY_API_VERSION=3
     openstack service create --name {{ keystone_glance_name }} --description "OpenStack Image Service" image
   when: service_entity_exists|failed
+  tags: workingon
 
 - name: Test if endpoint exists
   shell: |
-    export OS_TOKEN={{ administration_token }}
-    export OS_URL=http://{{ admin_hostname }}:35357/v3
-    export OS_IDENTITY_API_VERSION=3
     openstack endpoint list | grep " image " | wc -l
   register: endpoint_exists
   ignore_errors: True
   failed_when: "'0' in endpoint_exists.stdout"
+  tags: workingon
 
 - name: Create the Image service API endpoints
   shell: |
-    export OS_TOKEN={{ administration_token }}
-    export OS_URL=http://{{ admin_hostname }}:35357/v3
-    export OS_IDENTITY_API_VERSION=3
     openstack endpoint create --region {{ region_name }} image public http://{{ admin_hostname }}:9292
     openstack endpoint create --region {{ region_name }} image internal http://{{ admin_hostname }}:9292
     openstack endpoint create --region {{ region_name }} image admin http://{{ admin_hostname }}:9292
   when: endpoint_exists|failed
+  tags: workingon
 
 # To install and configure the Image Service components
 - name: Install glance
   apt: name=glance state=present
   tags:
   - appliance
+  - workingon
+  tags: workingon
 
 - name: Install python-glanceclient
   apt: name=python-glanceclient state=present
   tags:
   - appliance
+  - workingon
+  tags: workingon
 
 - name: Configure glance api service
-  template: src=glance-api.conf.j2 dest=/etc/glance/glance-api.conf owner=glance group=glance
+  template: src=glance-api.conf.j2 dest=/etc/glance/glance-api.conf owner=glance group=glance mode=0644
   notify:
   - populate database
   - restart glance-api
+  tags: workingon
 
 - name: Configure glance registry service
-  template: src=glance-registry.conf.j2 dest=/etc/glance/glance-registry.conf owner=glance group=glance
+  template: src=glance-registry.conf.j2 dest=/etc/glance/glance-registry.conf owner=glance group=glance mode=0644
   notify:
   - populate database
   - restart glance-registry
+  tags: workingon
 
 - name: Remove sqlite database
   file: path=/var/lib/glance/glance.sqlite state=absent
+  tags: workingon
