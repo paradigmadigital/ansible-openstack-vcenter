@@ -38,7 +38,7 @@
   - appliance
 
 - name: Configure keystone service
-  template: src=keystone.conf.j2 dest=/etc/keystone/keystone.conf owner=keystone group=root
+  template: src=keystone.conf.j2 dest=/etc/keystone/keystone.conf owner=keystone group=root mode=0640
   notify:
   - populate database
   - fernet setup
