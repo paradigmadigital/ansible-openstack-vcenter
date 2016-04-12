@@ -43,6 +43,9 @@
   - populate database
   - fernet setup
 
+- name: Ensure keystone service is stopped
+  service: name=keystone state=stopped
+
 - meta: flush_handlers
 
 - name: Configure apache hostname
@@ -106,7 +109,7 @@
 - name: Create the default domain
   shell: |
     openstack domain create --description "{{ keystone_default_domain_description }}"  {{ keystone_default_domain_name }}
-  when: exists:failed
+  when: exists|failed
 
 - name: Test if admin project exists
   shell: |
