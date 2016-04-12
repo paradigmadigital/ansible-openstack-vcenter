@@ -29,9 +29,9 @@
   tags: workingon
 
 # http://blog.oddbit.com/2015/10/26/ansible-20-new-openstack-modules/
-- name: Install shade to manage OpenStack objects with ansible
-  package: name=python-shade state=present
-  tags: workingon
+#- name: Install shade to manage OpenStack objects with ansible
+#  package: name=python-shade state=present
+#  tags: workingon
 
 # This does not work :'(
 #- name: Create the glance user
