@@ -23,6 +23,11 @@
   when: relational_database == "postgresql"
 
 
+- name: Disable keystone service autostart
+  template: src=keystone.override.j2 dest=/etc/init/keystone.override
+  tags:
+  - appliance
+
 - name: Install keystone
   apt: name={{ item }} state=present
   with_items:
@@ -31,68 +36,51 @@
   - libapache2-mod-wsgi
   tags:
   - appliance
-  - workingon
-
-- name: Stop and disable keystone service
-  service: name=keystone state=stopped enabled=no
-  tags:
-  - appliance
-  - workingon
 
 - name: Configure keystone service
-  template: src=keystone.conf.j2 dest=/etc/keystone/keystone.conf owner=root group=root mode=0644
+  template: src=keystone.conf.j2 dest=/etc/keystone/keystone.conf owner=keystone group=root mode=0640
   notify:
   - populate database
   - fernet setup
-  tags: workingon
+
+- name: Ensure keystone service is stopped
+  service: name=keystone state=stopped
 
 - meta: flush_handlers
-  tags: workingon
 
 - name: Configure apache hostname
   lineinfile: dest=/etc/apache2/apache2.conf regexp='^\s*ServerName' line="ServerName {{ admin_hostname }}" owner=root group=root mode=0644
   notify:
   - restart apache2
-  tags: workingon
 
 - name: Configure apache virtualhost
   template: src=wsgi-keystone.conf.j2 dest=/etc/apache2/sites-available/wsgi-keystone.conf owner=root group=root mode=0644
   notify:
   - restart apache2
-  tags: workingon
 
 - name: Enable apache virtualhost
   file: src=/etc/apache2/sites-available/wsgi-keystone.conf dest=/etc/apache2/sites-enabled/wsgi-keystone.conf owner=root group=root state=link
   notify:
   - restart apache2
-  tags: workingon
 
 - meta: flush_handlers
-  tags: workingon
 
 - name: Remove sqlite database
   file: path=/var/lib/keystone/keystone.db state=absent
-  tags: workingon
 
 # Create the service entity and API endpoint
 # http://docs.openstack.org/liberty/install-guide-ubuntu/keystone-services.html
-- name: Install python-openstackclient
-  package: name=python-openstackclient state=present
-  tags: workingon
-
 - name: Test if service entity exists
   shell: |
     openstack service list | grep " identity "| wc -l
   register: service_entity_exists
   ignore_errors: True
   failed_when: "'0' in service_entity_exists.stdout"
-  tags: workingon
 
 - name: Create the service entity for the Identity service
   shell: |
     openstack service create --name {{ keystone_keystone_name }} --description "OpenStack Identity" identity
   when: service_entity_exists|failed
-  tags: workingon
 
 - name: Test if endpoints exists
   shell: |
@@ -100,31 +88,40 @@
   register: endpoint_exists
   ignore_errors: True
   failed_when: "'0' in endpoint_exists.stdout"
-  tags: workingon
 
 - name: Create the Identity service API endpoints
   shell: |
-    openstack endpoint create --region {{ region_name }} identity public http://{{ admin_hostname }}:5000/v2.0
-    openstack endpoint create --region {{ region_name }} identity internal http://{{ admin_hostname }}:5000/v2.0
-    openstack endpoint create --region {{ region_name }} identity admin http://{{ admin_hostname }}:5000/v2.0
+    openstack endpoint create --region {{ region_name }} identity public http://{{ admin_hostname }}:5000/v3
+    openstack endpoint create --region {{ region_name }} identity internal http://{{ admin_hostname }}:5000/v3
+    openstack endpoint create --region {{ region_name }} identity admin http://{{ admin_hostname }}:5000/v3
   when: endpoint_exists|failed
-  tags: workingon
+
 
 # Create projects, users and roles
 # http://docs.openstack.org/liberty/install-guide-ubuntu/keystone-users.html
+- name: Test if default domain exists
+  shell: |
+    openstack domain list | grep " {{ keystone_default_domain_name }}" | wc -l
+  register: exists
+  ignore_errors: True
+  failed_when: "'0' in exists.stdout"
+
+- name: Create the default domain
+  shell: |
+    openstack domain create --description "{{ keystone_default_domain_description }}"  {{ keystone_default_domain_name }}
+  when: exists|failed
+
 - name: Test if admin project exists
   shell: |
     openstack project list | grep " {{ keystone_admin_project_name }} " | wc -l
   register: exists
   ignore_errors: True
   failed_when: "'0' in exists.stdout"
-  tags: workingon
 
 - name: Create the admin project
   shell: |
     openstack project create --domain {{ keystone_default_domain_name }} --description "{{ keystone_admin_project_description }}" {{ keystone_admin_project_name }}
   when: exists|failed
-  tags: workingon
 
 
 - name: Test if admin user exists
@@ -133,7 +130,6 @@
   register: exists
   ignore_errors: True
   failed_when: "'0' in exists.stdout"
-  tags: workingon
 
 - name: Create the admin user, role and asociate both to admin project
   shell: |
@@ -141,12 +137,6 @@
     openstack role create {{ keystone_admin_role }}
     openstack role add --project {{ keystone_admin_project_name }} --user {{ keystone_admin_name }} {{ keystone_admin_role }}
   when: exists|failed
-  tags: workingon
-
-
-- name: Install shade to manage OpenStack objects
-  package: name=python-shade state=present
-  tags: workingon
 
 
 # Create the service project
@@ -156,54 +146,46 @@
   register: exists
   ignore_errors: True
   failed_when: "'0' in exists.stdout"
-  tags: workingon
 
 - name: Create the service project
   shell: |
     openstack project create --domain {{ keystone_default_domain_name }} --description "{{ keystone_service_project_description}}" {{ keystone_service_project_name }}
   when: exists|failed
-  tags: workingon
+
+# Whe don't need non admin stuff. This will be created by admin after installation.
+## Non admin project, user and role
+#- name: Test if non admin project exists
+#  shell: |
+#    openstack project list | grep " {{ keystone_user_project_name }} " | wc -l
+#  register: exists
+#  ignore_errors: True
+#  failed_when: "'0' in exists.stdout"
+
+#- name: Create the non admin project
+#  shell: |
+#    openstack project create --domain {{ keystone_default_domain_name }} --description "{{ keystone_user_project_description }}" {{ keystone_user_project_name }}
+#  when: exists|failed
 
 
-# Non admin project, user and role
-- name: Test if non admin project exists
-  shell: |
-    openstack project list | grep " {{ keystone_user_project_name }} " | wc -l
-  register: exists
-  ignore_errors: True
-  failed_when: "'0' in exists.stdout"
-  tags: workingon
+#- name: Test if non admin user exists
+#  shell: |
+#    openstack user list | grep " {{ keystone_user_name }} " | wc -l
+#  register: exists
+#  ignore_errors: True
+#  failed_when: "'0' in exists.stdout"
 
-- name: Create the non admin project
-  shell: |
-    openstack project create --domain {{ keystone_default_domain_name }} --description "{{ keystone_user_project_description }}" {{ keystone_user_project_name }}
-  when: exists|failed
-  tags: workingon
-
-
-- name: Test if non admin user exists
-  shell: |
-    openstack user list | grep " {{ keystone_user_name }} " | wc -l
-  register: exists
-  ignore_errors: True
-  failed_when: "'0' in exists.stdout"
-  tags: workingon
-
-- name: Create the admin user, role and associate both to admin project
-  shell: |
-    openstack user create --domain {{ keystone_default_domain_name }} --password {{ keystone_user_password }} {{ keystone_user_name }}
-    openstack role create {{ keystone_user_role }}
-    openstack role add --project {{ keystone_user_project_name }} --user {{ keystone_user_name }} {{ keystone_user_role }}
-  when: exists|failed
-  tags: workingon
+#- name: Create the non admin user, role and associate both to non admin project
+#  shell: |
+#    openstack user create --domain {{ keystone_default_domain_name }} --password {{ keystone_user_password }} {{ keystone_user_name }}
+#    openstack role create {{ keystone_user_role }}
+#    openstack role add --project {{ keystone_user_project_name }} --user {{ keystone_user_name }} {{ keystone_user_role }}
+#  when: exists|failed
 
 
 # http://docs.openstack.org/liberty/install-guide-ubuntu/keystone-openrc.html
 #  Create OpenStack client environment scripts
 - name: Create admin-openrc.sh environment script
   template: src=admin-openrc.sh.j2 dest=/root/{{ keystone_admin_name }}-openrc.sh
-  tags: workingon
 
-- name: Create {{ keystone_user_name }} environment script
-  template: src=user-openrc.sh.j2 dest=/root/{{ keystone_user_name }}-openrc.sh
-  tags: workingon
+#- name: Create {{ keystone_user_name }} environment script
+#  template: src=user-openrc.sh.j2 dest=/root/{{ keystone_user_name }}-openrc.sh
