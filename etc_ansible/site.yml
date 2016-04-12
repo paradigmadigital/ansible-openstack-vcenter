@@ -41,57 +41,57 @@
   - image
   - glance
 
-## Networking and compute services
-#- hosts: networking-compute-controller
-#  roles:
+# Networking and compute services
+- hosts: networking-compute-controller
+  roles:
+  - ntp
+  - networking-compute-controller
+  tags:
+  - networking-compute-controller
+  - controller
+  - networking
+
+# Dashboard service
+- hosts: dashboard
+  roles:
 #  - ntp
-#  - networking-compute-controller
-#  tags:
-#  - networking-compute-controller
-#  - controller
-#  - networking
-#
-## Dashboard service
-#- hosts: dashboard
-#  roles:
-##  - ntp
-#  - dashboard
-#  tags:
-#  - dashboard
-#  - horizon
-#
-## Block Storage service
-#- hosts: block-storage
-#  roles:
-##  - ntp
-#  - block-storage
-#  tags:
-#  - cinder
-#  - block-storage
-#
-## Ochestration service
-#- hosts: orchestation
-#  roles:
-##  - ntp
-#  - orchestation
-#  tags:
-#  - heat
-#  - orchestation
-#  - cloudformation
-#
-## Adding hypervisors
-#- hosts: kvm-hypervisor
-#  roles:
+  - dashboard
+  tags:
+  - dashboard
+  - horizon
+
+# Block Storage service
+- hosts: block-storage
+  roles:
 #  - ntp
-#  - kvm-hypervisor
-#  tags:
-#  - kvm-hypervisor
-#  - compute
-#
-#- hosts: lxd-hypervisor
-#  roles:
+  - block-storage
+  tags:
+  - cinder
+  - block-storage
+
+# Ochestration service
+- hosts: orchestation
+  roles:
 #  - ntp
-#  - lxd-hypervisor
-#  tags:
-#  - lxd-hypervisor
-#  - compute
+  - orchestation
+  tags:
+  - heat
+  - orchestation
+  - cloudformation
+
+# Adding hypervisors
+- hosts: kvm-hypervisor
+  roles:
+  - ntp
+  - kvm-hypervisor
+  tags:
+  - kvm-hypervisor
+  - compute
+
+- hosts: lxd-hypervisor
+  roles:
+  - ntp
+  - lxd-hypervisor
+  tags:
+  - lxd-hypervisor
+  - compute
