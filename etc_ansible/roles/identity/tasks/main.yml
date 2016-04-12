@@ -37,14 +37,16 @@
   tags:
   - appliance
 
+- name: Stop and disable keystone service
+  service: name=keystone state=stopped enabled=no
+  tags:
+  - appliance
+
 - name: Configure keystone service
   template: src=keystone.conf.j2 dest=/etc/keystone/keystone.conf owner=keystone group=root mode=0640
   notify:
   - populate database
   - fernet setup
-
-- name: Ensure keystone service is stopped
-  service: name=keystone state=stopped
 
 - meta: flush_handlers
 
@@ -70,6 +72,9 @@
 
 # Create the service entity and API endpoint
 # http://docs.openstack.org/liberty/install-guide-ubuntu/keystone-services.html
+- name: Install python-openstackclient
+  package: name=python-openstackclient state=present
+
 - name: Test if service entity exists
   shell: |
     openstack service list | grep " identity "| wc -l
@@ -95,7 +100,6 @@
     openstack endpoint create --region {{ region_name }} identity internal http://{{ admin_hostname }}:5000/v3
     openstack endpoint create --region {{ region_name }} identity admin http://{{ admin_hostname }}:5000/v3
   when: endpoint_exists|failed
-
 
 # Create projects, users and roles
 # http://docs.openstack.org/liberty/install-guide-ubuntu/keystone-users.html
