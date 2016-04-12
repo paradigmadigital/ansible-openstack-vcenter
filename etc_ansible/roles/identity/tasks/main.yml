@@ -69,9 +69,6 @@
 # http://docs.openstack.org/liberty/install-guide-ubuntu/keystone-services.html
 - name: Test if service entity exists
   shell: |
-    export OS_TOKEN={{ administration_token }}
-    export OS_URL=http://{{ admin_hostname }}:35357/v3
-    export OS_IDENTITY_API_VERSION=3
     openstack service list | grep " identity "| wc -l
   register: service_entity_exists
   ignore_errors: True
@@ -79,17 +76,11 @@
 
 - name: Create the service entity for the Identity service
   shell: |
-    export OS_TOKEN={{ administration_token }}
-    export OS_URL=http://{{ admin_hostname }}:35357/v3
-    export OS_IDENTITY_API_VERSION=3
     openstack service create --name {{ keystone_keystone_name }} --description "OpenStack Identity" identity
   when: service_entity_exists|failed
 
 - name: Test if endpoints exists
   shell: |
-    export OS_TOKEN={{ administration_token }}
-    export OS_URL=http://{{ admin_hostname }}:35357/v3
-    export OS_IDENTITY_API_VERSION=3
     openstack endpoint list | grep " identity " | wc -l
   register: endpoint_exists
   ignore_errors: True
@@ -97,22 +88,28 @@
 
 - name: Create the Identity service API endpoints
   shell: |
-    export OS_TOKEN={{ administration_token }}
-    export OS_URL=http://{{ admin_hostname }}:35357/v3
-    export OS_IDENTITY_API_VERSION=3
-    openstack endpoint create --region {{ region_name }} identity public http://{{ admin_hostname }}:5000/v2.0
-    openstack endpoint create --region {{ region_name }} identity internal http://{{ admin_hostname }}:5000/v2.0
-    openstack endpoint create --region {{ region_name }} identity admin http://{{ admin_hostname }}:5000/v2.0
+    openstack endpoint create --region {{ region_name }} identity public http://{{ admin_hostname }}:5000/v3
+    openstack endpoint create --region {{ region_name }} identity internal http://{{ admin_hostname }}:5000/v3
+    openstack endpoint create --region {{ region_name }} identity admin http://{{ admin_hostname }}:5000/v3
   when: endpoint_exists|failed
 
 
 # Create projects, users and roles
 # http://docs.openstack.org/liberty/install-guide-ubuntu/keystone-users.html
+- name: Test if default domain exists
+  shell: |
+    openstack domain list | grep " {{ keystone_default_domain_name }}" | wc -l
+  register: exists
+  ignore_errors: True
+  failed_when: "'0' in exists.stdout"
+
+- name: Create the default domain
+  shell: |
+    openstack domain create --description "{{ keystone_default_domain_description }}"  {{ keystone_default_domain_name }}
+  when: exists:failed
+
 - name: Test if admin project exists
   shell: |
-    export OS_TOKEN={{ administration_token }}
-    export OS_URL=http://{{ admin_hostname }}:35357/v3
-    export OS_IDENTITY_API_VERSION=3
     openstack project list | grep " {{ keystone_admin_project_name }} " | wc -l
   register: exists
   ignore_errors: True
@@ -120,18 +117,12 @@
 
 - name: Create the admin project
   shell: |
-    export OS_TOKEN={{ administration_token }}
-    export OS_URL=http://{{ admin_hostname }}:35357/v3
-    export OS_IDENTITY_API_VERSION=3
     openstack project create --domain {{ keystone_default_domain_name }} --description "{{ keystone_admin_project_description }}" {{ keystone_admin_project_name }}
   when: exists|failed
 
 
 - name: Test if admin user exists
   shell: |
-    export OS_TOKEN={{ administration_token }}
-    export OS_URL=http://{{ admin_hostname }}:35357/v3
-    export OS_IDENTITY_API_VERSION=3
     openstack user list | grep " {{ keystone_admin_name }} " | wc -l
   register: exists
   ignore_errors: True
@@ -139,9 +130,6 @@
 
 - name: Create the admin user, role and asociate both to admin project
   shell: |
-    export OS_TOKEN={{ administration_token }}
-    export OS_URL=http://{{ admin_hostname }}:35357/v3
-    export OS_IDENTITY_API_VERSION=3
     openstack user create --domain {{ keystone_default_domain_name }} --password {{ keystone_admin_password }} {{ keystone_admin_name }}
     openstack role create {{ keystone_admin_role }}
     openstack role add --project {{ keystone_admin_project_name }} --user {{ keystone_admin_name }} {{ keystone_admin_role }}
@@ -151,9 +139,6 @@
 # Create the service project
 - name: Test if service project exists
   shell: |
-    export OS_TOKEN={{ administration_token }}
-    export OS_URL=http://{{ admin_hostname }}:35357/v3
-    export OS_IDENTITY_API_VERSION=3
     openstack project list | grep " service " | wc -l
   register: exists
   ignore_errors: True
@@ -161,54 +146,37 @@
 
 - name: Create the service project
   shell: |
-    export OS_TOKEN={{ administration_token }}
-    export OS_URL=http://{{ admin_hostname }}:35357/v3
-    export OS_IDENTITY_API_VERSION=3
     openstack project create --domain {{ keystone_default_domain_name }} --description "{{ keystone_service_project_description}}" {{ keystone_service_project_name }}
-    openstack role create {{ keystone_admin_role }}
-    openstack role add --project {{ keystone_admin_project_name }} --user {{ keystone_admin_name }} {{ keystone_admin_role }}
   when: exists|failed
 
+# Whe don't need non admin stuff. This will be created by admin after installation.
+## Non admin project, user and role
+#- name: Test if non admin project exists
+#  shell: |
+#    openstack project list | grep " {{ keystone_user_project_name }} " | wc -l
+#  register: exists
+#  ignore_errors: True
+#  failed_when: "'0' in exists.stdout"
 
-# Non admin project, user and role
-- name: Test if non admin project exists
-  shell: |
-    export OS_TOKEN={{ administration_token }}
-    export OS_URL=http://{{ admin_hostname }}:35357/v3
-    export OS_IDENTITY_API_VERSION=3
-    openstack project list | grep " {{ keystone_user_project_name }} " | wc -l
-  register: exists
-  ignore_errors: True
-  failed_when: "'0' in exists.stdout"
-
-- name: Create the non admin project
-  shell: |
-    export OS_TOKEN={{ administration_token }}
-    export OS_URL=http://{{ admin_hostname }}:35357/v3
-    export OS_IDENTITY_API_VERSION=3
-    openstack project create --domain {{ keystone_default_domain_name }} --description "{{ keystone_user_project_description }}" {{ keystone_user_project_name }}
-  when: exists|failed
+#- name: Create the non admin project
+#  shell: |
+#    openstack project create --domain {{ keystone_default_domain_name }} --description "{{ keystone_user_project_description }}" {{ keystone_user_project_name }}
+#  when: exists|failed
 
 
-- name: Test if non admin user exists
-  shell: |
-    export OS_TOKEN={{ administration_token }}
-    export OS_URL=http://{{ admin_hostname }}:35357/v3
-    export OS_IDENTITY_API_VERSION=3
-    openstack user list | grep " {{ keystone_user_name }} " | wc -l
-  register: exists
-  ignore_errors: True
-  failed_when: "'0' in exists.stdout"
+#- name: Test if non admin user exists
+#  shell: |
+#    openstack user list | grep " {{ keystone_user_name }} " | wc -l
+#  register: exists
+#  ignore_errors: True
+#  failed_when: "'0' in exists.stdout"
 
-- name: Create the admin user, role and associate both to admin project
-  shell: |
-    export OS_TOKEN={{ administration_token }}
-    export OS_URL=http://{{ admin_hostname }}:35357/v3
-    export OS_IDENTITY_API_VERSION=3
-    openstack user create --domain {{ keystone_default_domain_name }} --password {{ keystone_user_password }} {{ keystone_user_name }}
-    openstack role create {{ keystone_user_role }}
-    openstack role add --project {{ keystone_user_project_name }} --user {{ keystone_user_name }} {{ keystone_user_role }}
-  when: exists|failed
+#- name: Create the non admin user, role and associate both to non admin project
+#  shell: |
+#    openstack user create --domain {{ keystone_default_domain_name }} --password {{ keystone_user_password }} {{ keystone_user_name }}
+#    openstack role create {{ keystone_user_role }}
+#    openstack role add --project {{ keystone_user_project_name }} --user {{ keystone_user_name }} {{ keystone_user_role }}
+#  when: exists|failed
 
 
 # http://docs.openstack.org/liberty/install-guide-ubuntu/keystone-openrc.html
@@ -216,5 +184,5 @@
 - name: Create admin-openrc.sh environment script
   template: src=admin-openrc.sh.j2 dest=/root/{{ keystone_admin_name }}-openrc.sh
 
-- name: Create {{ keystone_user_name }} environment script
-  template: src=user-openrc.sh.j2 dest=/root/{{ keystone_user_name }}-openrc.sh
+#- name: Create {{ keystone_user_name }} environment script
+#  template: src=user-openrc.sh.j2 dest=/root/{{ keystone_user_name }}-openrc.sh
