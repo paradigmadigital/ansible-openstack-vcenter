@@ -55,14 +55,12 @@
   register: exists
   ignore_errors: True
   failed_when: "'0' in exists.stdout"
-  tags: workingon
 
 - name: Create the nova user, role and asociate both to admin project
   shell: |
     openstack user create --domain {{ keystone_default_domain_name }} --password {{ keystone_nova_password }} {{ keystone_nova_name }}
     openstack role add --project {{ keystone_service_project_name }} --user {{ keystone_nova_name }} {{ keystone_admin_role }}
   when: exists|failed
-  tags: workingon
 
 
 #Create the service entity and API endpoint
@@ -145,14 +143,12 @@
   register: exists
   ignore_errors: True
   failed_when: "'0' in exists.stdout"
-  tags: workingon
 
 - name: Create the neutron user, role and asociate both to admin project
   shell: |
     openstack user create --domain {{ keystone_default_domain_name }} --password {{ keystone_neutron_password }} {{ keystone_neutron_name }}
     openstack role add --project {{ keystone_service_project_name }} --user {{ keystone_neutron_name }} {{ keystone_admin_role }}
   when: exists|failed
-  tags: workingon
 
 
 #Create the service entity and API endpoint
@@ -182,14 +178,6 @@
     openstack endpoint create --region {{ region_name }} network admin http://{{ admin_hostname }}:9696
   when: endpoint_exists|failed
 
-- name: Install networking components
-  apt: name={{ item }} state=present
-  with_items:
-  - neutron-server
-  - neutron-plugin-ml2
-  - python-neutronclient
-  tags:
-  - appliance
 
 ## Install NEUTRON component and configure it ##
 # http://docs.openstack.org/juno/install-guide/install/apt/content/section_neutron-networking.html
@@ -217,6 +205,7 @@
   - python-neutronclient
   tags:
   - appliance
+  - workingon
 
 - name: Configure neutron server component
   template: src=neutron.conf.j2 dest=/etc/neutron/neutron.conf owner=root group=neutron mode=0644
@@ -230,6 +219,7 @@
   - restart neutron-l3-agent
   - restart neutron-dhcp-agent
   - restart neutron-metadata-agent
+  tags: workingon
 
 - name: Configure Modular Layer 2 (ML2) plug-in
   template: src=ml2_conf.ini.j2 dest=/etc/neutron/plugins/ml2/ml2_conf.ini owner=root group=neutron mode=0644
@@ -238,6 +228,7 @@
   - restart neutron-plugin-openvswitch-agent
   - restart neutron-server
   - restart neutron-server
+  tags: workingon
 
 - name: Configure Layer-3 (L3) agent
   template: src=l3_agent.ini.j2 dest=/etc/neutron/l3_agent.ini owner=root group=neutron mode=0644

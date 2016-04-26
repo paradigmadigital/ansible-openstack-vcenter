@@ -67,6 +67,7 @@ metadata_secret: METADATA_SECRET
 public_cidr: 10.20.30.0/24
 public_gateway: 10.20.30.1
 public_allocation_pool: 10.20.30.10,10.20.30.200
+public_network_name: provider
 # Cinder vars
 # http://docs.openstack.org/kilo/install-guide/install/apt/content/cinder-install-controller-node.html
 cinder_dbpass: CINDER_DBPASS
