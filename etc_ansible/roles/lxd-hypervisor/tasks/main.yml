@@ -5,68 +5,75 @@
   with_items:
   - nova-compute-lxd
   - sysfsutils
-  when: ansible_distribution == "Ubuntu" and ansible_distribution_version == "15.10"
+  when: ansible_distribution == "Ubuntu" and ansible_distribution_version == "16.04"
   tags:
   - appliance
+  - workingon
 
 - name: Add nova user to lxd group
   user: name=nova groups=lxd
   notify:
   - restart nova-compute
-  when: ansible_distribution == "Ubuntu" and ansible_distribution_version == "15.10"
+  when: ansible_distribution == "Ubuntu" and ansible_distribution_version == "16.04"
+  tags: workingon
 
-- name: Ensure br_netfilter is loaded
-  modprobe: name=br_netfilter state=present
-  when: ansible_distribution == "Ubuntu" and ansible_distribution_version == "15.10"
-
-- name: Ensure br_netfilter is loaded at boot time
-  lineinfile: dest=/etc/modules line=br_netfilter state=present
-  when: ansible_distribution == "Ubuntu" and ansible_distribution_version == "15.10"
-
-- name: Disable net.ipv4.conf.all.rp_filter
-  sysctl: name=net.ipv4.conf.all.rp_filter value=0 reload=yes sysctl_set=yes
-  when: ansible_distribution == "Ubuntu" and ansible_distribution_version == "15.10"
-
-- name: Disable name=net.ipv4.conf.default.rp_filter
-  sysctl: name=net.ipv4.conf.default.rp_filter value=0 reload=yes sysctl_set=yes
-  when: ansible_distribution == "Ubuntu" and ansible_distribution_version == "15.10"
-
-- name: Enable net.bridge.bridge-nf-call-iptables
-  sysctl: name=net.bridge.bridge-nf-call-iptables value=1 reload=yes sysctl_set=yes
-  when: ansible_distribution == "Ubuntu" and ansible_distribution_version == "15.10"
-
-- name: Enable net.bridge.bridge-nf-call-ip6tables
-  sysctl: name=net.bridge.bridge-nf-call-ip6tables value=1 reload=yes sysctl_set=yes
-  when: ansible_distribution == "Ubuntu" and ansible_distribution_version == "15.10"
+#- name: Ensure br_netfilter is loaded
+#  modprobe: name=br_netfilter state=present
+#  when: ansible_distribution == "Ubuntu" and ansible_distribution_version == "16.04"
+#
+# - name: Ensure br_netfilter is loaded at boot time
+#   lineinfile: dest=/etc/modules line=br_netfilter state=present
+#   when: ansible_distribution == "Ubuntu" and ansible_distribution_version == "16.04"
+#
+# - name: Disable net.ipv4.conf.all.rp_filter
+#   sysctl: name=net.ipv4.conf.all.rp_filter value=0 reload=yes sysctl_set=yes
+#   when: ansible_distribution == "Ubuntu" and ansible_distribution_version == "16.04"
+#
+# - name: Disable name=net.ipv4.conf.default.rp_filter
+#   sysctl: name=net.ipv4.conf.default.rp_filter value=0 reload=yes sysctl_set=yes
+#   when: ansible_distribution == "Ubuntu" and ansible_distribution_version == "16.04"
+#
+# - name: Enable net.bridge.bridge-nf-call-iptables
+#   sysctl: name=net.bridge.bridge-nf-call-iptables value=1 reload=yes sysctl_set=yes
+#   when: ansible_distribution == "Ubuntu" and ansible_distribution_version == "16.04"
+#
+# - name: Enable net.bridge.bridge-nf-call-ip6tables
+#   sysctl: name=net.bridge.bridge-nf-call-ip6tables value=1 reload=yes sysctl_set=yes
+#   when: ansible_distribution == "Ubuntu" and ansible_distribution_version == "16.04"
 
 - name: Install networking components (Ubuntu)
   apt: name={{ item }} state=present
   with_items:
   - neutron-plugin-ml2
-  - neutron-plugin-openvswitch-agent
-  when: ansible_distribution == "Ubuntu" and ansible_distribution_version == "15.10"
+  - neutron-openvswitch-agent
+  when: ansible_distribution == "Ubuntu" and ansible_distribution_version == "16.04"
   tags:
   - appliance
+  - workingon
 
 - name: Configure neutron server component (Ubuntu)
   template: src=neutron.conf.j2 dest=/etc/neutron/neutron.conf owner=root group=neutron mode=0644
   notify:
   - restart openvswitch-switch
-  when: ansible_distribution == "Ubuntu" and ansible_distribution_version == "15.10"
+  when: ansible_distribution == "Ubuntu" and ansible_distribution_version == "16.04"
+  tags: workingon
 
 - name: Configure Modular Layer 2 (ML2) plug-in (Ubuntu)
   template: src=ml2_conf.ini.j2 dest=/etc/neutron/plugins/ml2/ml2_conf.ini owner=root group=neutron mode=0644
   notify:
   - restart openvswitch-switch
-  when: ansible_distribution == "Ubuntu" and ansible_distribution_version == "15.10"
+  when: ansible_distribution == "Ubuntu" and ansible_distribution_version == "16.04"
+  tags: workingon
 
 - name: Configure Compute to use Networking (Ubuntu)
   template: src=nova.conf.j2 dest=/etc/nova/nova.conf owner=nova group=nova
   notify:
   - restart nova-compute
   - restart neutron-plugin-openvswitch-agent
-  when: ansible_distribution == "Ubuntu" and ansible_distribution_version == "15.10"
+  when: ansible_distribution == "Ubuntu" and ansible_distribution_version == "16.04"
+  tags: workingon
 
 - name: Remove sqlite database
   file: path=/var/lib/nova/nova.sqlite state=absent
-  when: ansible_distribution == "Ubuntu" and ansible_distribution_version == "15.10"
+  when: ansible_distribution == "Ubuntu" and ansible_distribution_version == "16.04"
+  tags: workingon
