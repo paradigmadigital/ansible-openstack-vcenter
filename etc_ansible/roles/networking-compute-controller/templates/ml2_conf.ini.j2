@@ -180,7 +180,6 @@ flat_networks = {{ public_network_name }}
 
 
 [ml2_type_gre]
-tunnel_id_ranges = 1:1000
 
 #
 # From neutron.ml2
@@ -189,6 +188,7 @@ tunnel_id_ranges = 1:1000
 # Comma-separated list of <tun_min>:<tun_max> tuples enumerating ranges of GRE
 # tunnel IDs that are available for tenant network allocation (list value)
 #tunnel_id_ranges =
+tunnel_id_ranges = 1:1000
 
 
 [ml2_type_vlan]
