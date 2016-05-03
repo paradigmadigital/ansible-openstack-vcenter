@@ -69,7 +69,7 @@
   template: src=nova.conf.j2 dest=/etc/nova/nova.conf owner=nova group=nova
   notify:
   - restart nova-compute
-  - restart neutron-plugin-openvswitch-agent
+  - restart neutron-openvswitch-agent
   when: ansible_distribution == "Ubuntu" and ansible_distribution_version == "16.04"
   tags: workingon
 
