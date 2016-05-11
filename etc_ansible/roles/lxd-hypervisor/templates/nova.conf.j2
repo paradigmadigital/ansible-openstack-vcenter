@@ -22,9 +22,10 @@ my_ip = {{ ansible_osm["ipv4"]["address"] }}
 my_ip = {{ ansible_eth0["ipv4"]["address"] }}
 {% endif %}
 
-network_api_class = nova.network.neutronv2.api.API
-security_group_api = neutron
-linuxnet_interface_driver = nova.network.linux_net.LinuxOVSInterfaceDriver
+#network_api_class = nova.network.neutronv2.api.API
+#security_group_api = neutron
+#linuxnet_interface_driver = nova.network.linux_net.LinuxOVSInterfaceDriver
+use_neutron = True
 firewall_driver = nova.virt.firewall.NoopFirewallDriver
 
 resume_guests_state_on_host_boot=true
@@ -32,12 +33,11 @@ resume_guests_state_on_host_boot=true
 
 [vnc]
 enabled = True
+vncserver_listen = 0.0.0.0
 {% if network_type == "openvswitch" %}
-vncserver_listen = {{ ansible_osm["ipv4"]["address"] }}
 vncserver_proxyclient_address = {{ ansible_osm["ipv4"]["address"] }}
 {% endif %}
 {% if network_type == "vxlan" %}
-vncserver_listen = {{ ansible_eth0["ipv4"]["address"] }}
 vncserver_proxyclient_address = {{ ansible_eth0["ipv4"]["address"] }}
 {% endif %}
 novncproxy_base_url = http://{{ admin_hostname }}:6080/vnc_auto.html
@@ -52,16 +52,16 @@ rabbit_password = {{ rabbitmq_password }}
 [keystone_authtoken]
 auth_uri = http://{{ admin_hostname }}:5000
 auth_url = http://{{ admin_hostname }}:35357
-auth_plugin = password
-project_domain_id = default
-user_domain_id = default
+auth_type = password
+project_domain_name = {{ keystone_default_project_name }}
+user_domain_name = {{ keystone_default_domain_name }}
 project_name = {{ keystone_service_project_name }}
 username = {{ keystone_nova_name }}
 password = {{ keystone_nova_password }}
 
 
 [glance]
-host = {{ controller_hostname }}
+api_servers = http://{{ controller_hostname }}:9292
 
 
 [oslo_concurrency]
@@ -71,10 +71,10 @@ lock_path = /var/lib/nova/tmp
 [neutron]
 url = http://{{ admin_hostname }}:9696
 auth_url = http://{{ admin_hostname }}:35357
-auth_plugin = password
-project_domain_id = default
-user_domain_id = default
+auth_type = password
+project_domain_name = {{ keystone_default_project_name }}
+user_domain_name = {{ keystone_default_domain_name }}
 region_name = {{ region_name }}
 project_name = {{ keystone_service_project_name }}
-username = {{ keystone_nova_name }}
-password = {{ keystone_nova_password }}
+username = {{ keystone_neutron_name }}
+password = {{ keystone_neutron_password }}

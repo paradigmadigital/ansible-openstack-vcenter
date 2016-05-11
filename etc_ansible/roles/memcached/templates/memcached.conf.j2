@@ -33,10 +33,10 @@ logfile /var/log/memcached.log
 # This parameter is one of the only security measures that memcached has, so make sure
 # it's listening on a firewalled interface.
 {% if network_type == "openvswitch" %}
--l {{ ansible_osm["ipv4"]["network"] }}
+-l {{ ansible_osm["ipv4"]["address"] }}
 {% endif %}
 {% if network_type == "vxlan" %}
--l {{ ansible_eth0["ipv4"]["network"] }}
+-l {{ ansible_eth0["ipv4"]["address"] }}
 {% endif %}
 
 # Limit the number of simultaneous incoming connections. The daemon default is 1024
