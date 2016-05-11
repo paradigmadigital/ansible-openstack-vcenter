@@ -105,7 +105,7 @@
 # List of network type driver entrypoints to be loaded from the
 # neutron.ml2.type_drivers namespace. (list value)
 #type_drivers = local,flat,vlan,gre,vxlan,geneve
-type_drivers = flat,vlan,gre,vxlan
+type_drivers = flat,gre
 
 # Ordered list of network_types to allocate as tenant networks. The default
 # value 'local' is useful for single-box testing but provides no connectivity
@@ -116,7 +116,7 @@ tenant_network_types = gre
 # An ordered list of networking mechanism driver entrypoints to be loaded from
 # the neutron.ml2.mechanism_drivers namespace. (list value)
 #mechanism_drivers =
-mechanism_drivers = openvswitch
+mechanism_drivers = openvswitch,l2population
 
 # An ordered list of extension driver entrypoints to be loaded from the
 # neutron.ml2.extension_drivers namespace. For example: extension_drivers =
@@ -159,7 +159,7 @@ extension_drivers = port_security
 # default '*' to allow flat networks with arbitrary physical_network names. Use
 # an empty list to disable flat networks. (list value)
 #flat_networks = *
-flat_networks = {{ public_network_name }}
+flat_networks = external
 
 [ml2_type_geneve]
 
@@ -237,3 +237,4 @@ enable_security_group = true
 # Use ipset to speed-up the iptables based security groups. Enabling ipset
 # support requires that ipset is installed on L2 agent node. (boolean value)
 enable_ipset = true
+

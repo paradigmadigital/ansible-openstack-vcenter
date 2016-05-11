@@ -1,29 +1,28 @@
 [databases]
-openstack-vcenter ansible_ssh_user=root
+openstack-vcenter become=yes become_user=root become_method=sudo ansible_connection=local
 
 [identity]
-openstack-vcenter ansible_ssh_user=root
+openstack-vcenter become=yes become_user=root become_method=sudo ansible_connection=local
 
 [image]
-openstack-vcenter ansible_ssh_user=root
+openstack-vcenter become=yes become_user=root become_method=sudo ansible_connection=local
 
 # vcenter node *MUST* be here
 # vcenter = networking controller + nova controller)
 [networking-compute-controller]
-openstack-vcenter ansible_ssh_user=root
+openstack-vcenter become=yes become_user=root become_method=sudo ansible_connection=local
 
-[block-storage]
-openstack-vcenter ansible_ssh_user=root
+#[block-storage]
+#openstack-vcenter become=yes become_user=root become_method=sudo ansible_connection=local
 
-[orchestation]
-openstack-vcenter ansible_ssh_user=root
+#[orchestation]
+#openstack-vcenter become=yes become_user=root become_method=sudo ansible_connection=local
 
 [dashboard]
-openstack-vcenter ansible_ssh_user=root
+openstack-vcenter become=yes become_user=root become_method=sudo ansible_connection=local
 
-[kvm-hypervisor]
-openstack-compute ansible_ssh_user=root
+#[kvm-hypervisor]
+#openstack-compute ansible_ssh_user=root
 
 [lxd-hypervisor]
 openstack-compute-lxd ansible_ssh_user=root
-
