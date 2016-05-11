@@ -136,11 +136,11 @@ allow_overlapping_ips = true
 #force_gateway_on_subnet = true
 
 # Send notification to nova when port status changes (boolean value)
-#notify_nova_on_port_status_changes = true
+notify_nova_on_port_status_changes = true
 
 # Send notification to nova when port data (fixed_ips/floatingip) changes so
 # nova can update its cache. (boolean value)
-#notify_nova_on_port_data_changes = true
+notify_nova_on_port_data_changes = true
 
 # Number of seconds between sending events to nova if there are any events to
 # send. (integer value)
@@ -1002,7 +1002,14 @@ password = {{ keystone_neutron_password }}
 
 # Authentication URL (unknown value)
 #auth_url = <None>
-
+auth_url = http://{{ admin_hostname }}:35357
+auth_type = password
+project_domain_name = {{ keystone_default_project_name }}
+user_domain_name = {{ keystone_default_domain_name }}
+region_name = {{ region_name }}
+project_name = {{ keystone_service_project_name }}
+username = {{ keystone_nova_name }}
+password = {{ keystone_nova_password }}
 # Authentication type to load (unknown value)
 # Deprecated group/name - [DEFAULT]/auth_plugin
 #auth_type = <None>

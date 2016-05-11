@@ -64,8 +64,8 @@ username = {{ keystone_nova_name }}
 password = {{ keystone_nova_password }}
 
 
-#[glance]
-#host = {{ admin_hostname }}
+[glance]
+host = {{ admin_hostname }}
 
 
 [neutron]
@@ -78,7 +78,6 @@ region_name = {{ region_name }}
 project_name = {{ keystone_service_project_name }}
 username = {{ keystone_nova_name }}
 password = {{ keystone_nova_password }}
-
 
 service_metadata_proxy = True
 metadata_proxy_shared_secret = {{ metadata_secret }}
