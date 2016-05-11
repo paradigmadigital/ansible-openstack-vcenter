@@ -772,26 +772,15 @@ connection = sqlite:////var/lib/neutron/neutron.sqlite
 
 # Complete public Identity API endpoint. (string value)
 #auth_uri = <None>
-auth_uri = http://{{ admin_hostname }}:5000
-auth_url = http://{{ admin_hostname }}:35357
-memcached_servers = {{ admin_hostname }}:11211
-auth_type = password
-project_domain_name = {{ keystone_default_project_name }}
-user_domain_name = {{ keystone_default_domain_name }}
-project_name = {{ keystone_service_project_name }}
-username = {{ keystone_neutron_name }}
-password = {{ keystone_neutron_password }}
-
-
-url = http://{{ admin_hostname }}:9696
-auth_url = http://{{ admin_hostname }}:35357
+auth_uri = http://openstack-vcenter:5000
+auth_url = http://openstack-vcenter:35357
+memcached_servers = openstack-vcenter:11211
 auth_type = password
 project_domain_name = default
 user_domain_name = default
-region_name = {{ region_name }}
-project_name = {{ keystone_service_project_name }}
-username = {{ keystone_neutron_name }}
-password = {{ keystone_neutron_password }}
+project_name = service
+username = neutron
+password = neutron
 
 # API version of the admin Identity API endpoint. (string value)
 #auth_version = <None>
@@ -1388,6 +1377,7 @@ rabbit_password = {{ rabbitmq_password }}
 
 # Persist notification messages. (boolean value)
 #notification_persistence = false
+notification_persistence = true
 
 # Exchange name for for sending notifications (string value)
 #default_notification_exchange = ${control_exchange}_notification
