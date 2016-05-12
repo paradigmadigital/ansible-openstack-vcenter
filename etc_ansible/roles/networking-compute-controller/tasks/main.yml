@@ -253,22 +253,24 @@
 
 # Add lbaas.
 # Thanks to: https://ask.openstack.org/en/question/82555/proper-installation-guide-for-lbaas-in-juno/?answer=82558#post-id-82558
-#- name: Install the lbaasv2 agent
-#  apt: name=neutron-lbaasv2-agent state=present
-#  tags:
-#  - appliance
+- name: Install the lbaas agent
+  apt: name=neutron-lbaas-agent state=present
+  tags:
+  - appliance
 
-#- name: Configure the lbaas agent
-#  template: src=lbaas_agent.ini.j2 dest=/etc/neutron/lbaas_agent.ini owner=root group=root mode=0644
-#  notify:
-#  - restart neutron-lbaas-agent
-#  - restart neutron-server
+- name: Configure the lbaas agent
+  template: src=lbaas_agent.ini.j2 dest=/etc/neutron/lbaas_agent.ini owner=root group=root mode=0644
+  notify:
+  - restart neutron-lbaas-agent
+  - restart neutron-server
+  - update lbaas tables in neutron database
 
-#- name: Configure neutron to use lbaas agent
-#  template: src=neutron_lbaas.conf.j2 dest=/etc/neutron/neutron_lbaas.conf owner=root group=root mode=0644
-#  notify:
-#  - restart neutron-lbaas-agent
-#  - restart neutron-server
+- name: Configure neutron to use lbaas agent
+  template: src=neutron_lbaas.conf.j2 dest=/etc/neutron/neutron_lbaas.conf owner=root group=root mode=0644
+  notify:
+  - restart neutron-lbaas-agent
+  - restart neutron-server
+  - update lbaas tables in neutron database
 
 # Configure Open vSwitch service
 - name: Restart OVS service
