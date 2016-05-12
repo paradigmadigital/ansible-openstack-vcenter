@@ -65,11 +65,12 @@
   when: ansible_distribution == "Ubuntu" and ansible_distribution_version == "16.04"
   tags: workingon
 
-- name: Configure Open vSwitch Agent) agent
+- name: Configure Open vSwitch Agent (Ubuntu)
   template: src=openvswitch_agent.ini.j2 dest=/etc/neutron/plugins/ml2/openvswitch_agent.ini owner=root group=neutron mode=0644
   notify:
   - restart openvswitch-switch
   - restart neutron-plugin-openvswitch-agent
+  when: ansible_distribution == "Ubuntu" and ansible_distribution_version == "16.04"
 
 - name: Configure Compute to use Networking (Ubuntu)
   template: src=nova.conf.j2 dest=/etc/nova/nova.conf owner=nova group=nova
