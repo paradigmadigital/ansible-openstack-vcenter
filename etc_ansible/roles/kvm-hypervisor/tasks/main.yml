@@ -12,7 +12,7 @@
   apt: name={{ item }} state=present
   with_items:
   - nova-compute
-#  - sysfsutils
+  - sysfsutils
   when: ansible_distribution == "Ubuntu" and ansible_distribution_version == "16.04"
   tags:
   - appliance
@@ -33,9 +33,9 @@
   when: ansible_distribution == "CentOS" and ansible_distribution_version | search("^7")
 
 
-#- name: Configure nova
-#  template: src=nova.conf.j2 dest=/etc/nova/nova.conf owner=nova group=nova
-#  notify: restart nova-compute
+- name: Configure nova
+  template: src=nova.conf.j2 dest=/etc/nova/nova.conf owner=nova group=nova
+  notify: restart nova-compute
 
 # http://docs.openstack.org/liberty/install-guide-ubuntu/neutron.html
 # http://docs.openstack.org/liberty/install-guide-ubuntu/neutron-compute-install.html
@@ -65,7 +65,7 @@
 - name: Install networking components (Ubuntu)
   apt: name={{ item }} state=present
   with_items:
-#  - neutron-plugin-ml2
+  - neutron-plugin-ml2
   - neutron-openvswitch-agent
   when: ansible_distribution == "Ubuntu" and ansible_distribution_version == "16.04"
   tags:
@@ -114,7 +114,7 @@
   template: src=openvswitch_agent.ini.j2 dest=/etc/neutron/plugins/ml2/openvswitch_agent.ini owner=root group=neutron mode=0644
   notify:
   - restart openvswitch-switch
-  - restart neutron-plugin-openvswitch-agent
+  - restart neutron-openvswitch-agent
   when: ansible_distribution == "Ubuntu" and ansible_distribution_version == "16.04"
 
 - name: Configure Modular Layer 2 (ML2) plug-in (CentOS)

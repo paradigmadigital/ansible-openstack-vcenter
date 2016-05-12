@@ -1,7 +1,4 @@
 [DEFAULT]
-verbose = True
-debug = True
-
 dhcpbridge_flagfile=/etc/nova/nova.conf
 dhcpbridge=/usr/bin/nova-dhcpbridge
 logdir=/var/log/nova
@@ -9,6 +6,7 @@ state_path=/var/lib/nova
 lock_path=/var/lock/nova
 force_dhcp_release=True
 libvirt_use_virtio_for_bridges=True
+verbose=True
 ec2_private_dns_show_ip=True
 api_paste_config=/etc/nova/api-paste.ini
 enabled_apis=osapi_compute,metadata
@@ -23,9 +21,11 @@ my_ip = {{ ansible_osm["ipv4"]["address"] }}
 my_ip = {{ ansible_eth0["ipv4"]["address"] }}
 {% endif %}
 
-network_api_class = nova.network.neutronv2.api.API
-security_group_api = neutron
-linuxnet_interface_driver = nova.network.linux_net.LinuxOVSInterfaceDriver
+#network_api_class = nova.network.neutronv2.api.API
+#security_group_api = neutron
+#linuxnet_interface_driver = nova.network.linux_net.LinuxOVSInterfaceDriver
+
+use_neutron = True
 firewall_driver = nova.virt.firewall.NoopFirewallDriver
 
 # http://docs.openstack.org/liberty/config-reference/content/section_compute-scheduler.html#diskfilter
@@ -45,6 +45,9 @@ vncserver_proxyclient_address = {{ ansible_eth0["ipv4"]["address"] }}
 
 
 
+[api_database]
+connection = {{ relational_database_driver[relational_database] }}://{{ keystone_nova_name }}:{{ nova_dbpass }}@{{ admin_hostname }}/nova_api
+
 [database]
 connection = {{ relational_database_driver[relational_database] }}://{{ keystone_nova_name }}:{{ nova_dbpass }}@{{ admin_hostname }}/nova
 
@@ -52,9 +55,10 @@ connection = {{ relational_database_driver[relational_database] }}://{{ keystone
 [keystone_authtoken]
 auth_uri = http://{{ admin_hostname }}:5000
 auth_url = http://{{ admin_hostname }}:35357
-auth_plugin = password
-project_domain_id = default
-user_domain_id = default
+memcached_servers = {{ admin_hostname }}:11211
+auth_type = password
+project_domain_name = {{ keystone_default_project_name }}
+user_domain_name = {{ keystone_default_domain_name }}
 project_name = {{ keystone_service_project_name }}
 username = {{ keystone_nova_name }}
 password = {{ keystone_nova_password }}
@@ -67,10 +71,9 @@ host = {{ admin_hostname }}
 [neutron]
 url = http://{{ admin_hostname }}:9696
 auth_url = http://{{ admin_hostname }}:35357
-auth_url = http://{{ admin_hostname }}:35357
-auth_plugin = password
-project_domain_id = default
-user_domain_id = default
+auth_type = password
+project_domain_name = {{ keystone_default_project_name }}
+user_domain_name = {{ keystone_default_domain_name }}
 region_name = {{ region_name }}
 project_name = {{ keystone_service_project_name }}
 username = {{ keystone_nova_name }}
