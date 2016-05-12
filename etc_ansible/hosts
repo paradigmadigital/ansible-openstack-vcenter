@@ -21,8 +21,8 @@ openstack-vcenter ansible_become=yes ansible_become_user=root ansible_become_pas
 [dashboard]
 openstack-vcenter  ansible_become=yes ansible_become_user=root ansible_become_pass=openstack ansible_become_method=sudo ansible_connection=local
 
-#[kvm-hypervisor]
-#openstack-compute ansible_ssh_user=root
+[kvm-hypervisor]
+openstack-compute-kvm ansible_ssh_user=root
 
 [lxd-hypervisor]
 openstack-compute-lxd ansible_ssh_user=openstack ansible_ssh_pass=openstack ansible_become=yes ansible_become_user=root ansible_become_pass=openstack ansible_become_method=sudo
