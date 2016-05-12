@@ -31,7 +31,7 @@ core_plugin = ml2
 
 # The service plugins Neutron will use (list value)
 #service_plugins =
-service_plugins = router
+service_plugins = router,neutron_lbaas.services.loadbalancer.plugin.LoadBalancerPlugin
 
 # The base MAC address Neutron will use for VIFs. The first 3 octets will
 # remain unchanged. If the 4th octet is not 00, it will also be used. The

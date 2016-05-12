@@ -25,6 +25,7 @@
 
 - name: populate neutron database
   shell: su -s /bin/sh -c "neutron-db-manage --config-file /etc/neutron/neutron.conf --config-file /etc/neutron/plugins/ml2/ml2_conf.ini upgrade mitaka" neutron
+  ignore_errors: True
 
 - name: restart nova-api
   service: name=nova-api state=restarted
@@ -60,3 +61,6 @@
 
 - name: restart neutron-lbaas-agent
   service: name=neutron-lbaas-agent state=restarted
+
+- name: update lbaas tables in neutron database
+  shell: su -s /bin/sh -c "neutron-db-manage --service lbaas upgrade mitaka" neutron
