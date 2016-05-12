@@ -7,7 +7,7 @@
   when: ansible_distribution == "CentOS" and ansible_distribution_version | search("^7")
   ignore_errors: True
 
-# Ubuntu 14.04
+# Ubuntu 16.04
 - name: Install nova packages (Ubuntu)
   apt: name={{ item }} state=present
   with_items:
@@ -95,12 +95,14 @@
   template: src=neutron.conf.j2 dest=/etc/neutron/neutron.conf owner=root group=neutron mode=0644
   notify:
   - restart openvswitch-switch
-  when: ansible_distribution == "Ubuntu" and ansible_distribution_version == "14.04"
+  - restart neutron-openvswitch-agent
+  when: ansible_distribution == "Ubuntu" and ansible_distribution_version == "16.04"
 
 - name: Configure neutron server component (CentOS)
   template: src=neutron.conf_centos7.j2 dest=/etc/neutron/neutron.conf owner=root group=neutron mode=0644
   notify:
   - restart openvswitch
+  - restart neutron-openvswitch-agent
   when: ansible_distribution == "CentOS" and ansible_distribution_version | search("^7")
 
 
@@ -108,6 +110,7 @@
   template: src=ml2_conf.ini.j2 dest=/etc/neutron/plugins/ml2/ml2_conf.ini owner=root group=neutron mode=0644
   notify:
   - restart openvswitch-switch
+  - restart neutron-openvswitch-agent
   when: ansible_distribution == "Ubuntu" and ansible_distribution_version == "16.04"
 
 - name: Configure Open vSwitch Agent) agent
@@ -141,7 +144,7 @@
   notify:
   - restart nova-compute
   - restart neutron-openvswitch-agent
-  when: ansible_distribution == "Ubuntu" and ansible_distribution_version == "14.04"
+  when: ansible_distribution == "Ubuntu" and ansible_distribution_version == "16.04"
 
 - name: Configure Compute to use Networking (CentOS)
   template: src=nova.conf_centos7.j2 dest=/etc/nova/nova.conf owner=nova group=nova
