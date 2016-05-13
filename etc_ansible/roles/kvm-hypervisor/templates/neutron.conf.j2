@@ -772,15 +772,16 @@ connection = sqlite:////var/lib/neutron/neutron.sqlite
 
 # Complete public Identity API endpoint. (string value)
 #auth_uri = <None>
-auth_uri = http://openstack-vcenter:5000
-auth_url = http://openstack-vcenter:35357
-memcached_servers = openstack-vcenter:11211
+auth_uri = http://{{ controller_hostname }}:5000
+auth_url = http://{{ controller_hostname }}:35357
+memcached_servers = {{ controller_hostname }}:11211
 auth_type = password
-project_domain_name = default
-user_domain_name = default
-project_name = service
-username = neutron
-password = neutron
+project_domain_name = {{ keystone_default_project_name }}
+user_domain_name = {{ keystone_default_domain_name }}
+project_name = {{ keystone_service_project_name }}
+username = {{ keystone_neutron_name }}
+password = {{ keystone_neutron_password }}
+
 
 # API version of the admin Identity API endpoint. (string value)
 #auth_version = <None>
