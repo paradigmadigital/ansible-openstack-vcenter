@@ -46,6 +46,15 @@
   roles:
   - ntp
   - networking-compute-controller
+  environment:
+    OS_PROJECT_DOMAIN_NAME: "{{ keystone_default_project_name }}"
+    OS_USER_DOMAIN_NAME: "{{ keystone_default_domain_name }}"
+    OS_PROJECT_NAME: "{{ keystone_admin_project_name }}"
+    OS_USERNAME: "{{ keystone_admin_name }}"
+    OS_PASSWORD: "{{ keystone_admin_password }}"
+    OS_AUTH_URL: "http://{{ admin_hostname }}:35357/v3"
+    OS_URL: "http://{{ admin_hostname }}:35357/v3"
+    OS_IDENTITY_API_VERSION: 3
   tags:
   - networking-compute-controller
   - controller

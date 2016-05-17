@@ -1,56 +1,71 @@
 # http://docs.openstack.org/liberty/install-guide-ubuntu/nova.html
 # http://docs.openstack.org/liberty/install-guide-ubuntu/nova-controller-install.html
 ## Install NOVA but not configure ##
-# mysql
-
-- name: Create mysql database
+## mysql
+# nova database
+- name: Create mysql nova database
   mysql_db: name=nova state=present
   when: relational_database == "mysql"
-  notify:
-  - populate neutron database
 
-- name: Create mysql database user from localhost
+- name: Create mysql nova database user from localhost
   mysql_user: name=nova host=localhost password={{ nova_dbpass }} priv=nova.*:ALL,GRANT state=present
   when: relational_database == "mysql"
 
-- name: Create mysql database user from %
+- name: Create mysql nova database user from %
   mysql_user: name=nova host=% password={{ nova_dbpass }} priv=nova.*:ALL,GRANT state=present
   when: relational_database == "mysql"
 
-# postgresql
-- name: Create postgresql database
+#nova_api database;
+- name: Create mysql nova_api database
+  mysql_db: name=nova_api state=present
+  when: relational_database == "mysql"
+
+- name: Create mysql nova_api database user from localhost
+  mysql_user: name=nova host=localhost password={{ nova_dbpass }} priv=nova_api.*:ALL,GRANT state=present
+  when: relational_database == "mysql"
+
+- name: Create mysql nova_api database user from %
+  mysql_user: name=nova host=% password={{ nova_dbpass }} priv=nova_api.*:ALL,GRANT state=present
+  when: relational_database == "mysql"
+
+## postgresql
+# nova database
+- name: Create postgresql nova database
   postgresql_db: name=nova
   when: relational_database == "postgresql"
-  notify:
-  - populate neutron database
 
-- name: Create postgresql database user
+- name: Create postgresql nova database user
   postgresql_user: db=nova name=nova password={{ nova_dbpass }} priv=ALL
   when: relational_database == "postgresql"
 
+# nova_api database
+- name: Create postgresql nova_api database
+  postgresql_db: name=nova_api
+  when: relational_database == "postgresql"
 
-- name: Create the nova user
-  keystone_user:
-    user={{ keystone_nova_name }}
-    tenant={{ keystone_service_project_name }}
-    password={{ keystone_nova_password }}
-    token={{ administration_token }}
-    endpoint=http://{{ admin_hostname }}:35357/v2.0
+- name: Create postgresql nova database user
+  postgresql_user: db=nova_api name=nova password={{ nova_dbpass }} priv=ALL
+  when: relational_database == "postgresql"
 
-- name: Add the admin role to the nova user
-  keystone_user:
-    role={{ keystone_admin_role }}
-    user={{ keystone_nova_name }}
-    tenant={{ keystone_service_project_name }}
-    token={{ administration_token }}
-    endpoint=http://{{ admin_hostname }}:35357/v2.0
+
+# Create nova user
+- name: Test if nova user exists
+  shell: |
+    openstack user list | grep " {{ keystone_nova_name }} " | wc -l
+  register: exists
+  ignore_errors: True
+  failed_when: "'0' in exists.stdout"
+
+- name: Create the nova user, role and asociate both to admin project
+  shell: |
+    openstack user create --domain {{ keystone_default_domain_name }} --password {{ keystone_nova_password }} {{ keystone_nova_name }}
+    openstack role add --project {{ keystone_service_project_name }} --user {{ keystone_nova_name }} {{ keystone_admin_role }}
+  when: exists|failed
+
 
 #Create the service entity and API endpoint
 - name: Test if service entity exists
   shell: |
-    export OS_TOKEN={{ administration_token }}
-    export OS_URL=http://{{ admin_hostname }}:35357/v3
-    export OS_IDENTITY_API_VERSION=3
     openstack service list | grep " compute " | wc -l
   register: service_entity_exists
   ignore_errors: True
@@ -58,17 +73,12 @@
 
 - name: Create the service entity for the Nova service
   shell: |
-    export OS_TOKEN={{ administration_token }}
-    export OS_URL=http://{{ admin_hostname }}:35357/v3
-    export OS_IDENTITY_API_VERSION=3
     openstack service create --name {{ keystone_nova_name }} --description "OpenStack Compute" compute
   when: service_entity_exists|failed
 
+
 - name: Test if endpoint exists
   shell: |
-    export OS_TOKEN={{ administration_token }}
-    export OS_URL=http://{{ admin_hostname }}:35357/v3
-    export OS_IDENTITY_API_VERSION=3
     openstack endpoint list | grep ' compute ' | wc -l
   register: endpoint_exists
   ignore_errors: True
@@ -76,12 +86,9 @@
 
 - name: Create the Compute service API endpoints
   shell: |
-    export OS_TOKEN={{ administration_token }}
-    export OS_URL=http://{{ admin_hostname }}:35357/v3
-    export OS_IDENTITY_API_VERSION=3
-    openstack endpoint create --region {{ region_name }} compute public http://{{ admin_hostname }}:8774/v2/%\(tenant_id\)s
-    openstack endpoint create --region {{ region_name }} compute internal http://{{ admin_hostname }}:8774/v2/%\(tenant_id\)s
-    openstack endpoint create --region {{ region_name }} compute admin http://{{ admin_hostname }}:8774/v2/%\(tenant_id\)s
+    openstack endpoint create --region {{ region_name }} compute public http://{{ admin_hostname }}:8774/v2.1/%\(tenant_id\)s
+    openstack endpoint create --region {{ region_name }} compute internal http://{{ admin_hostname }}:8774/v2.1/%\(tenant_id\)s
+    openstack endpoint create --region {{ region_name }} compute admin http://{{ admin_hostname }}:8774/v2.1/%\(tenant_id\)s
   when: endpoint_exists|failed
 
 # To install and configure the Compute controller components
@@ -98,7 +105,6 @@
   tags:
   - appliance
 
-
 # http://docs.openstack.org/liberty/install-guide-ubuntu/neutron.html
 # http://docs.openstack.org/liberty/install-guide-ubuntu/neutron-controller-install.html
 ## Install NEUTRON controller but no configure ##
@@ -108,6 +114,7 @@
   when: relational_database == "mysql"
   notify:
   - populate nova database
+  - populate nova api database
 
 - name: Create database user from localhost
   mysql_user: name=neutron host=localhost password={{ neutron_dbpass }} priv=neutron.*:ALL,GRANT state=present
@@ -124,34 +131,30 @@
   when: relational_database == "postgresql"
   notify:
   - populate nova database
+  - populate nova api database
 
 - name: Create database user
   postgresql_user: db=neutron name=neutron password={{ neutron_dbpass }} priv=ALL
   when: relational_database == "postgresql"
 
 
-- name: Create the neutron user
-  keystone_user:
-    user={{ keystone_neutron_name }}
-    tenant={{ keystone_service_project_name }}
-    password={{ keystone_neutron_password }}
-    token={{ administration_token }}
-    endpoint=http://{{ admin_hostname }}:35357/v2.0
+- name: Test if neutron user exists
+  shell: |
+    openstack user list | grep " {{ keystone_neutron_name }} " | wc -l
+  register: exists
+  ignore_errors: True
+  failed_when: "'0' in exists.stdout"
 
-- name: Add the admin role to the neutron user
-  keystone_user:
-    role={{ keystone_admin_role }}
-    user={{ keystone_neutron_name }}
-    tenant={{ keystone_service_project_name }}
-    token={{ administration_token }}
-    endpoint=http://{{ admin_hostname }}:35357/v2.0
+- name: Create the neutron user, role and asociate both to admin project
+  shell: |
+    openstack user create --domain {{ keystone_default_domain_name }} --password {{ keystone_neutron_password }} {{ keystone_neutron_name }}
+    openstack role add --project {{ keystone_service_project_name }} --user {{ keystone_neutron_name }} {{ keystone_admin_role }}
+  when: exists|failed
+
 
 #Create the service entity and API endpoint
 - name: Test if service entity exists
   shell: |
-    export OS_TOKEN={{ administration_token }}
-    export OS_URL=http://{{ admin_hostname }}:35357/v3
-    export OS_IDENTITY_API_VERSION=3
     openstack service list | grep " network "| wc -l
   register: service_entity_exists
   ignore_errors: True
@@ -159,31 +162,36 @@
 
 - name: Create the service entity for the Neutron service
   shell: |
-    export OS_TOKEN={{ administration_token }}
-    export OS_URL=http://{{ admin_hostname }}:35357/v3
-    export OS_IDENTITY_API_VERSION=3
     openstack service create --name {{ keystone_neutron_name }} --description "OpenStack Networking" network
   when: service_entity_exists|failed
 
 - name: Test if network service API endpoint exists
   shell: |
-    export OS_TOKEN={{ administration_token }}
-    export OS_URL=http://{{ admin_hostname }}:35357/v3
-    export OS_IDENTITY_API_VERSION=3
     openstack endpoint list | grep ' network ' | wc -l
   register: endpoint_exists
   ignore_errors: True
   failed_when: "'0' in endpoint_exists.stdout"
 
-- name: Create the Compute service API endpoints
+- name: Create the Network service API endpoints
   shell: |
-    export OS_TOKEN={{ administration_token }}
-    export OS_URL=http://{{ admin_hostname }}:35357/v3
-    export OS_IDENTITY_API_VERSION=3
     openstack endpoint create --region {{ region_name }} network public http://{{ admin_hostname }}:9696
     openstack endpoint create --region {{ region_name }} network internal http://{{ admin_hostname }}:9696
     openstack endpoint create --region {{ region_name }} network admin http://{{ admin_hostname }}:9696
   when: endpoint_exists|failed
+
+
+## Install NEUTRON component and configure it ##
+# http://docs.openstack.org/juno/install-guide/install/apt/content/section_neutron-networking.html
+# http://docs.openstack.org/juno/install-guide/install/apt/content/neutron-network-node.html
+
+#- name: Enable ip forwarding
+#  sysctl: name=net.ipv4.ip_forward value=1 reload=yes sysctl_set=yes
+
+#- name: Disable all rp_filter
+#  sysctl: name=net.ipv4.conf.all.rp_filter value=0 reload=yes sysctl_set=yes
+
+#- name: Disable default rp_filter
+#  sysctl: name=net.ipv4.conf.default.rp_filter value=0 reload=yes sysctl_set=yes
 
 # http://docs.openstack.org/liberty/install-guide-ubuntu/neutron-controller-install-option2.html
 - name: Install networking components
@@ -191,31 +199,11 @@
   with_items:
   - neutron-server
   - neutron-plugin-ml2
-  - python-neutronclient
-  tags:
-  - appliance
-
-## Install NEUTRON component and configure it ##
-# http://docs.openstack.org/juno/install-guide/install/apt/content/section_neutron-networking.html
-# http://docs.openstack.org/juno/install-guide/install/apt/content/neutron-network-node.html
-
-- name: Enable ip forwarding
-  sysctl: name=net.ipv4.ip_forward value=1 reload=yes sysctl_set=yes
-
-- name: Disable all rp_filter
-  sysctl: name=net.ipv4.conf.all.rp_filter value=0 reload=yes sysctl_set=yes
-
-- name: Disable default rp_filter
-  sysctl: name=net.ipv4.conf.default.rp_filter value=0 reload=yes sysctl_set=yes
-
-- name: Install networking components
-  apt: name={{ item }} state=present
-  with_items:
-  - neutron-plugin-ml2
   - neutron-plugin-openvswitch-agent
   - neutron-l3-agent
   - neutron-dhcp-agent
   - neutron-metadata-agent
+  - python-neutronclient
   tags:
   - appliance
 
@@ -240,6 +228,12 @@
   - restart neutron-server
   - restart neutron-server
 
+- name: Configure Open vSwitch Agent) agent
+  template: src=openvswitch_agent.ini.j2 dest=/etc/neutron/plugins/ml2/openvswitch_agent.ini owner=root group=neutron mode=0644
+  notify:
+  - restart openvswitch-switch
+  - restart neutron-plugin-openvswitch-agent
+
 - name: Configure Layer-3 (L3) agent
   template: src=l3_agent.ini.j2 dest=/etc/neutron/l3_agent.ini owner=root group=neutron mode=0644
   notify:
@@ -247,10 +241,7 @@
   - restart neutron-server
 
 - name: Configure the DHCP agent
-  template: src={{ item }}.j2 dest=/etc/neutron/{{ item }} owner=root group=root mode=0644
-  with_items:
-  - dhcp_agent.ini
-  - dnsmasq-neutron.conf
+  template: src=dhcp_agent.ini.j2 dest=/etc/neutron/dhcp_agent.ini owner=root group=root mode=0644
   notify:
   - restart neutron-dhcp-agent
   - pkill dnsmasq
@@ -272,12 +263,14 @@
   notify:
   - restart neutron-lbaas-agent
   - restart neutron-server
+  - update lbaas tables in neutron database
 
 - name: Configure neutron to use lbaas agent
   template: src=neutron_lbaas.conf.j2 dest=/etc/neutron/neutron_lbaas.conf owner=root group=root mode=0644
   notify:
   - restart neutron-lbaas-agent
   - restart neutron-server
+  - update lbaas tables in neutron database
 
 # Configure Open vSwitch service
 - name: Restart OVS service
@@ -302,6 +295,7 @@
   template: src=nova.conf.j2 dest=/etc/nova/nova.conf owner=nova group=nova
   notify:
   - populate nova database
+  - populate nova api database
   - restart nova-api
   - restart nova-cert
   - restart nova-consoleauth
@@ -317,7 +311,6 @@
 # Create external net
 - name: Test if public network exists
   shell: |
-    . /root/admin-openrc.sh
     neutron net-list | grep ' public ' | wc -l
   register: net_exists
   ignore_errors: True
@@ -325,21 +318,18 @@
 
 - name: Create the public network
   shell: |
-    . /root/admin-openrc.sh
-    neutron net-create public --router:external --provider:physical_network external --provider:network_type flat
+    neutron net-create public --router:external --provider:physical_network {{ public_network_name }} --provider:network_type flat
   when: net_exists|failed
 
 # Create external subnet
 - name: Test if public subnet exists
   shell: |
-    . /root/admin-openrc.sh
     neutron subnet-list | grep ' public ' | wc -l
   register: subnet_exists
   ignore_errors: True
   failed_when: "'0' in subnet_exists.stdout"
 
-- name: Create the public network
+- name: Create the public subnet
   shell: |
-    . /root/admin-openrc.sh
     neutron subnet-create public {{ public_cidr }} --name public --allocation-pool start={{ public_allocation_pool.split(",")[0] }},end={{ public_allocation_pool.split(",")[-1] }} --disable-dhcp --gateway {{ public_gateway }}
   when: subnet_exists|failed

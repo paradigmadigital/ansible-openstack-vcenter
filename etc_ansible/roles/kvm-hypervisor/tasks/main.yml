@@ -7,13 +7,13 @@
   when: ansible_distribution == "CentOS" and ansible_distribution_version | search("^7")
   ignore_errors: True
 
-# Ubuntu 14.04
+# Ubuntu 16.04
 - name: Install nova packages (Ubuntu)
   apt: name={{ item }} state=present
   with_items:
   - nova-compute
   - sysfsutils
-  when: ansible_distribution == "Ubuntu" and ansible_distribution_version == "14.04"
+  when: ansible_distribution == "Ubuntu" and ansible_distribution_version == "16.04"
   tags:
   - appliance
 
@@ -33,41 +33,41 @@
   when: ansible_distribution == "CentOS" and ansible_distribution_version | search("^7")
 
 
-#- name: Configure nova
-#  template: src=nova.conf.j2 dest=/etc/nova/nova.conf owner=nova group=nova
-#  notify: restart nova-compute
+- name: Configure nova
+  template: src=nova.conf.j2 dest=/etc/nova/nova.conf owner=nova group=nova
+  notify: restart nova-compute
 
 # http://docs.openstack.org/liberty/install-guide-ubuntu/neutron.html
 # http://docs.openstack.org/liberty/install-guide-ubuntu/neutron-compute-install.html
 
-- name: Ensure br_netfilter is loaded
-  modprobe: name=br_netfilter state=present
-  when: ansible_distribution == "Ubuntu"
-  ignore_errors: True
-
-- name: Ensure br_netfilter is loaded at boot time
-  lineinfile: dest=/etc/modules line=br_netfilter state=present
-  when: ansible_distribution == "Ubuntu"
-
-- name: Disable net.ipv4.conf.all.rp_filter
-  sysctl: name=net.ipv4.conf.all.rp_filter value=0 reload=yes sysctl_set=yes
-
-- name: Disable name=net.ipv4.conf.default.rp_filter
-  sysctl: name=net.ipv4.conf.default.rp_filter value=0 reload=yes sysctl_set=yes
-
-- name: Enable net.bridge.bridge-nf-call-iptables
-  sysctl: name=net.bridge.bridge-nf-call-iptables value=1 reload=yes sysctl_set=yes
-
-- name: Enable net.bridge.bridge-nf-call-ip6tables
-  sysctl: name=net.bridge.bridge-nf-call-ip6tables value=1 reload=yes sysctl_set=yes
+#- name: Ensure br_netfilter is loaded
+#  modprobe: name=br_netfilter state=present
+#  when: ansible_distribution == "Ubuntu"
+#  ignore_errors: True
+#
+#- name: Ensure br_netfilter is loaded at boot time
+#  lineinfile: dest=/etc/modules line=br_netfilter state=present
+#  when: ansible_distribution == "Ubuntu"
+#
+#- name: Disable net.ipv4.conf.all.rp_filter
+#  sysctl: name=net.ipv4.conf.all.rp_filter value=0 reload=yes sysctl_set=yes
+#
+#- name: Disable name=net.ipv4.conf.default.rp_filter
+#  sysctl: name=net.ipv4.conf.default.rp_filter value=0 reload=yes sysctl_set=yes
+#
+#- name: Enable net.bridge.bridge-nf-call-iptables
+#  sysctl: name=net.bridge.bridge-nf-call-iptables value=1 reload=yes sysctl_set=yes
+#
+#- name: Enable net.bridge.bridge-nf-call-ip6tables
+#  sysctl: name=net.bridge.bridge-nf-call-ip6tables value=1 reload=yes sysctl_set=yes
 
 
 - name: Install networking components (Ubuntu)
   apt: name={{ item }} state=present
   with_items:
   - neutron-plugin-ml2
-  - neutron-plugin-openvswitch-agent
-  when: ansible_distribution == "Ubuntu" and ansible_distribution_version == "14.04"
+  - neutron-openvswitch-agent
+  when: ansible_distribution == "Ubuntu" and ansible_distribution_version == "16.04"
   tags:
   - appliance
 
@@ -95,12 +95,14 @@
   template: src=neutron.conf.j2 dest=/etc/neutron/neutron.conf owner=root group=neutron mode=0644
   notify:
   - restart openvswitch-switch
-  when: ansible_distribution == "Ubuntu" and ansible_distribution_version == "14.04"
+  - restart neutron-openvswitch-agent
+  when: ansible_distribution == "Ubuntu" and ansible_distribution_version == "16.04"
 
 - name: Configure neutron server component (CentOS)
   template: src=neutron.conf_centos7.j2 dest=/etc/neutron/neutron.conf owner=root group=neutron mode=0644
   notify:
   - restart openvswitch
+  - restart neutron-openvswitch-agent
   when: ansible_distribution == "CentOS" and ansible_distribution_version | search("^7")
 
 
@@ -108,7 +110,15 @@
   template: src=ml2_conf.ini.j2 dest=/etc/neutron/plugins/ml2/ml2_conf.ini owner=root group=neutron mode=0644
   notify:
   - restart openvswitch-switch
-  when: ansible_distribution == "Ubuntu" and ansible_distribution_version == "14.04"
+  - restart neutron-openvswitch-agent
+  when: ansible_distribution == "Ubuntu" and ansible_distribution_version == "16.04"
+
+- name: Configure Open vSwitch Agent) agent
+  template: src=openvswitch_agent.ini.j2 dest=/etc/neutron/plugins/ml2/openvswitch_agent.ini owner=root group=neutron mode=0644
+  notify:
+  - restart openvswitch-switch
+  - restart neutron-openvswitch-agent
+  when: ansible_distribution == "Ubuntu" and ansible_distribution_version == "16.04"
 
 - name: Configure Modular Layer 2 (ML2) plug-in (CentOS)
   template: src=ml2_conf.ini_centos7.j2 dest=/etc/neutron/plugins/ml2/ml2_conf.ini owner=root group=neutron mode=0644
@@ -133,8 +143,8 @@
   template: src=nova.conf.j2 dest=/etc/nova/nova.conf owner=nova group=nova
   notify:
   - restart nova-compute
-  - restart neutron-plugin-openvswitch-agent
-  when: ansible_distribution == "Ubuntu" and ansible_distribution_version == "14.04"
+  - restart neutron-openvswitch-agent
+  when: ansible_distribution == "Ubuntu" and ansible_distribution_version == "16.04"
 
 - name: Configure Compute to use Networking (CentOS)
   template: src=nova.conf_centos7.j2 dest=/etc/nova/nova.conf owner=nova group=nova
