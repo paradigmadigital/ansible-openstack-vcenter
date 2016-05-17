@@ -5,23 +5,28 @@
 - name: Create mysql database
   mysql_db: name=heat state=present
   when: relational_database == "mysql"
+  tags: workingon
 
 - name: Create mysql database user
   mysql_user: name=heat host=localhost password={{ heat_dbpass }} priv=heat.*:ALL,GRANT state=present
   when: relational_database == "mysql"
+  tags: workingon
 
 - name: Create mysql database user
   mysql_user: name=heat host=% password={{ heat_dbpass }} priv=heat.*:ALL,GRANT state=present
   when: relational_database == "mysql"
+  tags: workingon
 
 # postgresql
 - name: Create postgresql database
   postgresql_db: name=heat
   when: relational_database == "postgresql"
+  tags: workingon
 
 - name: Create postgresql database user
   postgresql_user: db=heat name=heat password={{ heat_dbpass }} priv=ALL
   when: relational_database == "postgresql"
+  tags: workingon
 
 
 - name: Test if heat user exists
@@ -43,27 +48,31 @@
 #Create the service entity and API endpoint
 - name: Test if service entity exists
   shell: |
-    openstack service list | grep " {{ keystone_heat_service_name }} "| wc -l
+    openstack service list | grep " {{ keystone_heat_service_name }} " | wc -l
   register: service_entity_exists
   ignore_errors: True
   failed_when: "'0' in service_entity_exists.stdout"
+  tags: workingon
 
 - name: Create the service entity for the heat service
   shell: |
     openstack service create --name {{ keystone_heat_service_name }} --description "Orchestration" orchestration
   when: service_entity_exists|failed
+  tags: workingon
 
 - name: Test if service entity exists
   shell: |
-    openstack service list | grep " {{ keystone_heat_cfn_service_name }} "| wc -l
+    openstack service list | grep " {{ keystone_heat_cfn_service_name }} " | wc -l
   register: service_entity_exists
   ignore_errors: True
   failed_when: "'0' in service_entity_exists.stdout"
+  tags: workingon
 
 - name: Create the service entity for the heat-cfn service
   shell: |
     openstack service create --name {{ keystone_heat_cfn_service_name }} --description "Orchestration" cloudformation
   when: service_entity_exists|failed
+  tags: workingon
 
 
 # Create the Orchestration service API endpoints
@@ -73,6 +82,7 @@
   register: endpoint_exists
   ignore_errors: True
   failed_when: "'0' in endpoint_exists.stdout"
+  tags: workingon
 
 - name: Create the Heat service API endpoints
   shell: |
@@ -80,6 +90,7 @@
     openstack endpoint create --region {{ region_name }} orchestration internal http://{{ admin_hostname }}:8004/v1/%\(tenant_id\)s
     openstack endpoint create --region {{ region_name }} orchestration admin http://{{ admin_hostname }}:8004/v1/%\(tenant_id\)s
   when: endpoint_exists|failed
+  tags: workingon
 
 - name: Test if endpoint exists
   shell: |
@@ -87,6 +98,7 @@
   register: endpoint_exists
   ignore_errors: True
   failed_when: "'0' in endpoint_exists.stdout"
+  tags: workingon
 
 - name: Create the Heat-cfn service API endpoints
   shell: |
@@ -94,6 +106,7 @@
     openstack endpoint create --region {{ region_name }} cloudformation internal http://{{ admin_hostname }}:8000/v1
     openstack endpoint create --region {{ region_name }} cloudformation admin http://{{ admin_hostname }}:8000/v1
   when: endpoint_exists|failed
+  tags: workingon
 
 
 - name: Test if heat domain exists
@@ -102,40 +115,35 @@
   register: domain_exists
   ignore_errors: True
   failed_when: "'0' in domain_exists.stdout"
+  tags: workingon
 
 - name: Create the heat domain
   shell: |
     openstack domain create --description "Stack projects and users" {{ heat_domain_name }}
   when: domain_exists|failed
+  tags: workingon
 
 
-
-# Ansible OpenStack module < 2.0 cannot handle openstack domains
-#- name: Create heat_stack_owner role and add the heat_stack_owner role to the demo project and user
-#  keystone_user:
-#    role={{ keystone_heat_stack_owner_role }}
-#    user={{ keystone_user_name }}
-#    tenant={{ keystone_user_tenant_name }}
-#    token={{ administration_token }}
-#    endpoint=http://{{ admin_hostname }}:35357/v2.0
-#
 - name: Test if heat_domain_admin user exists
   shell: |
     openstack user list | grep " {{ heat_domain_admin }} " | wc -l
   register: user_exists
   ignore_errors: True
   failed_when: "'0' in user_exists.stdout"
+  tags: workingon
 
 - name: Create the heat_domain_admin user
   shell: |
     openstack user create --domain {{ heat_domain_name }} --password {{ heat_domain_admin_password }} {{ heat_domain_admin }}
-    openstack role add --domain {{ heat_domain_name }} --user {{ heat_domain_admin }} {{ keystone_admin_role }}
+    openstack role add --domain {{ heat_domain_name }} --user-domain {{ keystone_heat_name }} --user {{ heat_domain_admin }} {{ keystone_admin_role }}
   when: user_exists|failed
+  tags: workingon
 
 - name: Create the heat_stack_owner role
   shell: |
     openstack role create {{ keystone_heat_stack_owner_role }}
   ignore_errors: True
+  tags: workingon
 
 # Non privileged user created after installing
 # openstack role add --project demo --user demo heat_stack_owner
@@ -144,7 +152,7 @@
   shell: |
     openstack role create {{ keystone_heat_stack_user_role }}
   ignore_errors: True
-
+  tags: workingon
 
 # To install and configure the Orchestration components
 - name: Install heat packages
@@ -156,6 +164,7 @@
   - python-heatclient
   tags:
   - appliance
+  - workingon
 
 - name: Configure heat api service (TBD)
   template: src=heat.conf.j2 dest=/etc/heat/heat.conf owner=heat group=heat
@@ -167,4 +176,3 @@
 
 - name: Remove sqlite database
   file: path=/var/lib/heat/heat.sqlite state=absent
-  tags: workingon
