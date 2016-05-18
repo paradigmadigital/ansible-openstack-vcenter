@@ -12,7 +12,7 @@
   when: relational_database == "mysql" or relational_database == "mariadb"
 
 - name: Create mysql nova database user from %
-  mysql_user: name=nova host=% password={{ nova_dbpass }} priv=nova.*:ALL,GRANT state=present
+  mysql_user: name=nova host=% password={{ nova_dbpass }} append_privs=yes priv=nova.*:ALL,GRANT state=present
   when: relational_database == "mysql" or relational_database == "mariadb"
 
 #nova_api database;
@@ -21,11 +21,11 @@
   when: relational_database == "mysql" or relational_database == "mariadb"
 
 - name: Create mysql nova_api database user from localhost
-  mysql_user: name=nova host=localhost password={{ nova_dbpass }} priv=nova_api.*:ALL,GRANT state=present
+  mysql_user: name=nova host=localhost password={{ nova_dbpass }} append_privs=yes priv=nova_api.*:ALL,GRANT state=present
   when: relational_database == "mysql" or relational_database == "mariadb"
 
 - name: Create mysql nova_api database user from %
-  mysql_user: name=nova host=% password={{ nova_dbpass }} priv=nova_api.*:ALL,GRANT state=present
+  mysql_user: name=nova host=% password={{ nova_dbpass }} append_privs=yes priv=nova_api.*:ALL,GRANT state=present
   when: relational_database == "mysql" or relational_database == "mariadb"
 
 ## postgresql

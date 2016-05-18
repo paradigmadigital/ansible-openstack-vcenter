@@ -11,7 +11,7 @@
   when: relational_database == "mysql" or relational_database == "mariadb"
 
 - name: Create database user
-  mysql_user: name=glance host=% password={{ glance_dbpass }} priv=glance.*:ALL,GRANT state=present
+  mysql_user: name=glance host=% password={{ glance_dbpass }} append_privs=yes priv=glance.*:ALL,GRANT state=present
   when: relational_database == "mysql" or relational_database == "mariadb"
 
 # postgresql
