@@ -13,7 +13,7 @@
   tags: workingon
 
 - name: Create mysql based database user
-  mysql_user: name=heat host=% password={{ heat_dbpass }} priv=heat.*:ALL,GRANT state=present
+  mysql_user: name=heat host=% password={{ heat_dbpass }} append_privs=yes priv=heat.*:ALL,GRANT state=present
   when: relational_database == "mysql" or relational_database == "mariadb"
   tags: workingon
 
