@@ -1,17 +1,17 @@
 # http://docs.openstack.org/liberty/install-guide-ubuntu/keystone.html
 # http://docs.openstack.org/liberty/install-guide-ubuntu/keystone-install.html
-# mysql
-- name: Create mysql database
+# mysql and mariadb
+- name: Create mysql based database
   mysql_db: name=keystone state=present
-  when: relational_database == "mysql"
+  when: relational_database == "mysql" or relational_database == "mariadb"
 
-- name: Create mysql database user to localhost
+- name: Create mysql based database user to localhost
   mysql_user: name=keystone host=localhost password={{ keystone_dbpass }} priv=keystone.*:ALL,GRANT state=present
-  when: relational_database == "mysql"
+  when: relational_database == "mysql" or relational_database == "mariadb"
 
-- name: Create mysql database user to %
+- name: Create mysql based database user to %
   mysql_user: name=keystone host=% password={{ keystone_dbpass }} priv=keystone.*:ALL,GRANT state=present
-  when: relational_database == "mysql"
+  when: relational_database == "mysql" or relational_database == "mariadb"
 
 # postgresql
 - name: Create postgresql database
