@@ -1,6 +1,6 @@
 heat_template_version: 2015-04-30
 
-description: Deploy a complete drupal cluster
+description: Deploy a simple drupal portal
 
 parameters:
   key_name:
