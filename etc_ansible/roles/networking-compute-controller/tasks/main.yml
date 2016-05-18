@@ -5,28 +5,28 @@
 # nova database
 - name: Create mysql nova database
   mysql_db: name=nova state=present
-  when: relational_database == "mysql"
+  when: relational_database == "mysql" or relational_database == "mariadb"
 
 - name: Create mysql nova database user from localhost
   mysql_user: name=nova host=localhost password={{ nova_dbpass }} priv=nova.*:ALL,GRANT state=present
-  when: relational_database == "mysql"
+  when: relational_database == "mysql" or relational_database == "mariadb"
 
 - name: Create mysql nova database user from %
   mysql_user: name=nova host=% password={{ nova_dbpass }} priv=nova.*:ALL,GRANT state=present
-  when: relational_database == "mysql"
+  when: relational_database == "mysql" or relational_database == "mariadb"
 
 #nova_api database;
 - name: Create mysql nova_api database
   mysql_db: name=nova_api state=present
-  when: relational_database == "mysql"
+  when: relational_database == "mysql" or relational_database == "mariadb"
 
 - name: Create mysql nova_api database user from localhost
   mysql_user: name=nova host=localhost password={{ nova_dbpass }} priv=nova_api.*:ALL,GRANT state=present
-  when: relational_database == "mysql"
+  when: relational_database == "mysql" or relational_database == "mariadb"
 
 - name: Create mysql nova_api database user from %
   mysql_user: name=nova host=% password={{ nova_dbpass }} priv=nova_api.*:ALL,GRANT state=present
-  when: relational_database == "mysql"
+  when: relational_database == "mysql" or relational_database == "mariadb"
 
 ## postgresql
 # nova database
@@ -111,18 +111,18 @@
 # mysql
 - name: Create database
   mysql_db: name=neutron state=present
-  when: relational_database == "mysql"
+  when: relational_database == "mysql" or relational_database == "mariadb"
   notify:
   - populate nova database
   - populate nova api database
 
 - name: Create database user from localhost
   mysql_user: name=neutron host=localhost password={{ neutron_dbpass }} priv=neutron.*:ALL,GRANT state=present
-  when: relational_database == "mysql"
+  when: relational_database == "mysql" or relational_database == "mariadb"
 
 - name: Create database user from %
   mysql_user: name=neutron host=% password={{ neutron_dbpass }} priv=neutron.*:ALL,GRANT state=present
-  when: relational_database == "mysql"
+  when: relational_database == "mysql" or relational_database == "mariadb"
 
 
 # postgresql

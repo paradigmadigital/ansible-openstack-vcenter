@@ -4,15 +4,15 @@
 # mysql
 - name: Create database
   mysql_db: name=glance state=present
-  when: relational_database == "mysql"
+  when: relational_database == "mysql" or relational_database == "mariadb"
 
 - name: Create database user
   mysql_user: name=glance host=localhost password={{ glance_dbpass }} priv=glance.*:ALL,GRANT state=present
-  when: relational_database == "mysql"
+  when: relational_database == "mysql" or relational_database == "mariadb"
 
 - name: Create database user
   mysql_user: name=glance host=% password={{ glance_dbpass }} priv=glance.*:ALL,GRANT state=present
-  when: relational_database == "mysql"
+  when: relational_database == "mysql" or relational_database == "mariadb"
 
 # postgresql
 - name: Create database

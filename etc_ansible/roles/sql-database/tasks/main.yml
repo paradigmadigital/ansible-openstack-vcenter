@@ -5,14 +5,25 @@
   tags:
   - appliance
 
+- name: Install mariadb server
+  apt: name=mariadb-server state=present
+  when: relational_database == "mariadb"
+  tags:
+  - appliance
+
 - name: Configure mysql server
   template: src=mysqld_openstack.cnf.j2 dest=/etc/mysql/conf.d/mysqld_openstack.cnf
   notify: restart mysql
   when: relational_database == "mysql"
 
+- name: Configure mariadb server
+  template: src=mysqld_openstack.cnf.j2 dest=/etc/mysql/mariadb.conf.d/mysqld_openstack.cnf
+  notify: restart mysql
+  when: relational_database == "mariadb"
+
 - name: Install python-mysqldb
   apt: name=python-mysqldb state=present
-  when: relational_database == "mysql"
+  when: relational_database == "mysql" or relational_database == "mariadb"
   tags:
   - appliance
 
