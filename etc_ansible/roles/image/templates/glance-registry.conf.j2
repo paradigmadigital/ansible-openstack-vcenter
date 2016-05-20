@@ -55,7 +55,7 @@
 # Whether to include the backend image storage location in image
 # properties. Revealing storage location can be a security risk, so
 # use this setting with caution! (boolean value)
-#show_image_direct_url = false
+show_image_direct_url = false
 
 # Whether to include the backend image locations in image properties.
 # For example, if using the file system store a URL of
@@ -483,6 +483,7 @@ connection = {{ relational_database_driver[relational_database] }}://{{ keystone
 # sheepdog, swift, s3, vsphere (list value)
 #stores = file,http
 
+
 # Default scheme to use to store image data. The scheme must be
 # registered by one of the stores defined by the 'stores' config
 # option. (string value)
@@ -765,7 +766,7 @@ connection = {{ relational_database_driver[relational_database] }}://{{ keystone
 
 # Directory to which the Filesystem backend store writes images.
 # (string value)
-#filesystem_store_datadir = /var/lib/glance/images
+#filesystem_store_datadir = /var/lib/glance/images/
 
 # List of directories and its priorities to which the Filesystem
 # backend store writes images. (multi valued)

@@ -61,7 +61,7 @@
 # Whether to include the backend image storage location in image
 # properties. Revealing storage location can be a security risk, so
 # use this setting with caution! (boolean value)
-#show_image_direct_url = false
+show_image_direct_url = True
 
 # Whether to include the backend image locations in image properties.
 # For example, if using the file system store a URL of
@@ -631,7 +631,7 @@
 
 # The back end to use for the database. (string value)
 # Deprecated group/name - [DEFAULT]/db_backend
-backend = sqlalchemy
+#backend = sqlalchemy
 
 # The SQLAlchemy connection string to use to connect to the database.
 # (string value)
@@ -639,7 +639,7 @@ backend = sqlalchemy
 # Deprecated group/name - [DATABASE]/sql_connection
 # Deprecated group/name - [sql]/connection
 #connection = <None>
-connection = {{ relational_database_driver[relational_database] }}://{{ keystone_glance_name }}:{{ glance_dbpass }}@{{ admin_hostname }}/glance
+#connection = {{ relational_database_driver[relational_database] }}://{{ keystone_glance_name }}:{{ glance_dbpass }}@{{ admin_hostname }}/glance
 
 # The SQLAlchemy connection string to use to connect to the slave
 # database. (string value)
@@ -739,12 +739,24 @@ connection = {{ relational_database_driver[relational_database] }}://{{ keystone
 
 # List of stores enabled. Valid stores are: cinder, file, http, rbd,
 # sheepdog, swift, s3, vsphere (list value)
+#stores = file,http
+{% if glance_storage == "file" %}
 stores = file,http
+{% endif %}
+{% if glance_storage == "rbd" %}
+stores = rbd,http
+{% endif %}
 
 # Default scheme to use to store image data. The scheme must be
 # registered by one of the stores defined by the 'stores' config
 # option. (string value)
+#default_store = file
+{% if glance_storage == "file" %}
 default_store = file
+{% endif %}
+{% if glance_storage == "rbd" %}
+default_store = rbd
+{% endif %}
 
 # Minimum interval seconds to execute updating dynamic storage
 # capabilities based on backend status then. It's not a periodic
@@ -889,21 +901,37 @@ default_store = file
 # RADOS images will be chunked into objects of this size (in
 # megabytes). For best performance, this should be a power of two.
 # (integer value)
+{% if glance_storage == "rbd" %}
+rbd_store_chunk_size = 8
+{% else %}
 #rbd_store_chunk_size = 8
+{% endif %}
+
 
 # RADOS pool in which images are stored. (string value)
+{% if glance_storage == "rbd" %}
+rbd_store_pool = {{ rbd_parameters.rbd_store_pool }}
+{% else %}
 #rbd_store_pool = images
+{% endif %}
 
 # RADOS user to authenticate as (only applicable if using Cephx. If
 # <None>, a default will be chosen based on the client. section in
 # rbd_store_ceph_conf) (string value)
 #rbd_store_user = <None>
+{% if glance_storage == "rbd" %}
+rbd_store_user = {{ rbd_parameters.rbd_store_user }}
+{% endif %}
 
 # Ceph configuration file path. If <None>, librados will locate the
 # default config. If using cephx authentication, this file should
 # include a reference to the right keyring in a client.<USER> section
 # (string value)
-#rbd_store_ceph_conf = /etc/ceph/ceph.conf
+{% if glance_storage == "rbd" %}
+rados_connect_timeout = 0
+{% else %}
+#rados_connect_timeout = 0
+{% endif %}
 
 # Timeout value (in seconds) used when connecting to ceph cluster. If
 # value <= 0, no timeout is set and default librados value is used.
@@ -1023,7 +1051,11 @@ default_store = file
 
 # Directory to which the Filesystem backend store writes images.
 # (string value)
+{% if glance_storage == "file" %}
 filesystem_store_datadir = /var/lib/glance/images/
+{% else %}
+#filesystem_store_datadir = /var/lib/glance/images/
+{% endif %}
 
 # List of directories and its priorities to which the Filesystem
 # backend store writes images. (multi valued)
