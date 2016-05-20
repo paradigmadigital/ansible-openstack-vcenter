@@ -171,6 +171,18 @@
 #  when: exists|failed
 
 
+- name: Test if user role exists
+  shell: |
+    openstack role list | grep " user " | wc -l
+  register: exists
+  ignore_errors: True
+  failed_when: "'0' in exists.stdout"
+
+- name: Create the user role
+  shell: |
+    openstack role create {{ keystone_user_role }}
+  when: exists|failed
+
 #- name: Test if non admin user exists
 #  shell: |
 #    openstack user list | grep " {{ keystone_user_name }} " | wc -l
@@ -178,10 +190,9 @@
 #  ignore_errors: True
 #  failed_when: "'0' in exists.stdout"
 
-#- name: Create the non admin user, role and associate both to non admin project
+#- name: Create the non admin user and associate to non admin project with user role
 #  shell: |
 #    openstack user create --domain {{ keystone_default_domain_name }} --password {{ keystone_user_password }} {{ keystone_user_name }}
-#    openstack role create {{ keystone_user_role }}
 #    openstack role add --project {{ keystone_user_project_name }} --user {{ keystone_user_name }} {{ keystone_user_role }}
 #  when: exists|failed
 
