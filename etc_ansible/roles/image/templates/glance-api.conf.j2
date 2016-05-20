@@ -631,7 +631,7 @@ show_image_direct_url = True
 
 # The back end to use for the database. (string value)
 # Deprecated group/name - [DEFAULT]/db_backend
-backend = sqlalchemy
+#backend = sqlalchemy
 
 # The SQLAlchemy connection string to use to connect to the database.
 # (string value)
@@ -639,7 +639,7 @@ backend = sqlalchemy
 # Deprecated group/name - [DATABASE]/sql_connection
 # Deprecated group/name - [sql]/connection
 #connection = <None>
-connection = {{ relational_database_driver[relational_database] }}://{{ keystone_glance_name }}:{{ glance_dbpass }}@{{ admin_hostname }}/glance
+#connection = {{ relational_database_driver[relational_database] }}://{{ keystone_glance_name }}:{{ glance_dbpass }}@{{ admin_hostname }}/glance
 
 # The SQLAlchemy connection string to use to connect to the slave
 # database. (string value)
@@ -741,10 +741,10 @@ connection = {{ relational_database_driver[relational_database] }}://{{ keystone
 # sheepdog, swift, s3, vsphere (list value)
 #stores = file,http
 {% if glance_storage == "file" %}
-stores = file
+stores = file,http
 {% endif %}
 {% if glance_storage == "rbd" %}
-stores = rbd
+stores = rbd,http
 {% endif %}
 
 # Default scheme to use to store image data. The scheme must be
@@ -910,7 +910,7 @@ rbd_store_chunk_size = 8
 
 # RADOS pool in which images are stored. (string value)
 {% if glance_storage == "rbd" %}
-rbd_store_pool = rbd_parameters[rbd_store_pool]
+rbd_store_pool = {{ rbd_parameters.rbd_store_pool }}
 {% else %}
 #rbd_store_pool = images
 {% endif %}
@@ -920,7 +920,7 @@ rbd_store_pool = rbd_parameters[rbd_store_pool]
 # rbd_store_ceph_conf) (string value)
 #rbd_store_user = <None>
 {% if glance_storage == "rbd" %}
-rbd_store_pool = rbd_parameters[rbd_store_user]
+rbd_store_user = {{ rbd_parameters.rbd_store_user }}
 {% endif %}
 
 # Ceph configuration file path. If <None>, librados will locate the
