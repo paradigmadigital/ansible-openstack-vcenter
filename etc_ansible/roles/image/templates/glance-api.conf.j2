@@ -639,7 +639,7 @@ show_image_direct_url = True
 # Deprecated group/name - [DATABASE]/sql_connection
 # Deprecated group/name - [sql]/connection
 #connection = <None>
-#connection = {{ relational_database_driver[relational_database] }}://{{ keystone_glance_name }}:{{ glance_dbpass }}@{{ admin_hostname }}/glance
+connection = {{ relational_database_driver[relational_database] }}://{{ keystone_glance_name }}:{{ glance_dbpass }}@{{ admin_hostname }}/glance
 
 # The SQLAlchemy connection string to use to connect to the slave
 # database. (string value)
