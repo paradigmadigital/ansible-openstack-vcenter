@@ -10,6 +10,7 @@ relational_database_driver:
 # vxlan with physical servers
 # openvswitch with appliance
 network_type: openvswitch
+network_mtu: 9000
 
 controller_hostname: openstack-vcenter
 rabbitmq_user: openstack
@@ -53,8 +54,8 @@ glance_dbpass: GLANCE_DBPASS
 keystone_glance_name: glance
 keystone_glance_password: glance
 
-glance_storage: file
-#glance_storage: rbd
+#glance_storage: file
+glance_storage: rbd
 rbd_parameters:
   rbd_store_pool: images
   rbd_store_user: glance
