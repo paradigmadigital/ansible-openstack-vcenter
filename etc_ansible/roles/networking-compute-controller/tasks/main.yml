@@ -220,6 +220,11 @@
   - restart neutron-dhcp-agent
   - restart neutron-metadata-agent
 
+- name: Configure dhcp agent (MTU VMs)
+  template: src=dnsmasq-neutron.conf.j2 dest=/etc/neutron/dnsmasq-neutron.conf owner=root group=neutron mode=0644
+  notify:
+  - restart neutron-dhcp-agent
+
 - name: Configure Modular Layer 2 (ML2) plug-in
   template: src=ml2_conf.ini.j2 dest=/etc/neutron/plugins/ml2/ml2_conf.ini owner=root group=neutron mode=0644
   notify:

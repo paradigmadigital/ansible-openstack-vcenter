@@ -11,6 +11,7 @@ relational_database_driver:
 # openvswitch with appliance
 network_type: openvswitch
 network_mtu: 9000
+vm_mtu: 1500
 
 controller_hostname: openstack-vcenter
 rabbitmq_user: openstack
