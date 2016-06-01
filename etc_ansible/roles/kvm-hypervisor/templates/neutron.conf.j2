@@ -170,7 +170,7 @@ service_plugins = router
 # value. Defaults to 1500, the standard value for Ethernet. (integer value)
 # Deprecated group/name - [ml2]/segment_mtu
 #global_physnet_mtu = 1500
-global_physnet_mtu = {{ network_mtu }}
+global_physnet_mtu = {{ physical_mtu }}
 
 # Number of backlog requests to configure the socket with (integer value)
 #backlog = 4096
