@@ -116,8 +116,7 @@ tenant_network_types = gre
 # An ordered list of networking mechanism driver entrypoints to be loaded from
 # the neutron.ml2.mechanism_drivers namespace. (list value)
 #mechanism_drivers =
-#mechanism_drivers = openvswitch,l2population
-mechanism_drivers = openvswitch
+mechanism_drivers = openvswitch,l2population
 
 
 # An ordered list of extension driver entrypoints to be loaded from the
@@ -135,7 +134,7 @@ extension_drivers = port_security
 # and instances typically default to a 1500 MTU. Only impacts instances, not
 # neutron network components such as bridges and routers. (integer value)
 #path_mtu = 1500
-path_mtu = {{ network_mtu }}
+#path_mtu = {{ network_mtu }}
 
 # A list of mappings of physical networks to MTU values. The format of the
 # mapping is <physnet>:<mtu val>. This mapping allows specifying a physical
@@ -231,6 +230,7 @@ tunnel_id_ranges = 1:1000
 
 # Driver for security groups firewall in the L2 agent (string value)
 #firewall_driver = <None>
+firewall_driver = iptables_hybrid
 
 # Controls whether the neutron security group API is enabled in the server. It
 # should be false when using no security groups or using the nova security
