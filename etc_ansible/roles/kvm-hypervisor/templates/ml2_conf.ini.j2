@@ -132,7 +132,7 @@ mechanism_drivers = openvswitch
 # and instances typically default to a 1500 MTU. Only impacts instances, not
 # neutron network components such as bridges and routers. (integer value)
 #path_mtu = 1500
-#path_mtu = {{ network_mtu }}
+path_mtu = {{ path_mtu }}
 
 # A list of mappings of physical networks to MTU values. The format of the
 # mapping is <physnet>:<mtu val>. This mapping allows specifying a physical
