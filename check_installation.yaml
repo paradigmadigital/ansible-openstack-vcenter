@@ -1,13 +1,13 @@
 heat_template_version: 2015-04-30
 
-description: Deploy a simple drupal portal
+description: Test heat stack
 
 parameters:
   key_name:
     type: string
     label: Key Name
     description: Name of key-pair to be used for all compute instances
-    default: admin
+    default: test_key
     constraints:
       - custom_constraint: nova.keypair
   image_id:
@@ -29,223 +29,82 @@ parameters:
     type: comma_delimited_list
     label: ports
     default: "80,443,22"
+
   protocols:
     type: comma_delimited_list
     label: protocols
     default: "tcp,udp"
 
+  public_net_id:
+    type: string
+    label: Public Network ID
+    description: Public Network ID
+    default: 3a420c37-4c76-49ed-b7c7-6dec944c040e
+    
+
 resources:
-  security_group:
+  test_security_group:
     type: OS::Neutron::SecurityGroup
     properties:
       name: server_security_group
       rules:
         repeat:
           for_each:
-            %port%: { get_param: ports }
-            %protocol%: { get_param: protocols }
+            <%port%>: { get_param: ports }
+            <%protocol%>: { get_param: protocols }
           template:
-            protocol: %protocol%
+            protocol: <%protocol%>
             remote_ip_prefix: 0.0.0.0/0
-            port_range_min: %port%
-            port_range_max: %port%
+            port_range_min: <%port%>
+            port_range_max: <%port%>
+
+  private_net:
+    type: OS::Neutron::Net
+    properties:
+      name: private_net
+
+  private_subnet:
+    type: OS::Neutron::Subnet
+    properties:
+      name: private_subnet
+      network_id: { get_resource: private_net }
+      cidr: "10.8.1.0/24"
+      dns_nameservers: [ "8.8.8.8", "8.8.4.4" ]
+      ip_version: 4
+
+  private_router:
+    type: OS::Neutron::Router
+    properties:
+      external_gateway_info: { network: public }
+
+  private_router_interface:
+    type: OS::Neutron::RouterInterface
+    properties:
+      router_id: { get_resource: private_router }
+      subnet: { get_resource: private_subnet }
 
 
-   private_net:
-     type: OS::Neutron::Net
-
-   private_subnet:
-     type: OS::Neutron::Subnet
-     properties:
-       network_id: { get_resource: private_net }
-       cidr: "10.8.1.0/24"
-       dns_nameservers: [ "8.8.8.8", "8.8.4.4" ]
-       ip_version: 4
-
-   private_router:
-     type: OS::Neutron::Router
-     properties:
-       external_gateway_info: { network: public }
-
-   private_router_interface:
-     type: OS::Neutron::RouterInterface
-     properties:
-       router_id: { get_resource: private_router }
-       subnet: { get_resource: private_subnet }
-
-
-  perconadb-01_port:
+  instance_port:
     type: OS::Neutron::Port
     properties:
-       network: private
-       fixed_ips:
-         - subnet_id: "private-subnet"
+      name: instance_port
+      network: { get_resource: private_net }
+      security_groups: 
+        - { get_resource: test_security_group}
+      fixed_ips:
+        - subnet_id: { get_resource: private_subnet }
 
-  perconadb-01:
+  instance_floating_ip:
+    type: OS::Neutron::FloatingIP
+    properties:
+      floating_network_id: { get_param: public_net_id }
+      port_id: { get_resource: instance_port }
+
+  instance:
     type: OS::Nova::Server
     properties:
       key_name: { get_param: key_name }
       image: { get_param: image_id }
       flavor: { get_param: instance_type }
       networks:
-      - network: private
-      user_data:
-        get_file:
-
-
-  perconadb-02_port:
-    type: OS::Neutron::Port
-    properties:
-       network: private
-       fixed_ips:
-         - subnet_id: "private-subnet"
-
-  perconadb-02:
-    type: OS::Nova::Server
-    properties:
-      key_name: { get_param: key_name }
-      image: { get_param: image_id }
-      flavor: { get_param: instance_type }
-      networks:
-      - network: private
-
-
-  perconadb-03_port:
-    type: OS::Neutron::Port
-    properties:
-       network: private
-       fixed_ips:
-         - subnet_id: "private-subnet"
-
-  perconadb-03:
-    type: OS::Nova::Server
-    properties:
-      key_name: { get_param: key_name }
-      image: { get_param: image_id }
-      flavor: { get_param: instance_type }
-      networks:
-      - network: private
-
-
-  drupal-01_port:
-    type: OS::Neutron::Port
-    properties:
-       network: private
-       fixed_ips:
-         - subnet_id: "private-subnet"
-
-  drupal-01:
-    type: OS::Nova::Server
-    properties:
-      key_name: { get_param: key_name }
-      image: { get_param: image_id }
-      flavor: { get_param: instance_type }
-      depends_on: [perconadb-01, perconadb-02, perconadb-03]
-      networks:
-      - network: private
-
-
-  drupal-02_port:
-    type: OS::Neutron::Port
-    properties:
-       network: private
-       fixed_ips:
-         - subnet_id: "private-subnet"
-
-  drupal-02:
-    type: OS::Nova::Server
-    properties:
-      key_name: { get_param: key_name }
-      image: { get_param: image_id }
-      flavor: { get_param: instance_type }
-      depends_on: [perconadb-01, perconadb-02, perconadb-03]
-      networks:
-      - network: private
-
-
-  nginx-01_port:
-    type: OS::Neutron::Port
-    properties:
-       network: private
-       fixed_ips:
-         - subnet_id: "private-subnet"
-
-  nginx-01:
-    type: OS::Nova::Server
-    properties:
-      key_name: { get_param: key_name }
-      image: { get_param: image_id }
-      flavor: { get_param: instance_type }
-      depends_on: [drupal-01, drupal-02]
-      networks:
-      - network: private
-
-  nginx-01_floating_ip:
-    type: OS::Nova::FloatingIP
-    properties:
-      pool: public
-
-  nginx-01_association:
-     type: OS::Nova::FloatingIPAssociation
-     properties:
-       floating_ip: { get_resource: nginx-01_floating_ip }
-       server_id: { get_resource: nginx-01 }
-
-
-
-  nginx-02_port:
-    type: OS::Neutron::Port
-    properties:
-       network: private
-       fixed_ips:
-         - subnet_id: "private-subnet"
-
-  nginx-02:
-    type: OS::Nova::Server
-    properties:
-      key_name: { get_param: key_name }
-      image: { get_param: image_id }
-      flavor: { get_param: instance_type }
-      depends_on: [drupal-01, drupal-02]
-      networks:
-        port: { get_resource: nginx-02_port }
-
-  nginx-02_floating_ip:
-    type: OS::Nova::FloatingIP
-    properties:
-      pool: public
-
-  nginx-02_association:
-     type: OS::Nova::FloatingIPAssociation
-     properties:
-       floating_ip: { get_resource: nginx-02_floating_ip }
-       server_id: { get_resource: nginx-02 }
-
-
-  haproxy_port:
-    type: OS::Neutron::Port
-    properties:
-       network: private
-       fixed_ips:
-         - subnet_id: "private-subnet"
-
-  haproxy:
-    type: OS::Nova::Server
-    properties:
-      key_name: { get_param: key_name }
-      image: { get_param: image_id }
-      flavor: { get_param: instance_type }
-      depends_on: [nginx-01, nginx-02]
-      networks:
-        port: { get_resource: haproxy_port }
-
-  haproxy_floating_ip:
-    type: OS::Nova::FloatingIP
-    properties:
-      pool: public
-
-  haproxy_association:
-     type: OS::Nova::FloatingIPAssociation
-     properties:
-       floating_ip: { get_resource: haproxy_floating_ip }
-       server_id: { get_resource: haproxy }
+      - port: { get_resource: instance_port }
