@@ -219,7 +219,7 @@ heat_waitcondition_server_url = http://{{ controller_hostname }}:8000/v1/waitcon
 
 stack_domain_admin = {{ heat_domain_admin }}
 stack_domain_admin_password = {{ heat_domain_admin_password }}
-stack_user_domain_name ={{ heat_user_domain }}
+stack_user_domain_name = {{ heat_domain_name }}
 
 
 [cors]
@@ -383,7 +383,7 @@ connection = {{ relational_database_driver[relational_database] }}://{{ keystone
 auth_uri = http://{{ admin_hostname }}:5000
 auth_url = http://{{ admin_hostname }}:35357
 memcached_servers = {{ admin_hostname }}:11211
-auth_plugin = password
+auth_type = password
 project_domain_name = {{ keystone_default_project_name }}
 user_domain_name = {{ keystone_default_domain_name }}
 project_name = {{ keystone_service_project_name }}
