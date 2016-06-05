@@ -40,12 +40,16 @@
 - name: Create the heat user, role and asociate both to admin project
   shell: |
     openstack user create --domain {{ keystone_default_domain_name }} --password {{ keystone_heat_password }} {{ keystone_heat_name }}
-    openstack role add --project {{ keystone_service_project_name }} --user {{ keystone_heat_name }} {{ keystone_admin_role }}
   when: exists|failed
   tags: workingon
 
+- name: Add admin role to heat user in service project
+  shell: |
+    openstack role add --project {{ keystone_service_project_name }} --user {{ keystone_heat_name }} {{ keystone_admin_role }}
+  ignore_errors: True
+  tags: workingon
 
-#Create the service entity and API endpoint
+
 - name: Test if service entity exists
   shell: |
     openstack service list | grep " {{ keystone_heat_service_name }} " | wc -l
@@ -135,8 +139,13 @@
 - name: Create the heat_domain_admin user
   shell: |
     openstack user create --domain {{ heat_domain_name }} --password {{ heat_domain_admin_password }} {{ heat_domain_admin }}
-    openstack role add --domain {{ heat_domain_name }} --user-domain {{ keystone_heat_name }} --user {{ heat_domain_admin }} {{ keystone_admin_role }}
   when: user_exists|failed
+  tags: workingon
+
+- name: Add admin role to heat_domain_admin user in the heat domain
+  shell: |
+    openstack role add --domain {{ heat_domain_name }} --user-domain {{ keystone_heat_name }} --user {{ heat_domain_admin }} {{ keystone_admin_role }}
+  ignore_errors: True
   tags: workingon
 
 - name: Create the heat_stack_owner role

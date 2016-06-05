@@ -55,8 +55,8 @@ glance_dbpass: GLANCE_DBPASS
 keystone_glance_name: glance
 keystone_glance_password: glance
 
-#glance_storage: file
-glance_storage: rbd
+glance_storage: file
+#glance_storage: rbd
 rbd_parameters:
   rbd_store_pool: images
   rbd_store_user: glance
