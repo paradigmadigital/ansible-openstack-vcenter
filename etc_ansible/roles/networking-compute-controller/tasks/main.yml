@@ -338,3 +338,10 @@
   shell: |
     neutron subnet-create public {{ public_cidr }} --name public --allocation-pool start={{ public_allocation_pool.split(",")[0] }},end={{ public_allocation_pool.split(",")[-1] }} --disable-dhcp --gateway {{ public_gateway }}
   when: subnet_exists|failed
+
+# Dirty way to set the MTU in network interfaces
+- name: Set gre_sys MTU
+  cron: name="Set gre_sys MTU" job="/sbin/ifconfig gre_sys mtu {{ path_mtu }}"
+
+- name: Set tap devices MTU
+  cron: name="Set tap devices MTU" job="for device in `/sbin/ifconfig | /bin/grep tap | /usr/bin/awk '{print $1}'`; do /sbin/ifconfig $device mtu {{ vm_mtu }};done"
