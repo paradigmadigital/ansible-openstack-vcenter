@@ -117,7 +117,7 @@ tenant_network_types = gre
 # the neutron.ml2.mechanism_drivers namespace. (list value)
 #mechanism_drivers =
 #mechanism_drivers = openvswitch,l2population
-mechanism_drivers = openvswitch
+mechanism_drivers = openvswitch,l2population
 
 
 # An ordered list of extension driver entrypoints to be loaded from the
@@ -231,6 +231,7 @@ tunnel_id_ranges = 1:1000
 
 # Driver for security groups firewall in the L2 agent (string value)
 #firewall_driver = <None>
+firewall_driver = iptables_hybrid
 
 # Controls whether the neutron security group API is enabled in the server. It
 # should be false when using no security groups or using the nova security
@@ -239,5 +240,5 @@ enable_security_group = true
 
 # Use ipset to speed-up the iptables based security groups. Enabling ipset
 # support requires that ipset is installed on L2 agent node. (boolean value)
-enable_ipset = true
+# enable_ipset = true
 

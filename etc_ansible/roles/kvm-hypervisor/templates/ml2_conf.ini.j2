@@ -227,16 +227,16 @@ tunnel_id_ranges = 1:1000
 
 # Driver for security groups firewall in the L2 agent (string value)
 #firewall_driver = <None>
-firewall_driver = neutron.agent.linux.iptables_firewall.OVSHybridIptablesFirewallDriver
+firewall_driver = iptables_hybrid
 
 # Controls whether the neutron security group API is enabled in the server. It
 # should be false when using no security groups or using the nova security
 # group API. (boolean value)
-enable_security_group = true
+# enable_security_group = true
 
 # Use ipset to speed-up the iptables based security groups. Enabling ipset
 # support requires that ipset is installed on L2 agent node. (boolean value)
-enable_ipset = true
+# enable_ipset = true
 
 [ovs]
 local_ip = {{ ansible_osm["ipv4"]["address"] }}
