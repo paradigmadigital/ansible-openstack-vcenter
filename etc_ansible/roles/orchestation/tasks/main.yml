@@ -49,7 +49,7 @@
   ignore_errors: True
   tags: workingon
 
-
+#Create the service entity and API endpoint
 - name: Test if service entity exists
   shell: |
     openstack service list | grep " {{ keystone_heat_service_name }} " | wc -l

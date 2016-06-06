@@ -199,7 +199,7 @@
   with_items:
   - neutron-server
   - neutron-plugin-ml2
-  - neutron-plugin-openvswitch-agent
+  - neutron-openvswitch-agent
   - neutron-l3-agent
   - neutron-dhcp-agent
   - neutron-metadata-agent
@@ -215,7 +215,7 @@
   - restart nova-scheduler
   - restart nova-conductor
   - restart neutron-server
-  - restart neutron-plugin-openvswitch-agent
+  - restart neutron-openvswitch-agent
   - restart neutron-l3-agent
   - restart neutron-dhcp-agent
   - restart neutron-metadata-agent
@@ -229,7 +229,7 @@
   template: src=ml2_conf.ini.j2 dest=/etc/neutron/plugins/ml2/ml2_conf.ini owner=root group=neutron mode=0644
   notify:
   - populate neutron database
-  - restart neutron-plugin-openvswitch-agent
+  - restart neutron-openvswitch-agent
   - restart neutron-server
   - restart neutron-server
 
@@ -237,7 +237,7 @@
   template: src=openvswitch_agent.ini.j2 dest=/etc/neutron/plugins/ml2/openvswitch_agent.ini owner=root group=neutron mode=0644
   notify:
   - restart openvswitch-switch
-  - restart neutron-plugin-openvswitch-agent
+  - restart neutron-openvswitch-agent
 
 - name: Configure Layer-3 (L3) agent
   template: src=l3_agent.ini.j2 dest=/etc/neutron/l3_agent.ini owner=root group=neutron mode=0644
@@ -287,7 +287,7 @@
 - name: Add a port to the external bridge that connects to the physical external network interface
   openvswitch_port: bridge=br-ex port=ose state=present
   notify:
-  - restart neutron-plugin-openvswitch-agent
+  - restart neutron-openvswitch-agent
   - restart neutron-l3-agent
   - restart neutron-dhcp-agent
   - restart neutron-metadata-agent
@@ -338,3 +338,10 @@
   shell: |
     neutron subnet-create public {{ public_cidr }} --name public --allocation-pool start={{ public_allocation_pool.split(",")[0] }},end={{ public_allocation_pool.split(",")[-1] }} --disable-dhcp --gateway {{ public_gateway }}
   when: subnet_exists|failed
+
+# Dirty way to set the MTU in network interfaces
+- name: Set gre_sys MTU
+  cron: name="Set gre_sys MTU" job="/sbin/ifconfig gre_sys mtu {{ path_mtu }}"
+
+- name: Set tap devices MTU
+  cron: name="Set tap devices MTU" job="for device in `/sbin/ifconfig | /bin/grep tap | /usr/bin/awk '{print $1}'`; do /sbin/ifconfig $device mtu {{ vm_mtu }};done"

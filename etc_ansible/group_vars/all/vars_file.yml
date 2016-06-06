@@ -10,8 +10,9 @@ relational_database_driver:
 # vxlan with physical servers
 # openvswitch with appliance
 network_type: openvswitch
-network_mtu: 9000
-vm_mtu: 1500
+physical_mtu: 1000
+path_mtu: 750
+vm_mtu: 500
 
 controller_hostname: openstack-vcenter
 rabbitmq_user: openstack
