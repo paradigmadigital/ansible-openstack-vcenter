@@ -219,7 +219,7 @@ heat_waitcondition_server_url = http://{{ controller_hostname }}:8000/v1/waitcon
 
 stack_domain_admin = {{ heat_domain_admin }}
 stack_domain_admin_password = {{ heat_domain_admin_password }}
-stack_user_domain_name ={{ heat_user_domain }}
+stack_user_domain_name = {{ keystone_heat_name }}
 
 
 [cors]
@@ -566,7 +566,7 @@ password = {{ keystone_heat_password }}
 user_domain_name = {{ keystone_default_domain_name }}
 
 [clients_keystone]
-auth_uri = http://{{ admin_hostname }}:5000
+auth_uri = http://{{ admin_hostname }}:35357
 
 [ec2authtoken]
 auth_uri = http://{{ admin_hostname }}:5000
