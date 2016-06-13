@@ -39,7 +39,7 @@ parameters:
     type: string
     label: Public Network ID
     description: Public Network ID
-    default: 3a420c37-4c76-49ed-b7c7-6dec944c040e
+    default: __public_net_id__
     
 
 resources:
