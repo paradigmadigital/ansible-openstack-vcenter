@@ -4,16 +4,15 @@
 # mysql
 - name: Create mysql database
   mysql_db: name=cinder state=present
-  when: relational_database == "mysql"
+  when: relational_database == "mysql" or relational_database == "mariadb"
 
 - name: Create mysql database user
   mysql_user: name=cinder host=localhost password={{ cinder_dbpass }} priv=cinder.*:ALL,GRANT state=present
-  when: relational_database == "mysql"
+  when: relational_database == "mysql" or relational_database == "mariadb"
 
 - name: Create mysql database user
   mysql_user: name=cinder host=% password={{ cinder_dbpass }} priv=cinder.*:ALL,GRANT state=present
-  when: relational_database == "mysql"
-
+  when: relational_database == "mysql" or relational_database == "mariadb"
 
 # postgresql
 - name: Create postgresql database
@@ -25,28 +24,24 @@
   when: relational_database == "postgresql"
 
 
-- name: Create the cinder user
-  keystone_user:
-    user={{ keystone_cinder_name }}
-    tenant={{ keystone_service_project_name }}
-    password={{ keystone_cinder_password }}
-    token={{ administration_token }}
-    endpoint=http://{{ admin_hostname }}:35357/v2.0
+# Create cinder user
+- name: Test if cinder user exists
+  shell: |
+    openstack user list | grep " {{ keystone_cinder_name }}" | wc -l
+  register: cinder_user_exists
+  ignore_errors: True
+  failed_when: "'0' in cinder_user_exists.stdout"
 
-- name: Add the admin role to the cinder user
-  keystone_user:
-    role={{ keystone_admin_role }}
-    user={{ keystone_cinder_name }}
-    tenant={{ keystone_service_project_name }}
-    token={{ administration_token }}
-    endpoint=http://{{ admin_hostname }}:35357/v2.0
+- name: Create the cinder user
+  shell: |
+    openstack user create --domain {{ keystone_default_domain_name }} --password {{ keystone_cinder_password }} {{ keystone_cinder_name }}
+    openstack role add --project {{ keystone_service_project_name }} --user {{ keystone_cinder_name }} {{ keystone_admin_role }}
+  when: cinder_user_exists|failed
+
 
 #Create the service entity and API endpoint
 - name: Test if service entity exists
   shell: |
-    export OS_TOKEN={{ administration_token }}
-    export OS_URL=http://{{ admin_hostname }}:35357/v3
-    export OS_IDENTITY_API_VERSION=3
     openstack service list | grep " volume "| wc -l
   register: service_entity_exists
   ignore_errors: True
@@ -54,17 +49,11 @@
 
 - name: Create the service entity for the Block Storage service
   shell: |
-    export OS_TOKEN={{ administration_token }}
-    export OS_URL=http://{{ admin_hostname }}:35357/v3
-    export OS_IDENTITY_API_VERSION=3
     openstack service create --name {{ keystone_cinder_name }} --description "OpenStack Block Storage" volume
   when: service_entity_exists|failed
 
 - name: Test if service entity v2 exists
   shell: |
-    export OS_TOKEN={{ administration_token }}
-    export OS_URL=http://{{ admin_hostname }}:35357/v3
-    export OS_IDENTITY_API_VERSION=3
     openstack service list | grep " volumev2 "| wc -l
   register: service_entity_exists
   ignore_errors: True
@@ -72,17 +61,12 @@
 
 - name: Create the service entity for the Block Storage service
   shell: |
-    export OS_TOKEN={{ administration_token }}
-    export OS_URL=http://{{ admin_hostname }}:35357/v3
-    export OS_IDENTITY_API_VERSION=3
-    openstack service create --name {{ keystone_cinder_name }}v2 --description "OpenStack Block Storage v2" volumev2
+    openstack service create --name {{ keystone_cinder_name }}v2 --description "OpenStack Block Storage" volumev2
   when: service_entity_exists|failed
+
 
 - name: Test if endpoint exists
   shell: |
-    export OS_TOKEN={{ administration_token }}
-    export OS_URL=http://{{ admin_hostname }}:35357/v3
-    export OS_IDENTITY_API_VERSION=3
     openstack endpoint list | grep " volume " | wc -l
   register: endpoint_exists
   ignore_errors: True
@@ -90,9 +74,6 @@
 
 - name: Create the Block Storage service API endpoints
   shell: |
-    export OS_TOKEN={{ administration_token }}
-    export OS_URL=http://{{ admin_hostname }}:35357/v3
-    export OS_IDENTITY_API_VERSION=3
     openstack endpoint create --region {{ region_name }} volume public http://{{ admin_hostname }}:8776/v1/%\(tenant_id\)s
     openstack endpoint create --region {{ region_name }} volume internal http://{{ admin_hostname }}:8776/v1/%\(tenant_id\)s
     openstack endpoint create --region {{ region_name }} volume admin http://{{ admin_hostname }}:8776/v1/%\(tenant_id\)s
@@ -100,9 +81,6 @@
 
 - name: Test if endpoint v2 exists
   shell: |
-    export OS_TOKEN={{ administration_token }}
-    export OS_URL=http://{{ admin_hostname }}:35357/v3
-    export OS_IDENTITY_API_VERSION=3
     openstack endpoint list | grep " volumev2 " | wc -l
   register: endpoint_exists
   ignore_errors: True
@@ -110,9 +88,6 @@
 
 - name: Create the Block Storage service API v2 endpoints
   shell: |
-    export OS_TOKEN={{ administration_token }}
-    export OS_URL=http://{{ admin_hostname }}:35357/v3
-    export OS_IDENTITY_API_VERSION=3
     openstack endpoint create --region {{ region_name }} volumev2 public http://{{ admin_hostname }}:8776/v2/%\(tenant_id\)s
     openstack endpoint create --region {{ region_name }} volumev2 internal http://{{ admin_hostname }}:8776/v2/%\(tenant_id\)s
     openstack endpoint create --region {{ region_name }} volumev2 admin http://{{ admin_hostname }}:8776/v2/%\(tenant_id\)s
