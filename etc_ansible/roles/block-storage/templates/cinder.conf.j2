@@ -21,7 +21,7 @@ my_ip = {{ ansible_eth0["ipv4"]["address"] }}
 
 enabled_backends = lvm
 
-glance_host = {{ admin_hostname }}
+glance_api_servers = http://{{ admin_hostname }}:9292
 
 
 [database]
@@ -37,9 +37,10 @@ rabbit_password = {{ rabbitmq_password }}
 [keystone_authtoken]
 auth_uri = http://{{ admin_hostname }}:5000
 auth_url = http://{{ admin_hostname }}:35357
-auth_plugin = password
-project_domain_id = default
-user_domain_id = default
+memcached_servers = {{ admin_hostname }}:11211
+auth_type = password
+project_domain_name = {{ keystone_default_project_name }}
+user_domain_name = {{ keystone_default_domain_name }}
 project_name = {{ keystone_service_project_name }}
 username = {{ keystone_cinder_name }}
 password = {{ keystone_cinder_password }}
