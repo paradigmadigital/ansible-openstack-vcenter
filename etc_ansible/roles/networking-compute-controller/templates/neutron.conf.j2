@@ -168,7 +168,11 @@ notify_nova_on_port_data_changes = true
 # MTU for all virtual network components. For flat and VLAN networks, neutron
 # uses this value without modification. For overlay networks such as VXLAN,
 # neutron automatically subtracts the overlay protocol overhead from this
-# value. Defaults to 1500, the standard value for Ethernet. (integer value)
+# value. Defaults to 1500, the standard value for Ethernet. Also consider
+# setting the path_mtu ml2 configuration value to the global_physnet_mtu value
+# when using the ml2 plug-in. Otherwise the global_physnet_mtu value might get
+# overridden by a smaller path_mtu value and hence have no effect on
+# overlay/tunnel networks but only flat and VLAN networks. (integer value)
 # Deprecated group/name - [ml2]/segment_mtu
 #global_physnet_mtu = 1500
 global_physnet_mtu = {{ physical_mtu }}
@@ -340,7 +344,7 @@ global_physnet_mtu = {{ physical_mtu }}
 #
 
 # Drivers list to use to send the update notification (list value)
-#notification_drivers = m,e,s,s,a,g,e,_,q,u,e,u,e
+#notification_drivers = message_queue
 
 #
 # From oslo.log

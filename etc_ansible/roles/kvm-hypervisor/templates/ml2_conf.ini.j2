@@ -124,20 +124,17 @@ mechanism_drivers = openvswitch
 #extension_drivers =
 
 # Maximum size of an IP packet (MTU) that can traverse the underlying physical
-# network infrastructure without fragmentation. For instances using a self-
-# service/private network, neutron subtracts the overlay protocol overhead from
-# this value and provides it to instances via DHCP option 26. For example,
-# using a value of 9000, DHCP provides 8950 to instances using a VXLAN network
-# that contains 50 bytes of overhead. Using a value of 0 disables this feature
-# and instances typically default to a 1500 MTU. Only impacts instances, not
-# neutron network components such as bridges and routers. (integer value)
+# network infrastructure without fragmentation when using an overlay/tunnel
+# protocol. Either set this to the same value as the global_physnet_mtu value
+# or use it to explicitly specify a physical network MTU value that differs
+# from the default global_physnet_mtu value. (integer value)
 #path_mtu = 1500
 path_mtu = {{ path_mtu }}
 
 # A list of mappings of physical networks to MTU values. The format of the
 # mapping is <physnet>:<mtu val>. This mapping allows specifying a physical
-# network MTU value that differs from the default segment_mtu value. (list
-# value)
+# network MTU value that differs from the default global_physnet_mtu value.
+# (list value)
 #physical_network_mtus =
 
 # Default network type for external networks when no provider attributes are
@@ -232,15 +229,8 @@ firewall_driver = iptables_hybrid
 # Controls whether the neutron security group API is enabled in the server. It
 # should be false when using no security groups or using the nova security
 # group API. (boolean value)
-# enable_security_group = true
+#enable_security_group = true
 
 # Use ipset to speed-up the iptables based security groups. Enabling ipset
 # support requires that ipset is installed on L2 agent node. (boolean value)
-# enable_ipset = true
-
-[ovs]
-local_ip = {{ ansible_osm["ipv4"]["address"] }}
-
-[agent]
-tunnel_types = gre
-
+#enable_ipset = true
