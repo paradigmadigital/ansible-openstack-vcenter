@@ -1,0 +1,139 @@
+#http://docs.openstack.org/developer/designate/install/ubuntu-liberty.html
+# mysql
+- name: Create designate database
+  mysql_db: name=designate state=present
+  when: relational_database == "mysql" or relational_database == "mariadb"
+  tags: workingon
+
+- name: Create designate database user
+  mysql_user: name=designate host=localhost password={{ designate_dbpass }} priv=designate.*:ALL,GRANT state=present
+  when: relational_database == "mysql" or relational_database == "mariadb"
+  tags: workingon
+
+- name: Create designate database user
+  mysql_user: name=designate host=% password={{ designate_dbpass }} append_privs=yes priv=designate.*:ALL,GRANT state=present
+  when: relational_database == "mysql" or relational_database == "mariadb"
+  tags: workingon
+
+- name: Create designate_pool_manager database
+  mysql_db: name=designate_pool_manager state=present
+  when: relational_database == "mysql" or relational_database == "mariadb"
+  tags: workingon
+
+- name: Create designate_pool_manager database user
+  mysql_user: name=designate host=localhost password={{ designate_dbpass }} priv=designate_pool_manager.*:ALL,GRANT state=present
+  when: relational_database == "mysql" or relational_database == "mariadb"
+  tags: workingon
+
+- name: Create designate database user
+  mysql_user: name=designate host=% password={{ designate_dbpass }} append_privs=yes priv=designate_pool_manager.*:ALL,GRANT state=present
+  when: relational_database == "mysql" or relational_database == "mariadb"
+  tags: workingon
+
+
+# postgresql
+- name: Create designate database
+  postgresql_db: name=designate
+  when: relational_database == "postgresql"
+  tags: workingon
+
+- name: Create designate database user
+  postgresql_user: db=designate name=designate password={{ designate_dbpass }} priv=ALL
+  when: relational_database == "postgresql"
+  tags: workingon
+
+- name: Create designate_pool_manager database
+  postgresql_db: name=designate_pool_manager
+  when: relational_database == "postgresql"
+  tags: workingon
+
+- name: Create designate_pool_manager database user
+  postgresql_user: db=designate_pool_manager name=designate password={{ designate_dbpass }} priv=ALL
+  when: relational_database == "postgresql"
+  tags: workingon
+
+# Create designate user
+- name: Test if designate user exists
+  shell: |
+    openstack user list | grep " designate " | wc -l
+  register: designate_user_exists
+  ignore_errors: True
+  failed_when: "'0' in designate_user_exists.stdout"
+  tags: workingon
+
+- name: Create the designate user
+  shell: |
+    openstack user create --domain {{ keystone_default_domain_name }} --password {{ keystone_designate_password }} {{ keystone_designate_name }}
+    openstack role add --project {{ keystone_service_project_name }} --user {{ keystone_designate_name}} {{ keystone_admin_role }}
+  when: designate_user_exists|failed
+  tags: workingon
+
+
+#Create the service entity and API endpoint
+- name: Test if service entity exists
+  shell: |
+    openstack service list | grep " dns "| wc -l
+  register: service_entity_exists
+  ignore_errors: True
+  failed_when: "'0' in service_entity_exists.stdout"
+  tags: workingon
+
+- name: Create the dns service entity
+  shell: |
+    openstack service create --name {{ keystone_designate_name }} --description "OpenStack DNS Service" dns
+  when: service_entity_exists|failed
+  tags: workingon
+
+- name: Test if endpoint exists
+  shell: |
+    openstack endpoint list | grep " dns " | wc -l
+  register: endpoint_exists
+  ignore_errors: True
+  failed_when: "'0' in endpoint_exists.stdout"
+  tags: workingon
+
+- name: Create the Image service API endpoints
+  shell: |
+    openstack endpoint create --region {{ region_name }} dns public http://{{ admin_hostname }}:9001
+    openstack endpoint create --region {{ region_name }} dns internal http://{{ admin_hostname }}:9001
+    openstack endpoint create --region {{ region_name }} dns admin http://{{ admin_hostname }}:9001
+  when: endpoint_exists|failed
+  tags: workingon
+
+# To install and configure the DNS Service components
+- name: Install bind9
+  apt: name=bind9 state=present
+  tags:
+  - appliance
+  tags: workingon
+
+- name: Configure bind9 options
+  template: src=named.conf.options.j2 dest=/etc/bind/named.conf.options owner=root group=bind mode=0644
+  notify:
+  - restart bind9
+  tags: workingon
+
+
+- name: Install designate
+  apt: name={{ item }} state=present
+  with_items:
+  - designate
+  - designate-pool-manager
+  - designate-mdns
+  tags:
+  - appliance
+  tags: workingon
+
+- name: Configure designate service
+  template: src=designate.conf.j2 dest=/etc/designate/designate.conf owner=designate group=designate mode=0644
+  notify:
+  - populate designate-pool-manager-database
+  - populate designate-database
+  - restart designate-api
+  - restart designate-central
+  - restart designate-mdns
+  - restart designate-pool-manager
+  tags: workingon
+
+- name: Remove sqlite database
+  file: path=/var/lib/designate/designate.sqlite state=absent

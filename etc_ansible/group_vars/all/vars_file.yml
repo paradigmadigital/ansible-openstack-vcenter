@@ -1,4 +1,4 @@
-# Relational database could be mysql with mysql+pymysql or
+# Relational database could be mariadb with mysql+pymysql or
 # postgresql with postgresql+psycopg2
 # {{ relational_database_driver[relational_database] }}
 relational_database: mariadb
@@ -111,3 +111,11 @@ heat_domain_admin: heat_domain_admin
 heat_domain_admin_password: HEAT_DOMAIN_PASS
 keystone_heat_stack_user_role: heat_stack_user_role
 keystone_heat_stack_owner_role: heat_stack_owner_role
+
+#http://docs.openstack.org/developer/designate/install/ubuntu-liberty.html
+designate_dbpass: DESIGNATE_DBPASS
+keystone_designate_name: designate
+keystone_designate_password: designate
+designate_pool_id: 794ccc2c-d751-44fe-b57f-8894c9f5c842
+designate_nameservers_id: 0f66b842-96c2-4189-93fc-1dc95a08b012
+designate_targets_id: f26e0b32-736f-4f0a-831b-039a415c481e
