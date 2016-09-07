@@ -19,3 +19,5 @@
 - name: restart designate-pool-manager
   service: name=designate-pool-manager state=restarted
 
+- name: update pools
+  shell: su -s /bin/sh -c "designate-manage pool update" designate

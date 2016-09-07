@@ -113,6 +113,11 @@
   - restart bind9
   tags: workingon
 
+- name: Configure rndc
+  template: src=rndc.conf.j2 dest=/etc/rndc.conf owner=root group=bind mode=0644
+  notify:
+  - restart bind9
+  tags: workingon
 
 - name: Install designate
   apt: name={{ item }} state=present
@@ -134,6 +139,11 @@
   - restart designate-mdns
   - restart designate-pool-manager
   tags: workingon
+
+- name: Configure pools
+  template: src=pools.yaml.j2 dest=/etc/designate/pools.yaml owner=designate group=designate mode=0644
+  notify:
+  - update pools
 
 - name: Remove sqlite database
   file: path=/var/lib/designate/designate.sqlite state=absent
