@@ -28,6 +28,28 @@
   - identity
   - keystone
 
+# Dashboard service
+- hosts: dashboard
+  roles:
+#  - ntp
+  - dashboard
+  tags:
+  - dashboard
+  - horizon
+
+# DNS service
+- hosts: dnsaas
+  roles:
+  - ntp
+  - dnsaas
+  environment:
+    OS_TOKEN: "{{ administration_token }}"
+    OS_URL: "http://{{ admin_hostname }}:35357/v3"
+    OS_IDENTITY_API_VERSION: 3
+  tags:
+  - dnsaas
+  - designate
+
 # Image service
 - hosts: image
   roles:
@@ -59,15 +81,6 @@
   - networking-compute-controller
   - controller
   - networking
-
-# Dashboard service
-- hosts: dashboard
-  roles:
-#  - ntp
-  - dashboard
-  tags:
-  - dashboard
-  - horizon
 
 # Block Storage service
 - hosts: block-storage

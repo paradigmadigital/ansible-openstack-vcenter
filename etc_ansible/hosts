@@ -4,6 +4,9 @@ openstack-vcenter ansible_become=yes ansible_become_user=root ansible_become_pas
 [identity]
 openstack-vcenter ansible_become=yes ansible_become_user=root ansible_become_pass=openstack ansible_become_method=sudo ansible_connection=local
 
+[dashboard]
+openstack-vcenter ansible_become=yes ansible_become_user=root ansible_become_pass=openstack ansible_become_method=sudo ansible_connection=local
+
 [image]
 openstack-vcenter ansible_become=yes ansible_become_user=root ansible_become_pass=openstack ansible_become_method=sudo ansible_connection=local
 
@@ -18,7 +21,7 @@ openstack-vcenter ansible_become=yes ansible_become_user=root ansible_become_pas
 [orchestation]
 openstack-vcenter ansible_become=yes ansible_become_user=root ansible_become_pass=openstack ansible_become_method=sudo ansible_connection=local
 
-[dashboard]
+[dnsaas]
 openstack-vcenter ansible_become=yes ansible_become_user=root ansible_become_pass=openstack ansible_become_method=sudo ansible_connection=local
 
 [kvm-hypervisor]

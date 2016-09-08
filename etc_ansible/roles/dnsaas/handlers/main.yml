@@ -1,0 +1,23 @@
+- name: populate designate-database
+  shell: su -s /bin/sh -c "designate-manage database sync" designate
+
+- name: populate designate-pool-manager-database
+  shell: su -s /bin/sh -c "designate-manage pool-manager-cache sync" designate
+
+- name: restart bind9
+  service: name=bind9 state=restarted
+
+- name: restart designate-api
+  service: name=designate-api state=restarted
+
+- name: restart designate-central
+  service: name=designate-central state=restarted
+
+- name: restart designate-mdns
+  service: name=designate-mdns state=restarted
+
+- name: restart designate-pool-manager
+  service: name=designate-pool-manager state=restarted
+
+- name: update pools
+  shell: su -s /bin/sh -c "designate-manage pool update" designate
