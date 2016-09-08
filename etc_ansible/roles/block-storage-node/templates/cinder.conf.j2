@@ -19,7 +19,9 @@ my_ip = {{ ansible_osm["ipv4"]["address"] }}
 my_ip = {{ ansible_eth0["ipv4"]["address"] }}
 {% endif %}
 
+enabled_backends = lvm
 
+glance_api_servers = http://{{ admin_hostname }}:9292
 
 
 [database]
@@ -46,3 +48,10 @@ password = {{ keystone_cinder_password }}
 
 [oslo_concurrency]
 lock_path = /var/lib/cinder/tmp
+
+
+[lvm]
+volume_driver = cinder.volume.drivers.lvm.LVMVolumeDriver
+volume_group = cinder-volumes
+iscsi_protocol = iscsi
+iscsi_helper = tgtadm

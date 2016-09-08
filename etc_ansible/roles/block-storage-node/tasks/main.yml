@@ -1,0 +1,41 @@
+# http://docs.openstack.org/mitaka/install-guide-ubuntu/cinder.html
+
+# http://docs.openstack.org/mitaka/install-guide-ubuntu/cinder-storage-install.html
+- name: Install cinder dependencies in storage node
+  apt: name={{ item }} state=present
+  with_items:
+  - qemu-utils
+  - lvm2
+
+# All LVM devices are allowed temporarily
+- name: Configure permissive lvm filters
+  template: src=permissive_lvm.conf.j2 dest=/etc/lvm/lvm.conf owner=root group=root mode=0644
+
+- name: Setup physical devices
+  shell: |
+         if [ `pvs | grep {{ item }} | wc -l` = "0" ]; then
+           pvcreate {{ item }}
+         fi
+  with_items: "{{ cinder_physical_devices }}"
+
+- name: Setup volume group
+  lvg: vg=cinder-volumes pvs={{ cinder_physical_devices|join(',') }}
+
+- name: Configure lvm filters
+  template: src=lvm.conf.j2 dest=/etc/lvm/lvm.conf owner=root group=root mode=0644
+
+- name: Install cinder components
+  apt: name={{ item }} state=present
+  with_items:
+  - cinder-volume
+  - python-mysqldb
+
+- name: Configure cinder service
+  template: src=cinder.conf.j2 dest=/etc/cinder/cinder.conf owner=cinder group=cinder
+  notify:
+  - populate database
+  - restart tgt
+  - restart cinder-volume
+
+- name: Remove sqlite database
+  file: path=/var/lib/cinder/cinder.sqlite state=absent
