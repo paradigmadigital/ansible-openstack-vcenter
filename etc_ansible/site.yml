@@ -95,6 +95,19 @@
   - cinder
   - block-storage
 
+# Block Storage service node
+- hosts: block-storage-node
+  roles:
+#  - ntp
+  - block-storage-node
+  environment:
+    OS_TOKEN: "{{ administration_token }}"
+    OS_URL: "http://{{ admin_hostname }}:35357/v3"
+    OS_IDENTITY_API_VERSION: 3
+  tags:
+  - cinder
+  - block-storage
+
 # Ochestration service
 - hosts: orchestation
   roles:
