@@ -105,7 +105,7 @@
   apt: name=bind9 state=present
   tags:
   - appliance
-  tags: workingon
+  - workingon
 
 - name: Configure bind9 options
   template: src=named.conf.options.j2 dest=/etc/bind/named.conf.options owner=root group=bind mode=0644
@@ -127,7 +127,7 @@
   - designate-mdns
   tags:
   - appliance
-  tags: workingon
+  - workingon
 
 - name: Configure designate service
   template: src=designate.conf.j2 dest=/etc/designate/designate.conf owner=designate group=designate mode=0644
