@@ -164,6 +164,9 @@ wget http://cloud-images.ubuntu.com/trusty/current/trusty-server-cloudimg-amd64-
 glance image-create --name="LXD Ubuntu 14.04 Trusty" --visibility public --progress --container-format=bare --disk-format=root-tar --property architecture="x86_64" --property hypervisor_type=lxc --file /tmp/trusty-server-cloudimg-amd64-root.tar.gz
 ```
 
+Download manila images from:
+http://docs.openstack.org/mitaka/install-guide-ubuntu/launch-instance-manila.html
+
 Restoring:
 * In Ubuntu KVM node:
   * apt-get -y remove --purge neutron-plugin-ml2 neutron-plugin-openvswitch-agent nova-compute neutron-plugin-openvswitch-agent python-neutron python-neutronclient neutron-common openvswitch-common openvswitch-switch

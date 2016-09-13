@@ -1,0 +1,119 @@
+# http://docs.openstack.org/mitaka/install-guide-ubuntu/manila-share-install.html
+# mysql
+- name: Create database
+  mysql_db: name=manila state=present
+  when: relational_database == "mysql" or relational_database == "mariadb"
+
+- name: Create database user
+  mysql_user: name=manila host=localhost password={{ manila_dbpass }} priv=manila.*:ALL,GRANT state=present
+  when: relational_database == "mysql" or relational_database == "mariadb"
+
+- name: Create database user
+  mysql_user: name=manila host=% password={{ manila_dbpass }} append_privs=yes priv=manila.*:ALL,GRANT state=present
+  when: relational_database == "mysql" or relational_database == "mariadb"
+
+# postgresql
+- name: Create database
+  postgresql_db: name=manila
+  when: relational_database == "postgresql"
+
+- name: Create database user
+  postgresql_user: db=manila name=manila password={{ manila_dbpass }} priv=ALL
+  when: relational_database == "postgresql"
+
+# Create manila user
+- name: Test if manila user exists
+  shell: |
+    openstack user list | grep " manila " | wc -l
+  register: manila_user_exists
+  ignore_errors: True
+  failed_when: "'0' in manila_user_exists.stdout"
+
+- name: Create the manila user
+  shell: |
+    openstack user create --domain {{ keystone_default_domain_name }} --password {{ keystone_manila_password }} {{ keystone_manila_name }}
+    openstack role add --project {{ keystone_service_project_name }} --user {{ keystone_manila_name}} {{ keystone_admin_role }}
+  when: manila_user_exists|failed
+
+
+#Create the service entity and API endpoint
+- name: Test manila service entity exists
+  shell: |
+    openstack service list | grep " share "| wc -l
+  register: service_entity_exists
+  ignore_errors: True
+  failed_when: "'0' in service_entity_exists.stdout"
+
+- name: Create the manila service entity
+  shell: |
+    openstack service create --name {{ keystone_manila_name }} --description "OpenStack Shared File Systems" share
+  when: service_entity_exists|failed
+
+- name: Test manilav2 service entity exists
+  shell: |
+    openstack service list | grep " sharev2 "| wc -l
+  register: service_entity_exists
+  ignore_errors: True
+  failed_when: "'0' in service_entity_exists.stdout"
+
+- name: Create the manilav2 service entity
+  shell: |
+    openstack service create --name {{ keystone_manila_name }} --description "OpenStack Shared File Systems" sharev2
+  when: service_entity_exists|failed
+
+
+- name: Test if manila endpoint exists
+  shell: |
+    openstack endpoint list | grep " share " | wc -l
+  register: endpoint_exists
+  ignore_errors: True
+  failed_when: "'0' in endpoint_exists.stdout"
+
+- name: Create the manila service API endpoints
+  shell: |
+    openstack endpoint create --region {{ region_name }} share public http://{{ admin_hostname }}:8786/v1/%\(tenant_id\)s
+    openstack endpoint create --region {{ region_name }} share internal http://{{ admin_hostname }}:8786/v1/%\(tenant_id\)s
+    openstack endpoint create --region {{ region_name }} share admin http://{{ admin_hostname }}:8786/v1/%\(tenant_id\)s
+  when: endpoint_exists|failed
+
+- name: Test if manilav2 endpoint exists
+  shell: |
+    openstack endpoint list | grep " sharev2 " | wc -l
+  register: endpoint_exists
+  ignore_errors: True
+  failed_when: "'0' in endpoint_exists.stdout"
+
+- name: Create the manilav2 service API endpoints
+  shell: |
+    openstack endpoint create --region {{ region_name }} sharev2 public http://{{ admin_hostname }}:8786/v2/%\(tenant_id\)s
+    openstack endpoint create --region {{ region_name }} sharev2 internal http://{{ admin_hostname }}:8786/v2/%\(tenant_id\)s
+    openstack endpoint create --region {{ region_name }} sharev2 admin http://{{ admin_hostname }}:8786/v2/%\(tenant_id\)s
+  when: endpoint_exists|failed
+
+
+# To install and configure the Image Service components
+- name: Install manila components
+  apt: name={{ item }} state=present
+  with_items:
+  - manila-api
+  - manila-scheduler
+  - python-manilaclient
+  tags:
+  - appliance
+
+
+- name: Configure glance api service
+  template: src=manila.conf.j2 dest=/etc/manila/manila.conf owner=manila group=manila mode=0644
+  notify:
+  - populate database
+  - restart manila-scheduler
+  - restart manila-api
+
+#- name: Configure glance registry service
+#  template: src=glance-registry.conf.j2 dest=/etc/glance/glance-registry.conf owner=glance group=glance mode=0644
+#  notify:
+#  - populate database
+#  - restart glance-registry
+
+#- name: Remove sqlite database
+#  file: path=/var/lib/glance/glance.sqlite state=absent

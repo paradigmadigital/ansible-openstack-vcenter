@@ -21,6 +21,9 @@ openstack-vcenter ansible_become=yes ansible_become_user=root ansible_become_pas
 [block-storage-node]
 openstack-block-storage ansible_ssh_user=root
 
+[shared-file-system]
+openstack-vcenter ansible_become=yes ansible_become_user=root ansible_become_pass=openstack ansible_become_method=sudo ansible_connection=local
+
 [orchestation]
 openstack-vcenter ansible_become=yes ansible_become_user=root ansible_become_pass=openstack ansible_become_method=sudo ansible_connection=local
 

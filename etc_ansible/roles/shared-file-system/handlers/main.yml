@@ -1,0 +1,8 @@
+- name: populate database
+  shell: su -s /bin/sh -c "manila-manage db sync" manila
+
+- name: restart manila-scheduler
+  service: name=manila-scheduler state=restarted
+
+- name: restart manila-api
+  service: name=manila-api state=restarted

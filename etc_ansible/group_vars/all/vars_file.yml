@@ -119,3 +119,7 @@ keystone_designate_password: designate
 designate_pool_id: 794ccc2c-d751-44fe-b57f-8894c9f5c842
 designate_nameservers_id: 0f66b842-96c2-4189-93fc-1dc95a08b012
 designate_targets_id: f26e0b32-736f-4f0a-831b-039a415c481e
+
+manila_dbpass: MANILA_DBPASS
+keystone_manila_name: manila
+keystone_manila_password: manila
