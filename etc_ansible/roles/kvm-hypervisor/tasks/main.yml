@@ -37,6 +37,10 @@
   template: src=nova.conf.j2 dest=/etc/nova/nova.conf owner=nova group=nova
   notify: restart nova-compute
 
+- name: Configure nova compute
+  template: src=nova-compute.conf.j2 dest=/etc/nova/nova-compute.conf owner=nova group=nova mode=0600
+  notify: restart nova-compute
+
 # http://docs.openstack.org/liberty/install-guide-ubuntu/neutron.html
 # http://docs.openstack.org/liberty/install-guide-ubuntu/neutron-compute-install.html
 
