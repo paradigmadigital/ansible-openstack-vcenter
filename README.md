@@ -1,11 +1,11 @@
 # ansible-openstack-vcenter
 Ansible playbooks to create a openstack vcenter.
 
-Liberty Release
+Newton Release
 
 # Steps
 ## Compute node
-* Install compute node (Ubuntu 14.04 or CentOS 7) with qemu-kvm, bridge-utils and virt-manager
+* Install compute node (Debian Stretch or Ubuntu 16.04) with qemu-kvm, bridge-utils and virt-manager
 * You need two network interfaces configured as external (ose) and management (osm).
   * In a development environment osm and ose network interfaces interface does not need to be "connected" to any physical device so you can use your physical network interfaces with network manager. Suppose you are using a 10.42.84.0/24 management network and a 10.20.30.0/24 external network:
 ```
@@ -82,7 +82,7 @@ Start libvirt:
 service libvirt-bin start
 ```
 #### Alternative 1: Build the appliance
-Create vcenter machine as a KVM virtual machine (Ubuntu 14.04) in compute node with two network interfaces attached to ose and osm bridges. Stop libvirtd, copy the configuration openstack-vcenter.xml in /etc/libvirt/qemu/openstack-vcenter.xml and create disks this way.
+Create vcenter machine as a KVM virtual machine (Debian Stretch) in compute node with two network interfaces attached to ose and osm bridges. Stop libvirtd, copy the configuration openstack-vcenter.xml in /etc/libvirt/qemu/openstack-vcenter.xml and create disks this way.
 ```
 sudo su -
 service libvirt-bin stop
@@ -95,10 +95,19 @@ qemu-img create -f qcow2 /var/lib/libvirt/images/openstack-vcenter-swift.qcow2 2
 qemu-img create -f qcow2 /var/lib/libvirt/images/openstack-vcenter-ceilometer.qcow2 20G
 chown libvirt-qemu:kvm /var/lib/libvirt/images/*qcow2
 chmod 644 /var/lib/libvirt/images/*qcow2
-wget http://releases.ubuntu.com/14.04.3/ubuntu-14.04.3-server-amd64.iso?_ga=1.264231052.1690675188.1451462087http://releases.ubuntu.com/14.04.3/ubuntu-14.04.3-server-amd64.iso?_ga=1.264231052.1690675188.1451462087 -O /var/lib/libvirt/images/ubuntu-14.04.3-server-amd64.iso
+wget http://ftp.de.debian.org/debian-cd/8.7.1/amd64/iso-cd/debian-8.7.1-amd64-netinst.iso -O /var/lib/libvirt/images/debian-8.7.1-amd64-netinst.iso
 service libvirt-bin start
 ```
 ### Configure vCenter machine
+#### Upgrade to Stretch
+Change jessie string in /etc/apt/sources.list to stretch and execute:
+```sh
+apt-get update
+apt-get -y upgrade
+apt-get -y dist-upgrade
+reboot
+```
+
 #### Networking
 * Install bridge-utils:
 ```
@@ -143,9 +152,10 @@ sudo apt-get install git ansible
 ```
 * In vcenter virtual machine generate ssh key with "ssh-keygen -t rsa"
 * Copy key to root@openstack-compute and openstack-vcenter: ssh-copy-id root@openstack-compute;ssh-copy-id root@openstack-vcenter
-* Clone ansible-openstack-vcenter epository:
+* Clone ansible-openstack-vcenter repository:
 ```
 git clone https://github.com/elmanytas/ansible-openstack-vcenter.git
+git checkout develop
 ```
 * Change to ansible-openstack-vcenter directory
 * Change vars in etc_ansible/group_vars/all/vars_file.yml
@@ -165,7 +175,7 @@ glance image-create --name="LXD Ubuntu 14.04 Trusty" --visibility public --progr
 ```
 
 Restoring:
-* In Ubuntu KVM node:
+* In Debian/Ubuntu KVM node:
   * apt-get -y remove --purge neutron-plugin-ml2 neutron-plugin-openvswitch-agent nova-compute neutron-plugin-openvswitch-agent python-neutron python-neutronclient neutron-common openvswitch-common openvswitch-switch
   * apt-get -y autoremove --purge
   * rm -rf /var/log/neutron /var/lib/neutron/lock /var/log/openvswitch /var/log/nova /var/lib/nova/instances
@@ -173,3 +183,30 @@ Restoring:
   * yum -y remove remove openstack-neutron-common openstack-neutron-openvswith python-neutron python-neutronclient openstack-neutron-ml2 openstack-nova-common openstack-nova-compute python-novaclient python-nova python-openvswitch openvswitch
 
 If this KVM node is hosting vCenter, destroy vCenter virtual machine with virt-manager.
+
+# TODO sorted by importance:
+* keystone
+* neutron
+* glance
+* nova
+* openstack-dashboard
+* heat
+* designate
+* trove
+* cinder
+* manila
+* swift
+* ceilometer
+* zaqar
+* barbican
+* sahara
+* magnum
+* ironic
+* aodh
+* congress
+* mistral
+* murano
+* rally
+* senlin
+* tempest
+* watcher
