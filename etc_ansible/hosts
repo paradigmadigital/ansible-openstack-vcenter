@@ -1,34 +1,34 @@
 [databases]
 openstack-vcenter ansible_become=yes ansible_become_user=root ansible_become_pass=openstack ansible_become_method=sudo ansible_connection=local
 
-[identity]
-openstack-vcenter ansible_become=yes ansible_become_user=root ansible_become_pass=openstack ansible_become_method=sudo ansible_connection=local
+#[identity]
+#openstack-vcenter ansible_become=yes ansible_become_user=root ansible_become_pass=openstack ansible_become_method=sudo ansible_connection=local
 
-[dashboard]
-openstack-vcenter ansible_become=yes ansible_become_user=root ansible_become_pass=openstack ansible_become_method=sudo ansible_connection=local
+#[dashboard]
+#openstack-vcenter ansible_become=yes ansible_become_user=root ansible_become_pass=openstack ansible_become_method=sudo ansible_connection=local
 
-[image]
-openstack-vcenter ansible_become=yes ansible_become_user=root ansible_become_pass=openstack ansible_become_method=sudo ansible_connection=local
+#[image]
+#openstack-vcenter ansible_become=yes ansible_become_user=root ansible_become_pass=openstack ansible_become_method=sudo ansible_connection=local
 
-# vcenter node *MUST* be here
-# vcenter = networking controller + nova controller)
-[networking-compute-controller]
-openstack-vcenter ansible_become=yes ansible_become_user=root ansible_become_pass=openstack ansible_become_method=sudo ansible_connection=local
+## vcenter node *MUST* be here
+## vcenter = networking controller + nova controller)
+#[networking-compute-controller]
+#openstack-vcenter ansible_become=yes ansible_become_user=root ansible_become_pass=openstack ansible_become_method=sudo ansible_connection=local
 
-[block-storage]
-openstack-vcenter ansible_become=yes ansible_become_user=root ansible_become_pass=openstack ansible_become_method=sudo ansible_connection=local
+#[block-storage]
+#openstack-vcenter ansible_become=yes ansible_become_user=root ansible_become_pass=openstack ansible_become_method=sudo ansible_connection=local
 
-[block-storage-node]
-openstack-block-storage ansible_ssh_user=root
+#[block-storage-node]
+#openstack-block-storage ansible_ssh_user=root
 
-[orchestation]
-openstack-vcenter ansible_become=yes ansible_become_user=root ansible_become_pass=openstack ansible_become_method=sudo ansible_connection=local
+#[orchestation]
+#openstack-vcenter ansible_become=yes ansible_become_user=root ansible_become_pass=openstack ansible_become_method=sudo ansible_connection=local
 
-[dnsaas]
-openstack-vcenter ansible_become=yes ansible_become_user=root ansible_become_pass=openstack ansible_become_method=sudo ansible_connection=local
+#[dnsaas]
+#openstack-vcenter ansible_become=yes ansible_become_user=root ansible_become_pass=openstack ansible_become_method=sudo ansible_connection=local
 
-[kvm-hypervisor]
-openstack-compute-kvm ansible_ssh_user=root
+#[kvm-hypervisor]
+#openstack-compute-kvm ansible_ssh_user=root
 
-#[lxd-hypervisor]
-#openstack-compute-lxd ansible_ssh_user=openstack ansible_ssh_pass=openstack ansible_become=yes ansible_become_user=root ansible_become_pass=openstack ansible_become_method=sudo
+##[lxd-hypervisor]
+##openstack-compute-lxd ansible_ssh_user=openstack ansible_ssh_pass=openstack ansible_become=yes ansible_become_user=root ansible_become_pass=openstack ansible_become_method=sudo
