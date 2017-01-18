@@ -23,22 +23,10 @@
   when: relational_database == "postgresql"
 
 
-- name: Disable keystone service autostart
-  template: src=keystone.override.j2 dest=/etc/init/keystone.override
-  tags:
-  - appliance
-
 - name: Install keystone
   apt: name={{ item }} state=present
   with_items:
   - keystone
-  - apache2
-  - libapache2-mod-wsgi
-  tags:
-  - appliance
-
-- name: Stop and disable keystone service
-  service: name=keystone state=stopped enabled=no
   tags:
   - appliance
 
@@ -47,6 +35,8 @@
   notify:
   - populate database
   - fernet setup
+  - credential setup
+  - bootstrap
 
 - meta: flush_handlers
 
@@ -55,93 +45,28 @@
   notify:
   - restart apache2
 
-- name: Configure apache virtualhost
-  template: src=wsgi-keystone.conf.j2 dest=/etc/apache2/sites-available/wsgi-keystone.conf owner=root group=root mode=0644
+- name: Configure apache http server
+  template: src=server-name.conf.j2 dest=/etc/apache2/conf-available/server-name.conf owner=root group=root mode=0644
   notify:
   - restart apache2
 
 - name: Enable apache virtualhost
-  file: src=/etc/apache2/sites-available/wsgi-keystone.conf dest=/etc/apache2/sites-enabled/wsgi-keystone.conf owner=root group=root state=link
+  file: src=/etc/apache2/conf-available/server-name.conf dest=/etc/apache2/conf-enabled/server-name.conf owner=root group=root state=link
   notify:
   - restart apache2
 
 - meta: flush_handlers
 
-- name: Remove sqlite database
-  file: path=/var/lib/keystone/keystone.db state=absent
+#- name: Remove sqlite database
+#  file: path=/var/lib/keystone/keystone.db state=absent
 
 # Create the service entity and API endpoint
 # http://docs.openstack.org/liberty/install-guide-ubuntu/keystone-services.html
 - name: Install python-openstackclient
   package: name=python-openstackclient state=present
 
-- name: Test if service entity exists
-  shell: |
-    openstack service list | grep " identity "| wc -l
-  register: service_entity_exists
-  ignore_errors: True
-  failed_when: "'0' in service_entity_exists.stdout"
-
-- name: Create the service entity for the Identity service
-  shell: |
-    openstack service create --name {{ keystone_keystone_name }} --description "OpenStack Identity" identity
-  when: service_entity_exists|failed
-
-- name: Test if endpoints exists
-  shell: |
-    openstack endpoint list | grep " identity " | wc -l
-  register: endpoint_exists
-  ignore_errors: True
-  failed_when: "'0' in endpoint_exists.stdout"
-
-- name: Create the Identity service API endpoints
-  shell: |
-    openstack endpoint create --region {{ region_name }} identity public http://{{ admin_hostname }}:5000/v3
-    openstack endpoint create --region {{ region_name }} identity internal http://{{ admin_hostname }}:5000/v3
-    openstack endpoint create --region {{ region_name }} identity admin http://{{ admin_hostname }}:5000/v3
-  when: endpoint_exists|failed
-
 # Create projects, users and roles
-# http://docs.openstack.org/liberty/install-guide-ubuntu/keystone-users.html
-- name: Test if default domain exists
-  shell: |
-    openstack domain list | grep " {{ keystone_default_domain_name }}" | wc -l
-  register: exists
-  ignore_errors: True
-  failed_when: "'0' in exists.stdout"
-
-- name: Create the default domain
-  shell: |
-    openstack domain create --description "{{ keystone_default_domain_description }}"  {{ keystone_default_domain_name }}
-  when: exists|failed
-
-- name: Test if admin project exists
-  shell: |
-    openstack project list | grep " {{ keystone_admin_project_name }} " | wc -l
-  register: exists
-  ignore_errors: True
-  failed_when: "'0' in exists.stdout"
-
-- name: Create the admin project
-  shell: |
-    openstack project create --domain {{ keystone_default_domain_name }} --description "{{ keystone_admin_project_description }}" {{ keystone_admin_project_name }}
-  when: exists|failed
-
-
-- name: Test if admin user exists
-  shell: |
-    openstack user list | grep " {{ keystone_admin_name }} " | wc -l
-  register: exists
-  ignore_errors: True
-  failed_when: "'0' in exists.stdout"
-
-- name: Create the admin user, role and asociate both to admin project
-  shell: |
-    openstack user create --domain {{ keystone_default_domain_name }} --password {{ keystone_admin_password }} {{ keystone_admin_name }}
-    openstack role create {{ keystone_admin_role }}
-    openstack role add --project {{ keystone_admin_project_name }} --user {{ keystone_admin_name }} {{ keystone_admin_role }}
-  when: exists|failed
-
+# http://docs.openstack.org/newton/install-guide-debian/keystone-users.html
 
 # Create the service project
 - name: Test if service project exists

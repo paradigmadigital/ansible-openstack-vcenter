@@ -1,8 +1,8 @@
 [databases]
 openstack-vcenter ansible_become=yes ansible_become_user=root ansible_become_pass=openstack ansible_become_method=sudo ansible_connection=local
 
-#[identity]
-#openstack-vcenter ansible_become=yes ansible_become_user=root ansible_become_pass=openstack ansible_become_method=sudo ansible_connection=local
+[identity]
+openstack-vcenter ansible_become=yes ansible_become_user=root ansible_become_pass=openstack ansible_become_method=sudo ansible_connection=local
 
 #[dashboard]
 #openstack-vcenter ansible_become=yes ansible_become_user=root ansible_become_pass=openstack ansible_become_method=sudo ansible_connection=local

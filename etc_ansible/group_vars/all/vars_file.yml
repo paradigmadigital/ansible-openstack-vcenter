@@ -37,7 +37,7 @@ keystone_user_role: user
 keystone_keystone_name: keystone
 keystone_keystone_password: keystone
 keystone_service_project_name: service
-keystone_service_project_description: service
+keystone_service_project_description: Service Project
 keystone_default_project_name: default
 keystone_default_domain_name: default
 keystone_default_domain_description: Default Domain

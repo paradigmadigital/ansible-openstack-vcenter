@@ -1,8 +1,19 @@
 - name: populate database
-  shell: su -s /bin/sh -c 'keystone-manage db_sync' keystone
+  shell: su -s /bin/sh -c "keystone-manage db_sync" keystone
 
 - name: fernet setup
   shell: keystone-manage fernet_setup --keystone-user keystone --keystone-group keystone
+
+- name: credential setup
+  shell: keystone-manage credential_setup --keystone-user keystone --keystone-group keystone
+
+- name: bootstrap
+  shell: |
+    keystone-manage bootstrap --bootstrap-password {{ keystone_admin_password }} \
+    --bootstrap-admin-url http://a{{ admin_hostname }}:35357/v3/ \
+    --bootstrap-internal-url http://{{ internal_hostname }}:35357/v3/ \
+    --bootstrap-public-url http://{{ public_hostname }}:5000/v3/ \
+    --bootstrap-region-id {{ region_name }}
 
 - name: restart apache2
   service: name=apache2 state=restarted
