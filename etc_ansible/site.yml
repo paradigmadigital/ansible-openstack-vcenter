@@ -4,8 +4,8 @@
   roles:
   - ntp
   - sql-database
-#  - message-queue
-#  - memcached
+  - message-queue
+  - memcached
   tags:
   - databases
   - sql-database
