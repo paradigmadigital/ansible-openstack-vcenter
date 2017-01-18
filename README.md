@@ -1,11 +1,11 @@
 # ansible-openstack-vcenter
 Ansible playbooks to create a openstack vcenter.
 
-Liberty Release
+Mitaka Release
 
 # Steps
 ## Compute node
-* Install compute node (Ubuntu 14.04 or CentOS 7) with qemu-kvm, bridge-utils and virt-manager
+* Install compute node (Ubuntu 16.04) with qemu-kvm, bridge-utils and virt-manager
 * You need two network interfaces configured as external (ose) and management (osm).
   * In a development environment osm and ose network interfaces interface does not need to be "connected" to any physical device so you can use your physical network interfaces with network manager. Suppose you are using a 10.42.84.0/24 management network and a 10.20.30.0/24 external network:
 ```
