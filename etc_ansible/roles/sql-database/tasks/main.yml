@@ -4,28 +4,35 @@
   when: relational_database == "mysql"
   tags:
   - appliance
+  - workingon
 
 - name: Install mariadb server
   apt: name=mariadb-server state=present
   when: relational_database == "mariadb"
   tags:
   - appliance
+  - workingon
 
 - name: Configure mysql server
-  template: src=mysqld_openstack.cnf.j2 dest=/etc/mysql/conf.d/mysqld_openstack.cnf
+  template: src=mysqld_openstack.cnf.j2 dest=/etc/mysql/conf.d/openstack.cnf
   notify: restart mysql
   when: relational_database == "mysql"
+  tags:
+  - workingon
 
 - name: Configure mariadb server
-  template: src=mysqld_openstack.cnf.j2 dest=/etc/mysql/mariadb.conf.d/mysqld_openstack.cnf
+  template: src=mysqld_openstack.cnf.j2 dest=/etc/mysql/mariadb.conf.d/90-openstack.cnf
   notify: restart mysql
   when: relational_database == "mariadb"
+  tags:
+  - workingon
 
 - name: Install python-mysqldb
   apt: name=python-mysqldb state=present
   when: relational_database == "mysql" or relational_database == "mariadb"
   tags:
   - appliance
+  - workingon
 
 # Postgresql https://fosskb.wordpress.com/2014/06/06/using-postgresql-with-openstack/
 - name: Install Postgresql

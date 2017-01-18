@@ -1,9 +1,12 @@
 # http://docs.openstack.org/juno/install-guide/install/apt/content/ch_basic_environment.html#basics-packages
-- name: Install ntp (Ubuntu)
+- name: Install ntp
   package: name=chrony state=present
   tags:
   - appliance
 
+- name: Start ntp service (Debian)
+  service: name=chrony state=started enabled=yes
+  when: ansible_distribution == "Debian"
 
 - name: Start ntp service (Ubuntu)
   service: name=chrony state=started enabled=yes

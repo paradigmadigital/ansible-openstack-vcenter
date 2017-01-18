@@ -98,6 +98,7 @@ operating_system_physical_devices:
 
 # Time zone in horizon
 time_zone: Europe/Madrid
+dash_dbpass: DASH_DBPASS
 
 # Heat vars
 heat_dbpass: HEAT_DBPASS
