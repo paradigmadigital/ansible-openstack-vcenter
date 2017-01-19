@@ -10,7 +10,7 @@
 - name: bootstrap
   shell: |
     keystone-manage bootstrap --bootstrap-password {{ keystone_admin_password }} \
-    --bootstrap-admin-url http://a{{ admin_hostname }}:35357/v3/ \
+    --bootstrap-admin-url http://{{ admin_hostname }}:35357/v3/ \
     --bootstrap-internal-url http://{{ internal_hostname }}:35357/v3/ \
     --bootstrap-public-url http://{{ public_hostname }}:5000/v3/ \
     --bootstrap-region-id {{ region_name }}

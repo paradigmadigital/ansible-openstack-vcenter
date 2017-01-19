@@ -60,6 +60,15 @@
 #- name: Remove sqlite database
 #  file: path=/var/lib/keystone/keystone.db state=absent
 
+# http://docs.openstack.org/liberty/install-guide-ubuntu/keystone-openrc.html
+#  Create OpenStack client environment scripts
+- name: Create admin-openrc.sh environment script
+  template: src=admin-openrc.sh.j2 dest=/root/{{ keystone_admin_name }}-openrc.sh
+
+#- name: Create {{ keystone_user_name }} environment script
+#  template: src=user-openrc.sh.j2 dest=/root/{{ keystone_user_name }}-openrc.sh
+
+
 # Create the service entity and API endpoint
 # http://docs.openstack.org/liberty/install-guide-ubuntu/keystone-services.html
 - name: Install python-openstackclient
@@ -120,12 +129,3 @@
 #    openstack user create --domain {{ keystone_default_domain_name }} --password {{ keystone_user_password }} {{ keystone_user_name }}
 #    openstack role add --project {{ keystone_user_project_name }} --user {{ keystone_user_name }} {{ keystone_user_role }}
 #  when: exists|failed
-
-
-# http://docs.openstack.org/liberty/install-guide-ubuntu/keystone-openrc.html
-#  Create OpenStack client environment scripts
-- name: Create admin-openrc.sh environment script
-  template: src=admin-openrc.sh.j2 dest=/root/{{ keystone_admin_name }}-openrc.sh
-
-#- name: Create {{ keystone_user_name }} environment script
-#  template: src=user-openrc.sh.j2 dest=/root/{{ keystone_user_name }}-openrc.sh
