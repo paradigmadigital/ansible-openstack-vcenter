@@ -6,46 +6,66 @@
 - name: Create mysql nova database
   mysql_db: name=nova state=present
   when: relational_database == "mysql" or relational_database == "mariadb"
+  tags:
+  - workingon
 
 - name: Create mysql nova database user from localhost
   mysql_user: name=nova host=localhost password={{ nova_dbpass }} priv=nova.*:ALL,GRANT state=present
   when: relational_database == "mysql" or relational_database == "mariadb"
+  tags:
+  - workingon
 
 - name: Create mysql nova database user from %
   mysql_user: name=nova host=% password={{ nova_dbpass }} append_privs=yes priv=nova.*:ALL,GRANT state=present
   when: relational_database == "mysql" or relational_database == "mariadb"
+  tags:
+  - workingon
 
 #nova_api database;
 - name: Create mysql nova_api database
   mysql_db: name=nova_api state=present
   when: relational_database == "mysql" or relational_database == "mariadb"
+  tags:
+  - workingon
 
 - name: Create mysql nova_api database user from localhost
-  mysql_user: name=nova host=localhost password={{ nova_dbpass }} append_privs=yes priv=nova_api.*:ALL,GRANT state=present
+  mysql_user: name=nova host=localhost password={{ nova_dbpass }} priv=nova_api.*:ALL,GRANT state=present
   when: relational_database == "mysql" or relational_database == "mariadb"
+  tags:
+  - workingon
 
 - name: Create mysql nova_api database user from %
   mysql_user: name=nova host=% password={{ nova_dbpass }} append_privs=yes priv=nova_api.*:ALL,GRANT state=present
   when: relational_database == "mysql" or relational_database == "mariadb"
+  tags:
+  - workingon
 
 ## postgresql
 # nova database
 - name: Create postgresql nova database
   postgresql_db: name=nova
   when: relational_database == "postgresql"
+  tags:
+  - workingon
 
 - name: Create postgresql nova database user
   postgresql_user: db=nova name=nova password={{ nova_dbpass }} priv=ALL
   when: relational_database == "postgresql"
+  tags:
+  - workingon
 
 # nova_api database
 - name: Create postgresql nova_api database
   postgresql_db: name=nova_api
   when: relational_database == "postgresql"
+  tags:
+  - workingon
 
 - name: Create postgresql nova database user
   postgresql_user: db=nova_api name=nova password={{ nova_dbpass }} priv=ALL
   when: relational_database == "postgresql"
+  tags:
+  - workingon
 
 
 # Create nova user
@@ -55,34 +75,44 @@
   register: exists
   ignore_errors: True
   failed_when: "'0' in exists.stdout"
+  tags:
+  - workingon
 
 - name: Create the nova user, role and asociate both to admin project
   shell: |
     openstack user create --domain {{ keystone_default_domain_name }} --password {{ keystone_nova_password }} {{ keystone_nova_name }}
     openstack role add --project {{ keystone_service_project_name }} --user {{ keystone_nova_name }} {{ keystone_admin_role }}
   when: exists|failed
+  tags:
+  - workingon
 
 
 #Create the service entity and API endpoint
 - name: Test if service entity exists
   shell: |
-    openstack service list | grep " compute " | wc -l
+    openstack service list | grep " nova " | wc -l
   register: service_entity_exists
   ignore_errors: True
   failed_when: "'0' in service_entity_exists.stdout"
+  tags:
+  - workingon
 
 - name: Create the service entity for the Nova service
   shell: |
     openstack service create --name {{ keystone_nova_name }} --description "OpenStack Compute" compute
   when: service_entity_exists|failed
+  tags:
+  - workingon
 
 
 - name: Test if endpoint exists
   shell: |
-    openstack endpoint list | grep ' compute ' | wc -l
+    openstack endpoint list | grep ' nova ' | wc -l
   register: endpoint_exists
   ignore_errors: True
   failed_when: "'0' in endpoint_exists.stdout"
+  tags:
+  - workingon
 
 - name: Create the Compute service API endpoints
   shell: |
@@ -90,20 +120,22 @@
     openstack endpoint create --region {{ region_name }} compute internal http://{{ admin_hostname }}:8774/v2.1/%\(tenant_id\)s
     openstack endpoint create --region {{ region_name }} compute admin http://{{ admin_hostname }}:8774/v2.1/%\(tenant_id\)s
   when: endpoint_exists|failed
+  tags:
+  - workingon
 
 # To install and configure the Compute controller components
 - name: Install nova packages
   apt: name={{ item }} state=present
   with_items:
   - nova-api
-  - nova-cert
   - nova-conductor
   - nova-consoleauth
-  - nova-novncproxy
+  - nova-consoleproxy
   - nova-scheduler
   - python-novaclient
   tags:
   - appliance
+  - workingon
 
 # http://docs.openstack.org/liberty/install-guide-ubuntu/neutron.html
 # http://docs.openstack.org/liberty/install-guide-ubuntu/neutron-controller-install.html
@@ -112,30 +144,34 @@
 - name: Create database
   mysql_db: name=neutron state=present
   when: relational_database == "mysql" or relational_database == "mariadb"
-  notify:
-  - populate nova database
-  - populate nova api database
+  tags:
+  - workingon
 
 - name: Create database user from localhost
   mysql_user: name=neutron host=localhost password={{ neutron_dbpass }} priv=neutron.*:ALL,GRANT state=present
   when: relational_database == "mysql" or relational_database == "mariadb"
+  tags:
+  - workingon
 
 - name: Create database user from %
-  mysql_user: name=neutron host=% password={{ neutron_dbpass }} priv=neutron.*:ALL,GRANT state=present
+  mysql_user: name=neutron host=% password={{ neutron_dbpass }} append_privs=yes priv=neutron.*:ALL,GRANT state=present
   when: relational_database == "mysql" or relational_database == "mariadb"
+  tags:
+  - workingon
 
 
 # postgresql
 - name: Create database
   postgresql_db: name=neutron
   when: relational_database == "postgresql"
-  notify:
-  - populate nova database
-  - populate nova api database
+  tags:
+  - workingon
 
 - name: Create database user
   postgresql_user: db=neutron name=neutron password={{ neutron_dbpass }} priv=ALL
   when: relational_database == "postgresql"
+  tags:
+  - workingon
 
 
 - name: Test if neutron user exists
@@ -144,33 +180,43 @@
   register: exists
   ignore_errors: True
   failed_when: "'0' in exists.stdout"
+  tags:
+  - workingon
 
 - name: Create the neutron user, role and asociate both to admin project
   shell: |
     openstack user create --domain {{ keystone_default_domain_name }} --password {{ keystone_neutron_password }} {{ keystone_neutron_name }}
     openstack role add --project {{ keystone_service_project_name }} --user {{ keystone_neutron_name }} {{ keystone_admin_role }}
   when: exists|failed
+  tags:
+  - workingon
 
 
 #Create the service entity and API endpoint
 - name: Test if service entity exists
   shell: |
-    openstack service list | grep " network "| wc -l
+    openstack service list | grep " neutron "| wc -l
   register: service_entity_exists
   ignore_errors: True
   failed_when: "'0' in service_entity_exists.stdout"
+  tags:
+  - workingon
 
 - name: Create the service entity for the Neutron service
   shell: |
     openstack service create --name {{ keystone_neutron_name }} --description "OpenStack Networking" network
   when: service_entity_exists|failed
+  tags:
+  - workingon
 
 - name: Test if network service API endpoint exists
   shell: |
-    openstack endpoint list | grep ' network ' | wc -l
+    openstack endpoint list | grep ' neutron ' | wc -l
   register: endpoint_exists
   ignore_errors: True
   failed_when: "'0' in endpoint_exists.stdout"
+  tags:
+  - workingon
 
 - name: Create the Network service API endpoints
   shell: |
@@ -178,6 +224,8 @@
     openstack endpoint create --region {{ region_name }} network internal http://{{ admin_hostname }}:9696
     openstack endpoint create --region {{ region_name }} network admin http://{{ admin_hostname }}:9696
   when: endpoint_exists|failed
+  tags:
+  - workingon
 
 
 ## Install NEUTRON component and configure it ##
@@ -198,14 +246,14 @@
   apt: name={{ item }} state=present
   with_items:
   - neutron-server
-  - neutron-plugin-ml2
-  - neutron-openvswitch-agent
-  - neutron-l3-agent
   - neutron-dhcp-agent
   - neutron-metadata-agent
+  - neutron-l3-agent
+  - neutron-openvswitch-agent
   - python-neutronclient
   tags:
   - appliance
+  - workingon
 
 - name: Configure neutron server component
   template: src=neutron.conf.j2 dest=/etc/neutron/neutron.conf owner=root group=neutron mode=0644
@@ -302,7 +350,6 @@
   - populate nova database
   - populate nova api database
   - restart nova-api
-  - restart nova-cert
   - restart nova-consoleauth
   - restart nova-scheduler
   - restart nova-conductor
@@ -323,7 +370,7 @@
 
 - name: Create the public network
   shell: |
-    neutron net-create public --router:external --provider:physical_network {{ public_network_name }} --provider:network_type flat
+    neutron net-create public --router:{{ public_network_name }} --provider:physical_network {{ public_network_name }} --provider:network_type flat
   when: net_exists|failed
 
 # Create external subnet
