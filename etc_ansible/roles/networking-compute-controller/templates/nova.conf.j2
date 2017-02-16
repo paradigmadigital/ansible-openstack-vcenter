@@ -29,8 +29,9 @@ use_neutron = True
 firewall_driver = nova.virt.firewall.NoopFirewallDriver
 
 # http://docs.openstack.org/liberty/config-reference/content/section_compute-scheduler.html#diskfilter
-# Allow to do "disk overbooking"
-disk_allocation_ratio = 2.0
+# Allow to do "disk and ram overbooking"
+disk_allocation_ratio = 3.0
+ram_allocation_ratio = 2.0
 
 
 [vnc]
