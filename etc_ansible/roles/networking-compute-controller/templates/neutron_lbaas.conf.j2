@@ -20,8 +20,7 @@
 # Name of the Barbican authentication method to use (string value)
 #barbican_auth = barbican_acl_auth
 
-# Absolute path to the certificate storage directory. Defaults to
-# env[OS_LBAAS_TLS_STORAGE]. (string value)
+# Absolute path to the certificate storage directory. Defaults to env[OS_LBAAS_TLS_STORAGE]. (string value)
 #storage_path = /var/lib/neutron-lbaas/certificates/
 
 
@@ -31,24 +30,19 @@
 # From neutron.lbaas
 #
 
-# Number of LoadBalancers allowed per tenant. A negative value means unlimited.
-# (integer value)
+# Number of LoadBalancers allowed per tenant. A negative value means unlimited. (integer value)
 #quota_loadbalancer = 10
 
-# Number of Loadbalancer Listeners allowed per tenant. A negative value means
-# unlimited. (integer value)
+# Number of Loadbalancer Listeners allowed per tenant. A negative value means unlimited. (integer value)
 #quota_listener = -1
 
-# Number of pools allowed per tenant. A negative value means unlimited.
-# (integer value)
+# Number of pools allowed per tenant. A negative value means unlimited. (integer value)
 #quota_pool = 10
 
-# Number of pool members allowed per tenant. A negative value means unlimited.
-# (integer value)
+# Number of pool members allowed per tenant. A negative value means unlimited. (integer value)
 #quota_member = -1
 
-# Number of health monitors allowed per tenant. A negative value means
-# unlimited. (integer value)
+# Number of health monitors allowed per tenant. A negative value means unlimited. (integer value)
 #quota_healthmonitor = -1
 
 
@@ -88,6 +82,9 @@
 # The endpoint_type to be used (string value)
 #endpoint_type = public
 
+# Disable server certificate verification (boolean value)
+#insecure = false
+
 
 [service_providers]
 
@@ -95,22 +92,9 @@
 # From neutron.lbaas
 #
 
-# Defines providers for advanced services using the format:
-# <service_type>:<name>:<driver>[:default] (multi valued)
+# Defines providers for advanced services using the format: <service_type>:<name>:<driver>[:default] (multi valued)
 #service_provider =
-# service_provider=LOADBALANCER:name:lbaas_plugin_driver_path:default
-service_provider=LOADBALANCER:Haproxy:neutron_lbaas.services.loadbalancer.drivers.haproxy.plugin_driver.HaproxyOnHostPluginDriver:default
-# service_provider = LOADBALANCER:radware:neutron_lbaas.services.loadbalancer.drivers.radware.driver.LoadBalancerDriver:default
-# service_provider = LOADBALANCERV2:radwarev2:neutron_lbaas.drivers.radware.v2_driver.RadwareLBaaSV2Driver:default
-# service_provider=LOADBALANCER:NetScaler:neutron_lbaas.services.loadbalancer.drivers.netscaler.netscaler_driver.NetScalerPluginDriver
-# service_provider=LOADBALANCER:Embrane:neutron_lbaas.services.loadbalancer.drivers.embrane.driver.EmbraneLbaas:default
-# service_provider = LOADBALANCER:A10Networks:neutron_lbaas.services.loadbalancer.drivers.a10networks.driver_v1.ThunderDriver:default
-# service_provider = LOADBALANCER:VMWareEdge:neutron_lbaas.services.loadbalancer.drivers.vmware.edge_driver.EdgeLoadbalancerDriver:default
 
 # LBaaS v2 drivers
 # service_provider = LOADBALANCERV2:Octavia:neutron_lbaas.drivers.octavia.driver.OctaviaDriver:default
-# service_provider = LOADBALANCERV2:LoggingNoop:neutron_lbaas.drivers.logging_noop.driver.LoggingNoopLoadBalancerDriver:default
-# service_provider=LOADBALANCERV2:Haproxy:neutron_lbaas.drivers.haproxy.plugin_driver.HaproxyOnHostPluginDriver:default
-# service_provider = LOADBALANCERV2:A10Networks:neutron_lbaas.drivers.a10networks.driver_v2.ThunderDriver:default
-# service_provider = LOADBALANCERV2:brocade:neutron_lbaas.drivers.brocade.driver_v2.BrocadeLoadBalancerDriver:default
-# service_provider = LOADBALANCERV2:kemptechnologies:neutron_lbaas.drivers.kemptechnologies.driver_v2.KempLoadMasterDriver:default
+service_provider = LOADBALANCERV2:Haproxy:neutron_lbaas.drivers.haproxy.plugin_driver.HaproxyOnHostPluginDriver:default

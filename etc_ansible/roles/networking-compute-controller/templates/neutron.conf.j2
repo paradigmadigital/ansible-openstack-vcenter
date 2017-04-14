@@ -27,7 +27,8 @@ auth_strategy = keystone
 core_plugin = ml2
 
 # The service plugins Neutron will use (list value)
-service_plugins = router,metering,qos,neutron_lbaas.services.loadbalancer.plugin.LoadBalancerPlugin
+#service_plugins = router,metering,qos
+service_plugins = router,metering,qos,neutron_lbaas.services.loadbalancer.plugin.LoadBalancerPluginv2
 
 # The base MAC address Neutron will use for VIFs. The first 3 octets will remain unchanged. If the 4th octet is not 00, it will also be
 # used. The others will be randomly generated. (string value)
@@ -98,7 +99,7 @@ allow_overlapping_ips = True
 #host = example.domain
 
 # Send notification to nova when port status changes (boolean value)
-notify_nova_on_port_status_changes = True 
+notify_nova_on_port_status_changes = True
 
 # Send notification to nova when port data (fixed_ips/floatingip) changes so nova can update its cache. (boolean value)
 #notify_nova_on_port_data_changes = true

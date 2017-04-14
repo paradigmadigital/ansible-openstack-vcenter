@@ -47,8 +47,8 @@
 - name: restart neutron-metadata-agent
   service: name=neutron-metadata-agent state=restarted
 
-- name: restart neutron-lbaas-agent
-  service: name=neutron-lbaas-agent state=restarted
+- name: restart neutron-lbaasv2-agent
+  service: name=neutron-lbaasv2-agent state=restarted
 
 - name: update lbaas tables in neutron database
-  shell: su -s /bin/sh -c "neutron-db-manage --service lbaas upgrade mitaka" neutron
+  shell: su -s /bin/sh -c "neutron-db-manage --subproject neutron-lbaas upgrade newton" neutron

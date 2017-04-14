@@ -267,11 +267,13 @@
   - restart neutron-l3-agent
   - restart neutron-dhcp-agent
   - restart neutron-metadata-agent
+  tags:
+  - workingon
 
-- name: Configure dhcp agent (MTU VMs)
-  template: src=dnsmasq-neutron.conf.j2 dest=/etc/neutron/dnsmasq-neutron.conf owner=root group=neutron mode=0644
-  notify:
-  - restart neutron-dhcp-agent
+#- name: Configure dhcp agent (MTU VMs)
+#  template: src=dnsmasq-neutron.conf.j2 dest=/etc/neutron/dnsmasq-neutron.conf owner=root group=neutron mode=0644
+#  notify:
+#  - restart neutron-dhcp-agent
 
 - name: Configure Modular Layer 2 (ML2) plug-in
   template: src=ml2_conf.ini.j2 dest=/etc/neutron/plugins/ml2/ml2_conf.ini owner=root group=neutron mode=0644
@@ -279,37 +281,48 @@
   - populate neutron database
   - restart neutron-openvswitch-agent
   - restart neutron-server
-  - restart neutron-server
+  tags:
+  - workingon
 
 - name: Configure Open vSwitch Agent) agent
   template: src=openvswitch_agent.ini.j2 dest=/etc/neutron/plugins/ml2/openvswitch_agent.ini owner=root group=neutron mode=0644
   notify:
   - restart openvswitch-switch
   - restart neutron-openvswitch-agent
+  tags:
+  - workingon
 
 - name: Configure Layer-3 (L3) agent
   template: src=l3_agent.ini.j2 dest=/etc/neutron/l3_agent.ini owner=root group=neutron mode=0644
   notify:
   - restart neutron-l3-agent
   - restart neutron-server
+  tags:
+  - workingon
 
 - name: Configure the DHCP agent
   template: src=dhcp_agent.ini.j2 dest=/etc/neutron/dhcp_agent.ini owner=root group=root mode=0644
   notify:
   - restart neutron-dhcp-agent
   - pkill dnsmasq
+  tags:
+  - workingon
 
 - name: Configure the metadata agent
   template: src=metadata_agent.ini.j2 dest=/etc/neutron/metadata_agent.ini owner=root group=root mode=0644
   notify:
   - restart neutron-metadata-agent
+  tags:
+  - workingon
 
 # Add lbaas.
 # Thanks to: https://ask.openstack.org/en/question/82555/proper-installation-guide-for-lbaas-in-juno/?answer=82558#post-id-82558
 - name: Install the lbaas agent
-  apt: name=neutron-lbaas-agent state=present
+  apt: name=neutron-lbaasv2-agent state=present
   tags:
   - appliance
+  tags:
+  - workingon
 
 - name: Configure the lbaas agent
   template: src=lbaas_agent.ini.j2 dest=/etc/neutron/lbaas_agent.ini owner=root group=root mode=0644
@@ -317,20 +330,28 @@
   - restart neutron-lbaas-agent
   - restart neutron-server
   - update lbaas tables in neutron database
+  tags:
+  - workingon
 
 - name: Configure neutron to use lbaas agent
   template: src=neutron_lbaas.conf.j2 dest=/etc/neutron/neutron_lbaas.conf owner=root group=root mode=0644
   notify:
-  - restart neutron-lbaas-agent
+  - restart neutron-lbaasv2-agent
   - restart neutron-server
   - update lbaas tables in neutron database
+  tags:
+  - workingon
 
 # Configure Open vSwitch service
 - name: Restart OVS service
-  shell: service openvswitch-switch restart; ethtool -K ose gro off
+  service: name=openvswitch-switch state=restarted
+  tags:
+  - workingon
 
 - name: Add the external bridge
   openvswitch_bridge: bridge=br-ex state=present
+  tags:
+  - workingon
 
 - name: Add a port to the external bridge that connects to the physical external network interface
   openvswitch_port: bridge=br-ex port=ose state=present
@@ -339,9 +360,8 @@
   - restart neutron-l3-agent
   - restart neutron-dhcp-agent
   - restart neutron-metadata-agent
-
-- name: Remove neutron sqlite database
-  file: path=/var/lib/neutron/neutron.sqlite state=absent
+  tags:
+  - workingon
 
 
 - name: Configure Nova Compute to use Networking
@@ -354,11 +374,13 @@
   - restart nova-scheduler
   - restart nova-conductor
   - restart nova-novncproxy
+  tags:
+  - workingon
 
-- name: Remove sqlite database
-  file: path=/var/lib/nova/nova.sqlite state=absent
 
 - meta: flush_handlers
+  tags:
+  - workingon
 
 # Create external net
 - name: Test if public network exists
@@ -367,11 +389,15 @@
   register: net_exists
   ignore_errors: True
   failed_when: "'0' in net_exists.stdout"
+  tags:
+  - workingon
 
 - name: Create the public network
   shell: |
     neutron net-create public --router:{{ public_network_name }} --provider:physical_network {{ public_network_name }} --provider:network_type flat
   when: net_exists|failed
+  tags:
+  - workingon
 
 # Create external subnet
 - name: Test if public subnet exists
@@ -380,15 +406,19 @@
   register: subnet_exists
   ignore_errors: True
   failed_when: "'0' in subnet_exists.stdout"
+  tags:
+  - workingon
 
 - name: Create the public subnet
   shell: |
     neutron subnet-create public {{ public_cidr }} --name public --allocation-pool start={{ public_allocation_pool.split(",")[0] }},end={{ public_allocation_pool.split(",")[-1] }} --disable-dhcp --gateway {{ public_gateway }}
   when: subnet_exists|failed
+  tags:
+  - workingon
 
 # Dirty way to set the MTU in network interfaces
-- name: Set gre_sys MTU
-  cron: name="Set gre_sys MTU" job="/sbin/ifconfig gre_sys mtu {{ path_mtu }}"
+#- name: Set gre_sys MTU
+#  cron: name="Set gre_sys MTU" job="/sbin/ifconfig gre_sys mtu {{ path_mtu }}"
 
-- name: Set tap devices MTU
-  cron: name="Set tap devices MTU" job="for device in `/sbin/ifconfig | /bin/grep tap | /usr/bin/awk '{print $1}'`; do /sbin/ifconfig $device mtu {{ vm_mtu }};done"
+#- name: Set tap devices MTU
+#  cron: name="Set tap devices MTU" job="for device in `/sbin/ifconfig | /bin/grep tap | /usr/bin/awk '{print $1}'`; do /sbin/ifconfig $device mtu {{ vm_mtu }};done"
