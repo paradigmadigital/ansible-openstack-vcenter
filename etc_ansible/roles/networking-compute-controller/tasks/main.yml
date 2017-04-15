@@ -321,7 +321,6 @@
   apt: name=neutron-lbaasv2-agent state=present
   tags:
   - appliance
-  tags:
   - workingon
 
 - name: Configure the lbaas agent

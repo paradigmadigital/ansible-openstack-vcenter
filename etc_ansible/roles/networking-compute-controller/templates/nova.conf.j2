@@ -3503,6 +3503,7 @@ firewall_driver = nova.virt.firewall.NoopFirewallDriver
 
 # A URL representing the messaging driver to use and its full configuration. (string value)
 #transport_url = <None>
+transport_url = rabbit://{{ rabbitmq_user }}:{{ rabbitmq_password }}@{{ controller_hostname }}
 
 
 # DEPRECATED: The messaging driver to use, defaults to rabbit. Other drivers include amqp and zmq. (string value)
@@ -5387,14 +5388,14 @@ password = {{ keystone_nova_password }}
 #auth_admin_prefix =
 
 # Host providing the admin Identity API endpoint. Deprecated, use identity_uri. (string value)
-auth_host = 127.0.0.1
+#auth_host = 127.0.0.1
 
 # Port of the admin Identity API endpoint. Deprecated, use identity_uri. (integer value)
 #auth_port = 35357
 
 # Protocol of the admin Identity API endpoint. Deprecated, use identity_uri. (string value)
 # Allowed values: http, https
-auth_protocol = http
+#auth_protocol = http
 
 # Complete admin Identity API endpoint. This should specify the unversioned root endpoint e.g. https://localhost:35357/ (string value)
 #identity_uri = <None>
@@ -6282,14 +6283,6 @@ admin_tenant_name = admin
 #  (uri value)
 #url = http://127.0.0.1:9696
 url = http://{{ admin_hostname }}:9696
-auth_url = http://{{ admin_hostname }}:35357
-auth_type = password
-project_domain_name = {{ keystone_default_project_name }}
-user_domain_name = {{ keystone_default_domain_name }}
-region_name = {{ region_name }}
-project_name = {{ keystone_service_project_name }}
-username = {{ keystone_nova_name }}
-password = {{ keystone_nova_password }}
 
 #
 # Region name for connecting to Neutron in admin context.
@@ -6302,6 +6295,7 @@ password = {{ keystone_nova_password }}
 # region the request is coming from.
 #  (string value)
 #region_name = RegionOne
+region_name = {{ region_name }}
 
 #
 # Specifies the name of an integration bridge interface used by OpenvSwitch.
@@ -6343,7 +6337,7 @@ service_metadata_proxy = true
 #
 # * service_metadata_proxy
 #  (string value)
-#metadata_proxy_shared_secret = 
+#metadata_proxy_shared_secret =
 metadata_proxy_shared_secret = {{ metadata_secret }}
 
 # PEM encoded Certificate Authority to use when verifying HTTPs connections. (string value)
@@ -6363,13 +6357,15 @@ metadata_proxy_shared_secret = {{ metadata_secret }}
 
 # Authentication type to load (string value)
 # Deprecated group/name - [neutron]/auth_plugin
-auth_type = v3password
+#auth_type = v3password
+auth_type = password
 
 # Config Section from which to load plugin specific options (string value)
 #auth_section = <None>
 
 # Authentication URL (string value)
-auth_url = http://127.0.0.1:5000/v3
+#auth_url = http://127.0.0.1:5000/v3
+auth_url = http://{{ admin_hostname }}:35357
 
 # Domain ID to scope to (string value)
 #domain_id = <None>
@@ -6381,13 +6377,15 @@ auth_url = http://127.0.0.1:5000/v3
 #project_id = <None>
 
 # Project name to scope to (string value)
-project_name = admin
+#project_name = admin
+project_name = {{ keystone_service_project_name }}
 
 # Domain ID containing project (string value)
 #project_domain_id = <None>
 
 # Domain name containing project (string value)
-project_domain_name = default
+#project_domain_name = default
+project_domain_name = {{ keystone_default_project_name }}
 
 # Trust ID (string value)
 #trust_id = <None>
@@ -6405,22 +6403,26 @@ project_domain_name = default
 
 # Username (string value)
 # Deprecated group/name - [neutron]/user-name
-username = admin
+#username = admin
+username = {{ keystone_nova_name }}
 
 # User's domain id (string value)
-user_domain_id = default
+#user_domain_id = default
 
 # User's domain name (string value)
-user_domain_name = default
+#user_domain_name = default
+user_domain_name = {{ keystone_default_domain_name }}
 
 # User's password (string value)
-password = 
+#password =
+password = {{ keystone_nova_password }}
 
 # Tenant ID (string value)
 #tenant_id = <None>
 
 # Tenant Name (string value)
-tenant_name = admin
+#tenant_name = admin
+project_name = {{ keystone_service_project_name }}
 
 
 [osapi_v21]
@@ -6670,7 +6672,6 @@ lock_path = /var/lock/nova
 # value)
 # Deprecated group/name - [DEFAULT]/notification_transport_url
 #transport_url = <None>
-transport_url = rabbit://{{ rabbitmq_user }}:{{ rabbitmq_password }}@{{ controller_hostname }}
 
 # AMQP topic used for OpenStack notifications. (list value)
 # Deprecated group/name - [rpc_notifier2]/topics
@@ -6767,7 +6768,7 @@ rabbit_userid = guest
 # This option is deprecated for removal.
 # Its value may be silently ignored in the future.
 # Reason: Replaced by [DEFAULT]/transport_url
-rabbit_password = 
+rabbit_password =
 
 # The RabbitMQ login method. (string value)
 # Deprecated group/name - [DEFAULT]/rabbit_login_method

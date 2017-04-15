@@ -102,7 +102,7 @@ allow_overlapping_ips = True
 notify_nova_on_port_status_changes = True
 
 # Send notification to nova when port data (fixed_ips/floatingip) changes so nova can update its cache. (boolean value)
-#notify_nova_on_port_data_changes = true
+notify_nova_on_port_data_changes = true
 
 # Number of seconds between sending events to nova if there are any events to send. (integer value)
 #send_events_interval = 2
@@ -448,6 +448,7 @@ global_physnet_mtu = {{ physical_mtu }}
 
 # A URL representing the messaging driver to use and its full configuration. (string value)
 #transport_url = <None>
+transport_url = rabbit://{{ rabbitmq_user }}:{{ rabbitmq_password }}@{{ controller_hostname }}
 
 # DEPRECATED: The messaging driver to use, defaults to rabbit. Other drivers include amqp and zmq. (string value)
 # This option is deprecated for removal.
@@ -808,14 +809,14 @@ region_name = {{ region_name }}
 #auth_admin_prefix =
 
 # Host providing the admin Identity API endpoint. Deprecated, use identity_uri. (string value)
-auth_host = 127.0.0.1
+#auth_host = 127.0.0.1
 
 # Port of the admin Identity API endpoint. Deprecated, use identity_uri. (integer value)
 #auth_port = 35357
 
 # Protocol of the admin Identity API endpoint. Deprecated, use identity_uri. (string value)
 # Allowed values: http, https
-auth_protocol = http
+#auth_protocol = http
 
 # Complete admin Identity API endpoint. This should specify the unversioned root endpoint e.g. https://localhost:35357/ (string value)
 #identity_uri = <None>

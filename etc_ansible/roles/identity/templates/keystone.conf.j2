@@ -1471,12 +1471,12 @@ connection = {{ relational_database_driver[relational_database] }}://{{ keystone
 # memcached servers to ensure that data (such as UUID tokens) created by one
 # node is available to the others. (list value)
 #servers = localhost:11211
-{% if network_type == "openvswitch" %}
-servers = {{ ansible_osm["ipv4"]["address"] }}:11211
-{% endif %}
-{% if network_type == "vxlan" %}
-servers = {{ ansible_eth0["ipv4"]["address"] }}:11211
-{% endif %}
+#{% if network_type == "openvswitch" %}
+#servers = {{ ansible_osm["ipv4"]["address"] }}:11211
+#{% endif %}
+#{% if network_type == "vxlan" %}
+#servers = {{ ansible_eth0["ipv4"]["address"] }}:11211
+#{% endif %}
 
 # Number of seconds memcached server is considered dead before it is tried
 # again. This is used by the key value store system (including, the `memcache`

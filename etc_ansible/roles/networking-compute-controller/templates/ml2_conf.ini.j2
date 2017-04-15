@@ -95,7 +95,8 @@ tenant_network_types = vxlan
 
 # An ordered list of networking mechanism driver entrypoints to be loaded from the neutron.ml2.mechanism_drivers namespace. (list value)
 # Guide broken in http://docs.openstack.org/newton/networking-guide/deploy-ovs-selfservice.html (linuxbridge -> openvswitch)
-mechanism_drivers = openvswitch,l2population
+#mechanism_drivers = openvswitch,l2population
+mechanism_drivers = linuxbridge,l2population
 
 # An ordered list of extension driver entrypoints to be loaded from the neutron.ml2.extension_drivers namespace. For example:
 extension_drivers = port_security,qos
